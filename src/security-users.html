@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title><%= title %></title>
+  <style>
+    #loader {
+      transition: all 0.3s ease-in-out;
+      opacity: 1;
+      visibility: visible;
+      position: fixed;
+      height: 100vh;
+      width: 100%;
+      background: #fff;
+      z-index: 90000;
+    }
+
+    #loader.fadeOut {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: calc(50% - 20px);
+      left: calc(50% - 20px);
+      background-color: #333;
+      border-radius: 100%;
+      -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+      animation: sk-scaleout 1.0s infinite ease-in-out;
+    }
+
+    @-webkit-keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0)
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+
+    @keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+
+    #grid {
+      margin: 0;
+      padding: 0;
+      border-width: 0;
+      height: 100%;
+      /* DO NOT USE !important for setting the Grid height! */
+    }
+  </style>
+</head>
+
+<body class="app" authenticate-required="true">
+  <!-- @TOC -->
+  <!-- =================================================== -->
+  <!--
+      + @Page Loader
+      + @App Content
+          - #Left Sidebar
+              > $Sidebar Header
+              > $Sidebar Menu
+
+          - #Main
+              > $Topbar
+              > $App Screen Content
+    -->
+
+  <!-- @Page Loader -->
+  <!-- =================================================== -->
+  <div id='loader'>
+    <div class="spinner"></div>
+  </div>
+  <script>
+    window.addEventListener('load', function load() {
+      const loader = document.getElementById('loader');
+      setTimeout(function () {
+        loader.classList.add('fadeOut');
+      }, 300);
+    });
+  </script>
+  <!-- @App Content -->
+  <!-- =================================================== -->
+  <div>
+    <!-- #Left Sidebar ==================== -->
+    <div class="sidebar">
+      <div class="sidebar-inner">
+        <!-- ### $Sidebar Header ### -->
+        <div class="sidebar-logo">
+          <div class="peers ai-c fxw-nw">
+            <div class="peer peer-greed">
+              <a class="sidebar-link td-n" href="index.html">
+                <div class="peers ai-c fxw-nw">
+                  <div class="peer">
+                    <div class="logo">
+                      <img src="assets/static/images/logo.png" alt="">
+                    </div>
+                  </div>
+                  <div class="peer peer-greed">
+                    <h5 class="lh-1 mB-0 logo-text">Adminator</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="peer">
+              <div class="mobile-toggle sidebar-toggle">
+                <a href="" class="td-n">
+                  <i class="ti-arrow-circle-left"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ### $Sidebar Menu ### -->
+        <ul class="sidebar-menu scrollable pos-r">
+          <li class="nav-item  mT-30">
+            <a class="sidebar-link" href="index.html">
+              <span class="icon-holder">
+                <i class="c-blue-500 ti-home"></i>
+              </span>
+              <span class="title">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item dropdown ">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-orange-500 ti-folder"></i>
+              </span>
+              <span class="title">Settings</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link ' href="settings-properties.html">Properties</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="settings-locale.html">Locale</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="settings-datasource.html">DataSource</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown open">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-deep-orange-500 ti-folder"></i>
+              </span>
+              <span class="title">Security</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
+              </li>
+              <li>
+                <a class='sidebar-link actived' href="security-users.html">Users</a>
+              </li>
+              <li>
+                <a class='sidebar-link ' href="security-audit.html">Audit</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-green-500 ti-folder"></i>
+              </span>
+              <span class="title">Services</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="services-email.html">Email</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-purple-500 ti-folder"></i>
+              </span>
+              <span class="title">Resources</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="resources-page.html">Pages</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-api.html">Apis</a>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="javascript:void(0);">
+                  <span>Sources</span>
+                  <span class="arrow">
+                    <i class="ti-angle-right"></i>
+                  </span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a href="resources-decorators.html">Decorators</a>
+                  </li>
+                  <li>
+                    <a href="resources-templates.html">Templates</a>
+                  </li>
+                  <li>
+                    <a href="resources-groovys.html">Gloovy</a>
+                  </li>  
+                  <li>
+                    <a href="resources-sqls.html">Sql</a>
+                  </li>                                 
+                </ul>
+              </li> 
+              <li>
+                <a class='sidebar-link' href="resources-files.html">Files</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-images.html">Images</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- #Main ============================ -->
+    <div class="page-container">
+      <!-- ### $Topbar ### -->
+      <%= require('html-loader!./include-topbar.html') %>
+
+      <!-- ### $App Screen Content ### -->
+      <script>
+        function setup() {
+          $(document).ajaxSend(function (event, jqXHR, options) {
+            jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
+          });
+
+          var $window = $(window).on('resize', function () {
+            var height = $(document).height() - ($('.header-container').height() + 61)
+            $('#grid').height(height);
+          }).trigger('resize'); //on page load  
+
+          const headers = {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          };
+          Object.assign(headers, studio.services.accounts.authHeader());
+
+          var renderTo = $("#mainContent");
+
+          var observable = new kendo.observable({
+            selected: false,
+            deleteUsers: function (e) {
+              var $this = this;
+              var grid = $('#grid').data('kendoGrid');
+              if (grid.selectedKeyNames().length > 0) {
+                var template = kendo.template('선택한 사용자를 영구적으로 제거합니다.<br/> 이동작은 최소할 수 없습니다.');
+                var dialog = $("#dialog").kendoDialog({
+                  title: '선택한 사용자을 삭제하시겠습니까?',
+                  content: template($this),
+                  closable: true,
+                  modal: true,
+                  buttonLayout: "normal",
+                  actions: [
+                    {
+                      text: 'Ok',
+                      action: function (e) {
+                        kendo.ui.progress($('.k-dialog'), true);
+                        axios({
+                          url: studio.services.getApiUrl('/data/secure/mgmt/security/users/delete.json'),
+                          method: "post",
+                          data: JSON.stringify(grid.selectedKeyNames()),
+                          headers: headers
+                        }).then(response => {
+                          let data = response.data;
+                          studio.ui.notify(null, data.count + " deleted.", "success");
+                          grid.dataSource.read();
+                          dialog.close();
+                        }).catch(function (error) {
+
+                        }).then(function () {
+                          // always executed
+                          kendo.ui.progress($('.k-dialog'), false);
+                        });
+                        return false;
+                      },
+                      primary: true
+                    },
+                    { text: 'Cancle' }
+                  ]
+                }).data('kendoDialog');
+                dialog.open();
+              }
+            },
+            selectedRole: null,
+            getSelectedRole: function () {
+              var $this = this;
+              var role = $this.get('selectedRole');
+              if (role != null) {
+                if (typeof role == 'string') {
+                  return role;
+                } else {
+                  return role.name;
+                }
+              }
+              return null;
+            },
+            roleChanged: function () {
+              var $this = this;
+              var grid = $('#grid').data('kendoGrid');
+              grid.dataSource.read();
+            },
+            rolesDataSource: kendo.data.DataSource.create({
+              transport: {
+                read: { url: studio.services.getApiUrl('/data/secure/mgmt/security/roles/list.json') , type: 'post', contentType: "application/json; charset=utf-8"},
+                parameterMap: function (options, operation) {
+                    return JSON.stringify(options);
+                }
+              },
+              schema: {
+                total: "totalCount",
+                data: "items",
+                model: studio.data.model.Role
+              }
+            })
+          });
+          createLocalUserGrid(observable);
+          kendo.bind(renderTo, observable);
+        }
+
+        function createLocalUserGrid(observable) {
+          var renderTo = $('#grid');
+          if (!renderTo.data("kendoWindow")) {
+            renderTo.kendoGrid({
+              dataSource: {
+                transport: {
+                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/security/users/find.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  parameterMap: function (options, operation) {
+                    requiredRole = observable.getSelectedRole();
+                    if (requiredRole != null)
+                      options['REQUIRED_ROLE'] = requiredRole;
+                    return JSON.stringify(options);
+                  }
+                },
+                pageSize: 50,
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true,
+                error: studio.ui.handleAjaxError,
+                batch: true,
+                schema: {
+                  total: "totalCount",
+                  data: "items",
+                  model: studio.data.model.User
+                }
+              },
+              toolbar: [{ name: "create", text: "Create New User", template: kendo.template($('#grid-toolbar-template').html()) }],
+              persistSelection: true,
+              sortable: true,
+              filterable: true,
+              resizable: true,
+              pageable: {
+                refresh: true,
+                pageSizes: [50, 100, 200, 300]
+              },
+              change: function (e) {
+                if (this.selectedKeyNames().length > 0) {
+                  observable.set('selected', true);
+                } else {
+                  observable.set('selected', false);
+                }
+              },
+              columns: [
+                { selectable: true, width: "50px", headerAttributes: {} },
+                { field: "USER_ID", title: "ID", template: '#: userId #', width: 80, alidation: { required: true } },
+                { field: "USERNAME", title: "Username", template: $('#user-column-template').html(), width: 200, validation: { required: true } },
+                { field: "NAME", title: "Name", template: '#: name #', width: 300, validation: { required: true } },
+                { field: "EMAIL", title: "Email", template: '#: email #', width: 300, validation: { required: true } },
+                { field: "USER_EXTERNAL", title: "External", template: '#: external#', width: 100, validation: { required: true } },
+                { field: "STATUS", title: "Status", template: '#:status#', width: 100, validation: { required: true } },
+                { field: "creationDate", title: "Creation Date", type: "date", format: "{0:yyyy.MM.dd}", width: 100, validation: { required: true }, filterable: { ui: "datetimepicker" } },
+                { field: "modifiedDate", title: "Modified Date", format: "{0:yyyy.MM.dd}", width: 100, validation: { required: true }, filterable: { ui: "datetimepicker" } }
+              ]
+            });
+          }
+        }
+      </script>
+      <main class='main-content bgc-grey-100'>
+        <div id='mainContent'>
+          <div class="full-container">
+            <div id="grid" style="border:0;"></div>
+          </div>
+        </div>
+      </main>
+      <span id="dialog"></span>
+      <script type="text/x-kendo-template" id="grid-toolbar-template">
+        <div class="layer w-100">
+            <div class="peers ai-c jc-sb fxw-nw">
+              <div class="peer">
+                <input data-role="dropdownlist"
+                data-option-label="롤을 선택하세요."
+                data-auto-bind="false"
+                data-text-field="name"
+                data-value-field="name"
+                data-bind="value: selectedRole, source: rolesDataSource, events:{ change : roleChanged }"
+                style="width: 300px;" />                  
+              </div>
+              <div class="peer">
+                <button type="button" class="btn cur-p btn-danger">
+                  <svg class="bi bi-person-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm4.5 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
+                    <path fill-rule="evenodd" d="M13 7.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0v-2z"/>
+                  </svg>
+                  New User</button>
+                <button type="button" class="btn cur-p btn-danger" data-bind="enabled:selected, click:deleteUsers" >
+                  <svg class="bi bi-person-dash" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm2 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+                  </svg>
+                  Delete
+                </button>
+              </div>
+            </div>
+        </div>  
+      </script>
+      <script type="text/x-kendo-template" id="user-column-template">
+      <div class="media">
+          <div class="d-flex align-self-center">
+            <img class="g-width-36 g-height-36 rounded-circle g-mr-15" src="#= studio.services.accounts.getUserAvatarUrl( username ) #" >
+        </div>
+        <div class="media-body align-self-center text-left">
+        <a class="d-flex align-items-center u-link-v5 u-link-underline g-color-black g-color-lightblue-v3--hover g-color-lightblue-v3--opened" href="\#!" data-action="edit" data-object-id="#=userId#">
+          <h5 class="g-font-weight-100 g-font-size-default g-mb-0">#= username #</h5> 
+        </a> 
+        </div>
+      </div>	
+      </script>
+      <!-- ### $App Screen Footer ### -->
+      <%= require('html-loader!./include-footer.html') %>
+    </div>
+  </div>
+</body>
+
+</html>

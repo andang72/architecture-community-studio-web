@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title><%= title %></title>
+    <style>
+      #loader {
+        transition: all 0.3s ease-in-out;
+        opacity: 1;
+        visibility: visible;
+        position: fixed;
+        height: 100vh;
+        width: 100%;
+        background: #fff;
+        z-index: 90000;
+      }
+
+      #loader.fadeOut {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        position: absolute;
+        top: calc(50% - 20px);
+        left: calc(50% - 20px);
+        background-color: #333;
+        border-radius: 100%;
+        -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+        animation: sk-scaleout 1.0s infinite ease-in-out;
+      }
+
+      @-webkit-keyframes sk-scaleout {
+        0% { -webkit-transform: scale(0) }
+        100% {
+          -webkit-transform: scale(1.0);
+          opacity: 0;
+        }
+      }
+
+      @keyframes sk-scaleout {
+        0% {
+          -webkit-transform: scale(0);
+          transform: scale(0);
+        } 100% {
+          -webkit-transform: scale(1.0);
+          transform: scale(1.0);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="app" >
+    <div id='loader'>
+      <div class="spinner"></div>
+    </div>
+
+    <script>
+      
+      window.addEventListener('load', function load() {
+        const loader = document.getElementById('loader');
+        setTimeout(function() {
+          loader.classList.add('fadeOut');
+        }, 300);
+      });
+      
+      function setup(){
+        
+        var renderTo = $('form[name=form-signin]');
+        var observable = new kendo.observable({
+          username : null,
+          password : null
+         });
+        var validator = renderTo.kendoValidator({
+          errorTemplate: "<p class='text-danger g-font-size-14'><i class='fa fa-info-circle'></i> #=message#</p>"
+        }).data("kendoValidator");;
+        
+        kendo.bind( renderTo , observable ); 
+
+        renderTo.submit(function(e) {
+			    e.preventDefault();		
+			    if( validator.validate() ){ 
+            kendo.ui.progress(renderTo, true);
+            axios.post(studio.services.getApiUrl('/data/accounts/signin.json'),
+              JSON.stringify(observable),
+              { headers: { "Content-Type": "application/json" }}
+            ).then(response => {
+              const data = response.data;
+              studio.services.accounts.loginSuccess(studio.services.accounts.state, data);
+              window.location.replace("index.html");
+            }).catch(function (error) {
+              // handle error
+              studio.ui.handleAxiosError(error);
+              observable.set('password', null);
+            })
+            .then(function () {
+              // always executed
+              kendo.ui.progress(renderTo, false);
+            }); 
+          }
+        });
+        
+        // toggle password visibility
+        $(".toggle-password").click(function() { 
+          $(this).toggleClass("fa-eye fa-eye-slash");
+          var input = $($(this).attr("toggle"));
+          if (input.attr("type") == "password") {
+            input.attr("type", "text");
+          } else {
+            input.attr("type", "password");
+          }
+        });
+      } 
+    </script>
+    <style>
+    .field-icon {
+      float: right;
+      margin-left: -25px;
+      margin-right : 10px;
+      margin-top: -25px;
+      position: relative;
+      z-index: 2;
+    }  
+    </style>
+    <div class="peers ai-s fxw-nw h-100vh">
+      <div class="d-n@sm- peer peer-greed h-100 pos-r bgr-n bgpX-c bgpY-c bgsz-cv" style='background-image: url("assets/static/images/bg.jpg")'>
+        <div class="pos-a centerXY">
+          <div class="bgc-white bdrs-50p pos-r" style='width: 120px; height: 120px;'>
+            <img class="pos-a centerXY" src="assets/static/images/logo.png" alt="">
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4 peer pX-40 pY-80 h-100 bgc-white scrollable pos-r" style='min-width: 320px;'>
+        <h4 class="fw-300 c-grey-900 mB-40">Login</h4>
+        <form name="form-signin">
+          <div class="form-group">
+            <label class="text-normal text-dark">Username</label>
+            <input type="text" id="username" name="username" data-bind="value:username" class="form-control" placeholder="ID" validationMessage="아이디 또는 이메일 주소를 입력하여 주세요." required autofocus>
+          </div>
+          <div class="form-group">
+            <label class="text-normal text-dark">Password</label>
+            <input id="password" type="password" data-bind="value:password" class="form-control" placeholder="Password" required validationMessage="비밀번호를 입력하여 주세요.">
+            <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span> 
+            <span class="k-invalid-msg" data-for="password"></span>
+          </div>
+          <div class="form-group">
+            <div class="peers ai-c jc-sb fxw-nw">
+              <div class="peer">
+                <div class="checkbox checkbox-circle checkbox-info peers ai-c">
+                  <input type="checkbox" id="inputCall1" name="inputCheckboxesCall" class="peer">
+                  <label for="inputCall1" class=" peers peer-greed js-sb ai-c">
+                    <span class="peer peer-greed">Remember Me</span>
+                  </label>
+                </div>
+              </div>
+              <div class="peer">
+                <button class="btn btn-primary">Login</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

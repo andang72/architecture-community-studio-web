@@ -1,0 +1,9 @@
+@import 'spec/settings/index';
+@import 'spec/tools/index';
+@import "~bootstrap/scss/bootstrap";
+@import 'spec/index';
+@import 'vendor/index';
+
+//@import "~@progress/kendo-ui/css/web/kendo.common.min.css";
+//@import "~@progress/kendo-ui/css/web/kendo.default.min.css";
+@import "~@progress/kendo-theme-default/dist/all";

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title><%= title %></title>
+  <style>
+    #loader {
+      transition: all 0.3s ease-in-out;
+      opacity: 1;
+      visibility: visible;
+      position: fixed;
+      height: 100vh;
+      width: 100%;
+      background: #fff;
+      z-index: 90000;
+    }
+
+    #loader.fadeOut {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: calc(50% - 20px);
+      left: calc(50% - 20px);
+      background-color: #333;
+      border-radius: 100%;
+      -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+      animation: sk-scaleout 1.0s infinite ease-in-out;
+    }
+
+    @-webkit-keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0)
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+
+    @keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body class="app" authenticate-required="true">
+  <!-- @TOC -->
+  <!-- =================================================== -->
+  <!--
+      + @Page Loader
+      + @App Content
+          - #Left Sidebar
+              > $Sidebar Header
+              > $Sidebar Menu
+
+          - #Main
+              > $Topbar
+              > $App Screen Content
+    -->
+
+  <!-- @Page Loader -->
+  <!-- =================================================== -->
+  <div id='loader'>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    window.addEventListener('load', function load() {
+      const loader = document.getElementById('loader');
+      setTimeout(function () {
+        loader.classList.add('fadeOut');
+      }, 300);
+    });
+  </script>
+
+  <!-- @App Content -->
+  <!-- =================================================== -->
+  <div>
+    <!-- #Left Sidebar ==================== -->
+    <div class="sidebar">
+      <div class="sidebar-inner">
+        <!-- ### $Sidebar Header ### -->
+        <div class="sidebar-logo">
+          <div class="peers ai-c fxw-nw">
+            <div class="peer peer-greed">
+              <a class="sidebar-link td-n" href="index.html">
+                <div class="peers ai-c fxw-nw">
+                  <div class="peer">
+                    <div class="logo">
+                      <img src="assets/static/images/logo.png" alt="">
+                    </div>
+                  </div>
+                  <div class="peer peer-greed">
+                    <h5 class="lh-1 mB-0 logo-text">Adminator</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="peer">
+              <div class="mobile-toggle sidebar-toggle">
+                <a href="" class="td-n">
+                  <i class="ti-arrow-circle-left"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ### $Sidebar Menu ### -->
+        <ul class="sidebar-menu scrollable pos-r">
+          <li class="nav-item  mT-30">
+            <a class="sidebar-link" href="index.html">
+              <span class="icon-holder">
+                <i class="c-blue-500 ti-home"></i>
+              </span>
+              <span class="title">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item dropdown open">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-orange-500 ti-folder"></i>
+              </span>
+              <span class="title">Settings</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link actived' href="settings-properties.html">Properties</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="settings-locale.html">Locale</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="settings-datasource.html">DataSource</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-deep-orange-500 ti-folder"></i>
+              </span>
+              <span class="title">Security</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="security-users.html">Users</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="security-audit.html">Audit</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-green-500 ti-folder"></i>
+              </span>
+              <span class="title">Services</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="services-email.html">Email</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-purple-500 ti-folder"></i>
+              </span>
+              <span class="title">Resources</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="resources-page.html">Pages</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-api.html">Apis</a>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="javascript:void(0);">
+                  <span>Sources</span>
+                  <span class="arrow">
+                    <i class="ti-angle-right"></i>
+                  </span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a href="resources-decorators.html">Decorators</a>
+                  </li>
+                  <li>
+                    <a href="resources-templates.html">Templates</a>
+                  </li>
+                  <li>
+                    <a href="resources-groovys.html">Gloovy</a>
+                  </li>  
+                  <li>
+                    <a href="resources-sqls.html">Sql</a>
+                  </li>                                 
+                </ul>
+              </li> 
+              <li>
+                <a class='sidebar-link' href="resources-files.html">Files</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-images.html">Images</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- #Main ============================ -->
+    <div class="page-container">
+      <!-- ### $Topbar ### -->
+      <%= require('html-loader!./include-topbar.html') %>
+
+      <!-- ### $App Screen Content ### -->
+      <script>
+        function setup() {
+
+          $(document).ajaxSend(function (event, jqXHR, options) {
+            jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
+          });
+          var $window = $(window).on('resize', function () {
+            var height = $(document).height() - ($('.header-container').height() + 61)
+            $('#grid').height(height);
+          }).trigger('resize'); //on page load             
+          createPropertyGrid($("#grid"));
+        }
+
+        function createPropertyGrid(renderTo) {
+          var grid = renderTo.kendoGrid({
+            dataSource: {
+              transport: {
+                read: { url: studio.services.getApiUrl('/data/secure/mgmt/properties/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                create: { url: studio.services.getApiUrl('/data/secure/mgmt/properties/update.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                update: { url: studio.services.getApiUrl('/data/secure/mgmt/properties/update.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                destroy: { url: studio.services.getApiUrl('/data/secure/mgmt/properties/delete.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                parameterMap: function (options, operation) {
+                  if (operation !== "read" && options.models) {
+                    return kendo.stringify(options.models);
+                  }
+                  return kendo.stringify(options);
+                }
+              },
+              error: studio.ui.handleAjaxError,
+              batch: true,
+              schema: {
+                model: {
+                  id: "name",
+                  fields: {
+                    name: { type: "string", defaultValue: "" },
+                    value: { type: "string", defaultValue: "" }
+                  }
+                }
+              }
+            },
+            //height: 700,
+            toolbar: [{ name: "create", text: "새로운 프로퍼티 만들기", template: kendo.template($('#grid-toolbar-template').html()) }],
+            sortable: true,
+            filterable: false,
+            editable: "inline",
+            pageable: false,
+            columns: [
+              { field: "name", title: "이름", width: 300, validation: { required: true } },
+              { field: "value", title: "값", validation: { required: true } },
+              { command: ["edit", "destroy"], title: "&nbsp;", width: "250px" }
+            ]
+          }).data('kendoGrid');
+          return grid;
+        }
+      </script>
+      <main class='main-content bgc-grey-100'>
+        <div id='mainContent'>
+          <div class="full-container">
+            <div id="grid" style="border:0;"></div>
+          </div>
+        </div>
+      </main>
+      <script type="text/x-kendo-template" id="grid-toolbar-template">
+        <div class="layer w-100">
+            <div class="peers ai-c jc-sb fxw-nw">
+              <div class="peer">
+                <button type="button" class="btn cur-p btn-danger k-grid-add">New Property</button>
+              </div>
+              <div class="peer">
+              </div>
+            </div>
+        </div>  
+        </script>
+
+      <!-- ### $App Screen Footer ### -->
+      <%= require('html-loader!./include-footer.html') %>
+    </div>
+  </div>
+</body>
+
+</html>

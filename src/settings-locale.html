@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title><%= title %></title>
+  <style>
+    #loader {
+      transition: all 0.3s ease-in-out;
+      opacity: 1;
+      visibility: visible;
+      position: fixed;
+      height: 100vh;
+      width: 100%;
+      background: #fff;
+      z-index: 90000;
+    }
+
+    #loader.fadeOut {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: calc(50% - 20px);
+      left: calc(50% - 20px);
+      background-color: #333;
+      border-radius: 100%;
+      -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+      animation: sk-scaleout 1.0s infinite ease-in-out;
+    }
+
+    @-webkit-keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0)
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+
+    @keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body class="app" authenticate-required="true">
+  <!-- @TOC -->
+  <!-- =================================================== -->
+  <!--
+      + @Page Loader
+      + @App Content
+          - #Left Sidebar
+              > $Sidebar Header
+              > $Sidebar Menu
+
+          - #Main
+              > $Topbar
+              > $App Screen Content
+    -->
+
+  <!-- @Page Loader -->
+  <!-- =================================================== -->
+  <div id='loader'>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    window.addEventListener('load', function load() {
+      const loader = document.getElementById('loader');
+      setTimeout(function () {
+        loader.classList.add('fadeOut');
+      }, 300);
+    });
+  </script>
+
+  <!-- @App Content -->
+  <!-- =================================================== -->
+  <div>
+    <!-- #Left Sidebar ==================== -->
+    <div class="sidebar">
+      <div class="sidebar-inner">
+        <!-- ### $Sidebar Header ### -->
+        <div class="sidebar-logo">
+          <div class="peers ai-c fxw-nw">
+            <div class="peer peer-greed">
+              <a class="sidebar-link td-n" href="index.html">
+                <div class="peers ai-c fxw-nw">
+                  <div class="peer">
+                    <div class="logo">
+                      <img src="assets/static/images/logo.png" alt="">
+                    </div>
+                  </div>
+                  <div class="peer peer-greed">
+                    <h5 class="lh-1 mB-0 logo-text">Adminator</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="peer">
+              <div class="mobile-toggle sidebar-toggle">
+                <a href="" class="td-n">
+                  <i class="ti-arrow-circle-left"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ### $Sidebar Menu ### -->
+        <ul class="sidebar-menu scrollable pos-r">
+          <li class="nav-item  mT-30">
+            <a class="sidebar-link" href="index.html">
+              <span class="icon-holder">
+                <i class="c-blue-500 ti-home"></i>
+              </span>
+              <span class="title">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item dropdown open">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-orange-500 ti-folder"></i>
+              </span>
+              <span class="title">Settings</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="settings-properties.html">Properties</a>
+              </li>
+              <li>
+                <a class='sidebar-link actived' href="settings-locale.html">Locale</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="settings-datasource.html">DataSource</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-deep-orange-500 ti-folder"></i>
+              </span>
+              <span class="title">Security</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="security-users.html">Users</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="security-audit.html">Audit</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-green-500 ti-folder"></i>
+              </span>
+              <span class="title">Services</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="services-email.html">Email</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-purple-500 ti-folder"></i>
+              </span>
+              <span class="title">Resources</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="resources-page.html">Pages</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-api.html">Apis</a>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="javascript:void(0);">
+                  <span>Sources</span>
+                  <span class="arrow">
+                    <i class="ti-angle-right"></i>
+                  </span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a href="resources-decorators.html">Decorators</a>
+                  </li>
+                  <li>
+                    <a href="resources-templates.html">Templates</a>
+                  </li>
+                  <li>
+                    <a href="resources-groovys.html">Gloovy</a>
+                  </li>
+                  <li>
+                    <a href="resources-sqls.html">Sql</a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-file.html">Files</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-images.html">Images</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- #Main ============================ -->
+    <div class="page-container">
+      <!-- ### $Topbar ### -->
+      <%= require('html-loader!./include-topbar.html') %>
+
+      <!-- ### $App Content ### -->
+      <script>
+        function setup() {
+
+          $(document).ajaxSend(function (event, jqXHR, options) {
+            jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
+          });
+          const headers = {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          };
+          Object.assign(headers, studio.services.accounts.authHeader());
+
+          var renderTo = $("#mainContent");
+          var observable = kendo.observable({
+            locale: "ko-KR",
+            timezone: "Asia/Seoul",
+            saveOrUpdate: function () {
+              var $this = this;
+              var template = kendo.template('Will you update Locale : <span class="g-color-blue" >#: locale #</span> and timezone : <span class="g-color-blue">#: timezone #</span> ?');
+              var dialog = $("#dialog").kendoDialog({
+                width: "450px",
+                closable: true,
+                modal: true,
+                buttonLayout: "normal",
+                title: 'Locale & Timezone',
+                content: template($this),
+                actions: [
+                  {
+                    text: 'Ok',
+                    action: function (e) {
+                      kendo.ui.progress($('.k-dialog'), true);
+                      axios({
+                        url: studio.services.getApiUrl('/data/secure/mgmt/locale/save-or-update.json'),
+                        method: "post",
+                        data: JSON.stringify({ locale: $this.locale, timeZone: $this.timezone }),
+                        headers: headers
+                      }).then(response => {
+                        let data = response.data;
+                        dialog.close();
+                      }).catch(function (error) {
+                        studio.ui.handleAxiosError(error);
+                      }).then(function () {
+                        // always executed
+                        kendo.ui.progress($('.k-dialog'), false);
+                      });
+                      return false;
+                    },
+                    primary: true
+                  },
+                  { text: 'Cancle' }
+                ]
+              }).data("kendoDialog");
+              dialog.open();
+            }
+          }); 
+          getAndSetStatus(observable);
+          kendo.bind(renderTo, observable);
+          createLocaleDorpDownList(observable);
+          createTimeZoneDorpDownList(observable);
+        }
+
+        function getAndSetStatus(observable) {
+          const headers = {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          };
+          Object.assign(headers, studio.services.accounts.authHeader());
+          axios({
+            url: studio.services.getApiUrl('/data/secure/mgmt/status/config.json'),
+            method: "get",
+            data: JSON.stringify({}),
+            headers: headers
+          })
+            .then(response => {
+              const data = response.data;
+              observable.set('locale', data.language);
+              observable.set('timezone', data.timezone);
+            })
+            .then(function () {
+              // always executed
+            });
+        }
+
+        function createLocaleDorpDownList(observable) {
+          var renderTo = $('#locale');
+          renderTo.kendoDropDownList({
+            dataTextField: "displayName",
+            dataValueField: "languageTag",
+            height: 500,
+            filter: "contains",
+            dataSource: {
+              transport: {
+                read: {
+                  type: 'post',
+                  dataType: 'json',
+                  contentType: "application/json; charset=utf-8",
+                  url: studio.services.getApiUrl('/data/secure/mgmt/locale/available-list.json'),
+                }
+              },
+              serverFiltering: false,
+              group: { field: "displayCountry" }
+            }
+          });
+        }
+
+        function createTimeZoneDorpDownList(observable) {
+          var renderTo = $('#timezone');
+          renderTo.kendoDropDownList({
+            dataTextField: "displayName",
+            dataValueField: "id",
+            height: 500,
+            filter: "contains",
+            dataSource: {
+              transport: {
+                read: {
+                  type: 'post',
+                  dataType: 'json',
+                  contentType: "application/json; charset=utf-8",
+                  url: studio.services.getApiUrl('/data/secure/mgmt/locale/') + observable.locale + '/timezone/list.json',
+                }
+              },
+              serverFiltering: false
+            }
+          });
+        }
+
+      </script>
+      <main class='main-content bgc-grey-100'>
+        <div id="mainContent">
+          <div class="row gap-20 masonry pos-r">
+            <div class="masonry-sizer col-md-6"></div>
+            <div class="masonry-item col-md-6">
+              <div class="bgc-white p-20 bd">
+                <h6 class="c-grey-900">Locale</h6>
+                <div class="mT-30">
+                  <form>
+                    <div class="form-group">
+                      <label for="exampleInputEmail1">Locale</label>
+                      <input class="form-control" id="locale" aria-describedby="localeHelp" placeholder="Locale"
+                        data-bind="value:locale">
+                      <small id="localeHelp" class="form-text text-muted">We'll never share your email with anyone
+                        else.</small>
+                    </div>
+                    <div class="form-group">
+                      <label for="exampleInputPassword1">Timezone</label>
+                      <input class="form-control" id="timezone" placeholder="Timezone" data-bind="value: timezone">
+                    </div>
+                    <button type="button" data-bind="click:saveOrUpdate" class="btn btn-primary">Save</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <span id="dialog"></span>
+      <!-- ### $App Screen Footer ### -->
+      <%= require('html-loader!./include-footer.html') %>
+    </div>
+  </div>
+</body>
+
+</html>
