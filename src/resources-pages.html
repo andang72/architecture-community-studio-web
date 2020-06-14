@@ -199,7 +199,7 @@
               </li>
               <li>
                 <a class='sidebar-link' href="services-menu.html">Menu</a>
-              </li> 
+              </li>
             </ul>
           </li>
           <li class="nav-item dropdown open">
@@ -274,7 +274,9 @@
           Object.assign(headers, studio.services.accounts.authHeader());
           var renderTo = $("#mainContent");
           var observable = kendo.observable({
-
+            edit: function () {
+              getPageEditorWindow();
+            }
           });
           createPageGrid(observable);
           kendo.bind(renderTo, observable);
@@ -321,15 +323,70 @@
                 { field: "MODIFIED_DATE", title: "Modified", filterable: false, sortable: true, width: 100, template: '#: studio.ui.format.date( modifiedDate ,"yyyy.MM.dd")#', attributes: { class: "text-center" } }
               ]
             }).data('kendoGrid');
-
             renderTo.on("click", "a[data-action=edit]", function (e) {
               var $this = $(this);
               if (studio.ui.defined($this.data("object-id"))) {
                 var objectId = $this.data("object-id");
-
+                var dataItem = grid.dataSource.get(objectId);
+                getPageEditorWindow(dataItem);
               }
             });
           }
+        }
+        function getPageEditorWindow(item) {
+          var renderTo = $('#page-window');
+          if (!renderTo.data("kendoWindow")) {
+            const PageModel = kendo.data.Model.define(studio.data.model.Page);
+            var observable = kendo.observable({
+              page: new PageModel(),
+              editable: false,
+              setSource: function (data) {
+                var $this = this;
+                data = data || new PageModel();
+                data.copy($this.page);
+                $this.set('editable', $this.page.pageId > 0 ? true : false);
+              },
+              objectTypeDataSource: kendo.data.DataSource.create({
+                transport: {
+                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/services/sequencers/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  parameterMap: function (options, operation) {
+                    return JSON.stringify(options);
+                  }
+                },
+                schema: {
+                  total: "totalCount",
+                  data: "items",
+                  model: {
+                    id: "sequencerId",
+                    fields: {
+                      sequencerId: { type: "number", defaultValue: 0 },
+                      name: { type: "string" },
+                      displayName: { type: "string" },
+                      value: { type: "number", defaultValue: 0 }
+                    }
+                  }
+                }
+              }),
+            });
+            kendo.bind(renderTo, observable);
+            renderTo.data('model', observable);
+            var window = renderTo.kendoWindow({
+              animation: false,
+              width: "900px",
+              title: "Page",
+              visible: false,
+              scrollable: true,
+              modal: true,
+              actions: ["Close"], // 
+              open: function () {
+                this.title(observable.page.name);
+              },
+              close: function () {
+              }
+            }).data('kendoWindow');
+          }
+          renderTo.data('model').setSource(item);
+          renderTo.data("kendoWindow").center().open();
         }
       </script>
       <!-- ### $App Screen Content ### -->
@@ -340,7 +397,170 @@
           </div>
         </div>
       </main>
+      <div id="page-window" class="g-height-600 container-fluid" style="display:none;">
+        <div class="form-row g-mb-25">
+          <div class="form-group col-md-6">
+            <label class="g-mb-10 g-font-weight-400" for="input-page-name">Name <span
+                class="text-danger">*</span></label>
+            <div class="g-pos-rel">
+              <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+              </span>
+              <input id="input-page-name" name="input-page-name"
+                class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text" placeholder="파일명을 입력하세요"
+                data-bind="value: page.name, enabled:editable" required validationMessage="이름을 입력하여 주세요." autofocus>
+              <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                이 페이지를 호출할때 사용되는 이름입니다. ex) /display/pages/<span data-bind="text: page.name"></span>
+              </small>
+            </div>
+            <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-page-name" role="alert"
+              style="display:none;"></span>
+          </div>
+          <div class="form-group col-md-6">
+            <label class="g-mb-10 g-font-weight-400" for="input-page-title">Title<span
+                class="text-danger">*</span></label>
+            <div class="g-pos-rel">
+              <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+              </span>
+              <input id="input-page-title" name="input-page-title"
+                class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text" placeholder="파일명을 입력하세요"
+                placeholder="페이지 타이틀을 입력하세요." data-bind="value: page.title, enabled:editable" required
+                validationMessage="페이지 타이틀을 입력하여 주세요.">
+              <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">The title used as the title of
+                the page.</small>
+            </div>
+            <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-page-title" role="alert"
+              style="display:none;"></span>
+          </div>
+        </div>
+        <div class="form-row g-mb-25">
+          <div class="form-group col-md-6">
+            <label class="g-mb-10 g-font-weight-400" for="input-page-name">Pattern</label>
+            <div class="g-pos-rel">
+              <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+              </span>
+              <input id="input-page-name" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
+                placeholder="패턴을 입력하세요" data-bind="value: page.pattern, enabled:editable">
+              <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                Call the page based on the pattern. ex) /display/pages<span data-bind="text: page.pattern"></span>
+              </small>
+            </div>
+          </div>
+          <div class="form-group col-md-6">
+            <label class="g-mb-10 g-font-weight-400" for="input-page-description">Description</label>
+            <textarea id="input-page-description" class="form-control form-control-md g-resize-none g-rounded-4"
+              rows="3" placeholder="간략하게 페이지에 대한 설명을 입력하세요."
+              data-bind="value:page.description, enabled:editable"></textarea>
+          </div>
+        </div>
+        <hr/>
+        <div class="form-row">
+          <div class="col-md-4">
+            <label class="g-mb-10 g-font-weight-400">OBEJCT TYPE</label>
+            <div class="form-group g-pos-rel g-rounded-4 mb-0">
+              <input data-role="dropdownlist" data-option-label="서비스를 소유하는 객체 유형을 선택하세요." data-auto-bind="true"
+                data-value-primitive="true" data-text-field="name" data-value-field="sequencerId"
+                data-bind="value: page.objectType, enabled:editable, source: objectTypeDataSource"
+                style="width: 100%;" />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="g-mb-10 g-font-weight-400">OBEJCT ID</label>
+            <div class="form-group g-pos-rel g-rounded-4 mb-0">
+              <input data-role="numerictextbox" placeholder="OBJECT ID" class="form-control form-control-md"
+                type="number" data-min="-1" step="1" data-format="##" data-bind="value:page.objectId, enabled:editable"
+                style="width: 100%" />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label class="g-mb-10 g-font-weight-400">State</label>
+              <div class="g-pos-rel">
+                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                  <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                </span>
+                <select class="form-control g-pos-rel" data-role="dropdownlist"
+                  data-bind="value:page.pageState,enabled:editable" style="width: 100%" class="form-control">
+                  <option value="INCOMPLETE">INCOMPLETE</option>
+                  <option value="APPROVAL">APPROVAL</option>
+                  <option value="PUBLISHED">PUBLISHED</option>
+                  <option value="REJECTED">REJECTED</option>
+                  <option value="ARCHIVED">ARCHIVED</option>
+                  <option value="DELETED">DELETED</option>
+                  <option value="NONE">NONE</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div class="form-row g-mb-25">
+          <div class="form-group col-md-4">
+            <label class="g-font-weight-400 g-mb-10">Version<span class="text-danger">*</span></label>
+            <div class="g-pos-rel">
+              <input class="form-control form-control-md" data-role="numerictextbox" type="number" data-format="###"
+                data-min="0" step="1" data-max="100" placeholder="버전 정보를 입력하세요"
+                data-bind="value: page.versionId,enabled:editable" style="width: 100%">
+            </div>
+          </div>
+          <div class="form-group col-md-4">
+            <label class="g-mb-10 g-font-weight-400">Content Type</label>
+            <div class="g-pos-rel">
+              <input data-role="dropdownlist" data-option-label="콘텐츠 유형을 선택하세요." data-auto-bind="true"
+                data-value-primitive="true" data-text-field="text" data-value-field="value"
+                data-bind="value: page.contentType, enabled:editable, source: contentTypes" style="width: 100%;" />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="d-flex align-items-center justify-content-between g-mb-15">
+              <span class="g-pr-20 g-font-weight-400">인증필요</span>
+              <div class="u-check">
+                <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" name="api-secured" value="true"
+                  data-bind="checked: source.secured,  enabled:editable" type="checkbox">
+                <div class="u-check-icon-radio-v8">
+                  <i class="fa" data-check-icon=""></i>
+                </div>
+              </div>
+            </label>
+            <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
+              ON 상태인 경우 접근권한이 허용된 사용자만 이용할 수 있습니다.
+            </small>
+          </div>
+        </div>
+        <div class="form-row"> 
+          <div class="form-group col-md-6">
+            <label class="g-mb-10 g-font-weight-400" for="input-page-template">Template (or redirect/forward command)
+              <span class="text-danger">*</span></label>
+            <div class="g-pos-rel">
+              <a class="d-flex align-items-center u-link-v5 g-color-gray-light-v6 g-color-secondary--hover g-ml-10 g-ml-15--sm g-ml-30--xl"
+                href="#!" data-bind="click:select, visible:editable" data-type="template">
+                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-1 g-opacity-1--success"><i
+                    class="hs-admin-search g-absolute-centered g-font-size-default"></i></span>
+              </a>
+              <input id="input-page-template" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10"
+                type="text" placeholder="템플릿으로 사용할 파일 경로를 입력하세요." data-bind="value: page.template, enabled:editable">
+            </div>
+            <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">값이 지정되지 않으면 디폴트 템플릿이 적용됩니다. ex)
+              redirect:/xxx/xx, forward:/xxx/xx</small>
+          </div>
+          <div class="form-group col-md-6">
+            <label class="g-mb-10 g-font-weight-400" for="input-page-template">Groovy Script Source<span
+                class="text-danger">*</span></label>
+            <div class="g-pos-rel">
+              <a class="d-flex align-items-center u-link-v5 g-color-gray-light-v6 g-color-sec	ondary--hover g-ml-10 g-ml-15--sm g-ml-30--xl"
+                href="#!" data-bind="click:select" data-type="script">
+                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-1 g-opacity-1--success"><i
+                    class="hs-admin-search g-absolute-centered g-font-size-default"></i></span>
+              </a>
+              <input id="input-page-script" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
+                placeholder="서버 스크립트 파일 경로를 입력하세요" data-bind="value: page.script, enabled:editable">
+            </div>
+          </div>
 
+        </div>
+      </div>
       <script type="text/x-kendo-template" id="name-column-template">
           <a class="d-flex align-items-center u-link-v5 g-min-height-25 u-link-underline g-color-black g-color-lightblue-v3--hover g-color-lightblue-v3--opened" href="\#!" data-action="edit" data-object-id="#=pageId#">
           <h5 class="g-font-weight-300 g-mb-0">

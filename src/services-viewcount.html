@@ -199,7 +199,7 @@
               </li>
               <li>
                 <a class='sidebar-link' href="services-menu.html">Menu</a>
-              </li> 
+              </li>
             </ul>
           </li>
           <li class="nav-item dropdown">
@@ -266,10 +266,12 @@
           $(document).ajaxSend(function (event, jqXHR, options) {
             jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
           });
+
           var $window = $(window).on('resize', function () {
             var height = $(document).height() - ($('.header-container').height() + 61)
             $('#grid').height(height);
-          }).trigger('resize'); //on page load     
+          }).trigger('resize'); //on page load    
+
           const headers = {
             Accept: "application/json",
             "Content-Type": "application/json"
@@ -283,7 +285,6 @@
               target.set("enabled", this.get("enabled"));
             }
           });
-
           var renderTo = $("#mainContent");
           var observable = kendo.observable({
             config: new ServiceConfig(),
@@ -392,7 +393,6 @@
           var renderTo = $('#grid');
           if (!renderTo.data('kendoGrid')) {
             var grid = renderTo.kendoGrid({
-              autoBind: false,
               dataSource: {
                 transport: {
                   read: {
@@ -442,8 +442,7 @@
             }).data('kendoGrid');
           }
           renderTo.data('kendoGrid').dataSource.read();
-        }
-
+        } 
       </script>
       <main class='main-content bgc-grey-100'>
         <div id="mainContent">

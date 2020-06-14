@@ -32,6 +32,22 @@ const initialState = user
   ? { status: { loggedIn: true }, user }
   : { status: { loggedIn: false }, user: null };
 
+const RoleModel = {
+  id: "roleId",
+  fields: {
+    roleId: {
+      type: "number",
+      defaultValue: 0,
+      editable: false,
+      validation: { min: 0, required: true },
+    },
+    name: { type: "string", defaultValue: null },
+    description: { type: "string", defaultValue: null },
+    creationDate: { type: "date", editable: false },
+    modifiedDate: { type: "date", editable: false },
+  },
+};
+
 const UserModel = {
   id: "userId",
   fields: {
@@ -260,6 +276,48 @@ const BodyContentModel = {
   },
 };
 
+const ApiModel = {
+  id: "apiId",
+  fields: {
+    apiId: { type: "number", defaultValue: -1 },
+    objectType: { type: "number", defaultValue: -1 },
+    objectId: { type: "number", defaultValue: -1 },
+    title: { type: "string", defaultValue: null },
+    name: { type: "string", defaultValue: null },
+    version: { type: "string", defaultValue: null },
+    description: { type: "string", defaultValue: null },
+    contentType: { type: "string", defaultValue: null },
+    scriptSource: { type: "string", defaultValue: null },
+    pattern: { type: "string", defaultValue: null },
+    creator: { type: "object", defaultValue: {} },
+    properties: { type: "object", defaultValue: {} },
+    secured: { type: "boolean", defaultValue: false },
+    enabled: { type: "boolean", defaultValue: false },
+    creationDate: { type: "date" },
+    modifiedDate: { type: "date" },
+  },
+  copy: function (target) {
+    target.apiId = this.get("apiId");
+    target.set("objectType", this.get("objectType"));
+    target.set("objectId", this.get("objectId"));
+    target.set("title", this.get("title"));
+    target.set("name", this.get("name"));
+    target.set("version", this.get("version"));
+    target.set("description", this.get("description"));
+    target.set("contentType", this.get("contentType"));
+    target.set("scriptSource", this.get("scriptSource"));
+    target.set("pattern", this.get("pattern"));
+    target.set("secured", this.get("secured"));
+    target.set("enabled", this.get("enabled"));
+    target.set("modifiedDate", this.get("modifiedDate"));
+    target.set("creationDate", this.get("creationDate"));
+    if (typeof this.get("creator") === "object")
+      target.set("creator", this.get("creator"));
+    if (typeof this.get("properties") === "object")
+      target.set("properties", this.get("properties"));
+  },
+};
+
 export const studio = {
   VERSION,
   services: {
@@ -277,27 +335,14 @@ export const studio = {
   },
   data: {
     model: {
-      Role: {
-        id: "roleId",
-        fields: {
-          roleId: {
-            type: "number",
-            defaultValue: 0,
-            editable: false,
-            validation: { min: 0, required: true },
-          },
-          name: { type: "string", defaultValue: null },
-          description: { type: "string", defaultValue: null },
-          creationDate: { type: "date", editable: false },
-          modifiedDate: { type: "date", editable: false },
-        },
-      },
+      Role: RoleModel,
       User: UserModel,
       Image: ImageModel,
       ImageLink: ImageLinkModel,
       Attachment: AttachmentModel,
       BodyContent: BodyContentModel,
       Page: PageModel,
+      Api: ApiModel,
     },
   },
   ui: {
@@ -399,7 +444,7 @@ axiosRetry(axios, {
 });
 */
 
-function setImageAsBase64(url, successHandler, errorHandler ) {
+function setImageAsBase64(url, successHandler, errorHandler) {
   const headers = {};
   Object.assign(headers, studio.services.accounts.authHeader());
   axios
@@ -407,7 +452,7 @@ function setImageAsBase64(url, successHandler, errorHandler ) {
     .then((response) => {
       let b64encoded = Buffer.from(response.data, "binary").toString("base64");
       var prefix = "data:" + response.headers["content-type"] + ";base64,";
-      if (isFunction(successHandler)) successHandler(prefix + b64encoded); 
+      if (isFunction(successHandler)) successHandler(prefix + b64encoded);
     })
     .then((error) => {
       if (isFunction(errorHandler)) errorHandler();
@@ -415,7 +460,7 @@ function setImageAsBase64(url, successHandler, errorHandler ) {
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function getImageAsBase64(url) {

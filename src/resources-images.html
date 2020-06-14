@@ -308,7 +308,7 @@
               grid.select().each(function () {
                 $this.selectedImages.push(grid.dataItem(this));
               });
-              $this.set('selectedImageCount', $this.get('selectedImages').length );
+              $this.set('selectedImageCount', $this.get('selectedImages').length);
             },
             setTags: function () {
               var $this = this;
@@ -340,7 +340,7 @@
                         .then(response => {
                           const data = response.data;
                           $('#grid').data('kendoGrid').clearSelection();
-                          $('#grid').data('kendoGrid').dataSource.read(); 
+                          $('#grid').data('kendoGrid').dataSource.read();
                           studio.ui.notify(null, "image tag has been updated.", "success");
                         }).catch(function (error) {
                           studio.ui.handleAxiosError(error);
@@ -766,6 +766,14 @@
                   objectId: observable.get("image.objectId"),
                   imageId: observable.get("image.imageId")
                 };
+                var xhr = e.XMLHttpRequest;
+                if (xhr) {
+                  xhr.addEventListener("readystatechange", function onUploadReady(e) {
+                    if (xhr.readyState == 1 /* OPENED */) {
+                      xhr.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']); 
+                    }
+                  });
+                } 
               },
               success: function (e) {
                 const data = e.response;
