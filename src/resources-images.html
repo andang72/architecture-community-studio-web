@@ -80,7 +80,6 @@
     .tab-pane-grid .k-grid-toolbar {
       background: #fff;
     }
-
   </style>
 </head>
 
@@ -221,6 +220,9 @@
               <li>
                 <a class='sidebar-link' href="services-viewcount.html">View Count</a>
               </li>
+              <li>
+                <a class='sidebar-link' href="services-menu.html">Menu</a>
+              </li>
             </ul>
           </li>
           <li class="nav-item dropdown open">
@@ -235,10 +237,10 @@
             </a>
             <ul class="dropdown-menu">
               <li>
-                <a class='sidebar-link' href="resources-page.html">Pages</a>
+                <a class='sidebar-link' href="resources-pages.html">Pages</a>
               </li>
               <li>
-                <a class='sidebar-link' href="resources-api.html">Apis</a>
+                <a class='sidebar-link' href="resources-apis.html">Apis</a>
               </li>
 
               <li class="nav-item dropdown">
@@ -297,14 +299,71 @@
           var renderTo = $("#mainContent");
           var observable = kendo.observable({
             selected: false,
-            selectedImages: null,
+            selectedImages: [],
+            selectedImageCount: 0,
+            setSelectedImages: function () {
+              var $this = this;
+              $this.set('selectedImages', []);
+              var grid = $('#grid').data('kendoGrid');
+              grid.select().each(function () {
+                $this.selectedImages.push(grid.dataItem(this));
+              });
+              $this.set('selectedImageCount', $this.get('selectedImages').length );
+            },
+            setTags: function () {
+              var $this = this;
+              $this.setSelectedImages();
+              getTagsWindow(this);
+            },
             createImage: function () {
               getImageEditorWindow();
             },
+            addTags: function () {
+              var $this = this;
+              var objectIds = $('#grid').data('kendoGrid').selectedKeyNames();
+              var selectedTags = $('#window-select-tags').data('kendoMultiSelect').value();
+              var template = kendo.template('Update tags the selected images (#= objectIds.length #).<br/> This action cannot be undone.');
+              var dialog = $("#tags-dialog").kendoDialog({
+                title: 'Are you sure you want to set tags ?',
+                content: template($this),
+                actions: [
+                  {
+                    text: 'Ok',
+                    action: function (e) {
+                      kendo.ui.progress($('.k-dialog'), true);
+                      axios({
+                        url: studio.services.getApiUrl('/data/secure/mgmt/services/tags/0/objects/add.json'),
+                        method: "post",
+                        data: JSON.stringify({ objectType: 11, objectIds: objectIds, tagIds: selectedTags }),
+                        headers: headers
+                      })
+                        .then(response => {
+                          const data = response.data;
+                          $('#grid').data('kendoGrid').clearSelection();
+                          $('#grid').data('kendoGrid').dataSource.read(); 
+                          studio.ui.notify(null, "image tag has been updated.", "success");
+                        }).catch(function (error) {
+                          studio.ui.handleAxiosError(error);
+                        })
+                        .then(function () {
+                          kendo.ui.progress($('.k-dialog'), false);
+                          dialog.close();
+                          $('#tags-window').data('kendoWindow').close();
+                        });
+                      return false;
+                    },
+                    primary: true
+                  },
+                  { text: 'Cancle' }
+                ]
+              }).data('kendoDialog');
+              dialog.open();
+            },
             delete: function (e) {
               var $this = this;
-              var selected = $('#grid').data('kendoGrid').dataSource.view();
-              var template = kendo.template('Permanently remove the selected image.<br/> Moves cannot be minimized.');
+              $this.setSelectedImages();
+              var grid = $('#grid').data('kendoGrid');
+              var template = kendo.template('Permanently remove the selected images (#= selectedImages.length #).<br/> This action cannot be undone.');
               var dialog = $("#delete-dialog").kendoDialog({
                 title: 'Are you sure you want to delete the image?',
                 content: template($this),
@@ -316,12 +375,13 @@
                       axios({
                         url: studio.services.getApiUrl('/data/secure/mgmt/images/delete.json'),
                         method: "post",
-                        data: JSON.stringify(selected),
+                        data: JSON.stringify($this.selectedImages),
                         headers: headers
                       })
                         .then(response => {
                           const data = response.data;
-                          $('#grid').data('kendoGrid').dataSource.read();
+                          $('#grid').data('kendoGrid').clearSelection();
+                          grid.dataSource.read();
                           studio.ui.notify(null, data.count + "image has been deleted.", "success");
                         }).catch(function (error) {
                           studio.ui.handleAxiosError(error);
@@ -354,6 +414,9 @@
                   parameterMap: function (options, operation) {
                     if (operation !== "read" && options.models) {
                       return JSON.stringify(options.models);
+                    } else {
+                      var tags = createTagSelect($("#tags"));
+                      options.tags = tags.value();
                     }
                     return JSON.stringify(options);
                   }
@@ -375,7 +438,7 @@
               filterable: true,
               pageable: {
                 refresh: true,
-                pageSizes: [50, 100, 200, 300, 400]
+                pageSizes: [50, 100, 200, 300, 400, 500, 1000]
               },
               change: function (e) {
                 if (this.selectedKeyNames().length > 0) {
@@ -385,11 +448,9 @@
                 }
               },
               dataBound: function () {
-                
                 $(".fancybox").fancybox({
                   protect: false
                 });
-
                 $("#grid figure img:not([is-secure])").one("load", function () {
                   var $this = $(this);
                   $this.parent().removeClass('is-loading');
@@ -398,12 +459,12 @@
                     // $(this).load(); // For jQuery < 3.0 
                     // $(this).trigger('load'); // For jQuery >= 3.0 
                   }
-                }); 
-                $("#grid figure img[is-secure]").each(function (){
+                });
+                $("#grid figure img[is-secure]").each(function () {
                   var $this = $(this);
                   $this.parent().addClass('is-loading');
-                  setImageAsBase64($this); 
-                }); 
+                  setImageAsBase64($this, 600);
+                });
               },
               columns: [
                 { selectable: true, width: "50px", headerAttributes: {} },
@@ -418,7 +479,9 @@
                 { field: "MODIFIED_DATE", title: "Modified Date", filterable: false, sortable: true, width: 100, template: '#: studio.ui.format.date( modifiedDate ,"yyyy.MM.dd")#', attributes: { class: "text-center" } }
               ]
             }).data('kendoGrid');
-
+            $("#tags").data('kendoMultiSelect').bind("change", function () {
+              grid.dataSource.read();
+            });
             renderTo.on("click", "a[data-action=edit]", function (e) {
               var $this = $(this);
               if (studio.ui.defined($this.data("object-id"))) {
@@ -430,12 +493,45 @@
           }
         }
 
-        function setImageAsBase64(elemment) {
-          var url = elemment.attr('secure-image');
-          studio.ui.getImageAsBase64(url, function (data) {
+        function setImageAsBase64(elemment, delay) {
+          let url = elemment.attr('secure-image');
+          studio.ui.setImageAsBase64(url, function (data) {
             elemment.attr('src', data);
             elemment.parent().removeClass('is-loading');
+          }, function () {
+            let maxRetry = elemment.data('max-retry') || 3;
+            let retry = elemment.data('retry') || 0;
+            let delay = delay || 1000;
+            console.log(retry + ' loading image ' + url)
+            if (retry < maxRetry) {
+              elemment.data('retry', retry + 1);
+              studio.ui.sleep(delay);
+              setImageAsBase64(elemment);
+            } else {
+              elemment.parent().removeClass('is-loading');
+            }
           });
+        }
+
+        function getTagsWindow(observable) {
+          var renderTo = $('#tags-window');
+          if (!renderTo.data('kendoWindow')) {
+            var select = createTagSelect($('#window-select-tags'));
+            var window = renderTo.kendoWindow({
+              width: "500px",
+              title: "Tags",
+              visible: false,
+              modal: true,
+              actions: ["Close"], // 
+              open: function () {
+                select.value("");
+              },
+              close: function () {
+              }
+            });
+            kendo.bind(renderTo, observable);
+          }
+          renderTo.data('kendoWindow').center().open();
         }
 
         function getImageEditorWindow(item) {
@@ -447,11 +543,12 @@
               "Content-Type": "application/json"
             };
             Object.assign(headers, studio.services.accounts.authHeader());
+            const NO_IMAGE_URL = 'assets/static/images/no-image.jpg';
             var grid = $('#grid').data('kendoGrid');
             var observable = kendo.observable({
               updated: false,
               image: new ImageModel(),
-              imageUrl: 'assets/static/images/no-image.jpg',
+              imageUrl: NO_IMAGE_URL,
               editable: false,
               shared: false,
               imageByUrl: {
@@ -459,20 +556,38 @@
                 imageUrl: null,
                 uploadable: false
               },
-              selectedTags : [],
+              selectedTags: [],
               previewUrlImage: function () {
                 var $this = this;
-                if ($this.get('imageByUrl.url') != null) { 
-                  $('#image-preview-area').parent().addClass('is-loading');
-                  $.get($this.get('imageByUrl.url')).done(
-                    function () {
-                      $this.set('imageByUrl.imageUrl', $this.get('imageByUrl.url'));
-                      $('#image-preview-area').parent().removeClass('is-loading');
-                    }).fail(function () {
-                      $this.set('imageByUrl.imageUrl', $this.get('imageByUrl.url'));
-                      $('#image-preview-area').parent().removeClass('is-loading');
+                var previewImg = $('#image-preview-area');
+                if ($this.get('imageByUrl.url') != null) {
+                  previewImg.parent().addClass('is-loading');
+
+                  /**
+                  fetch($this.get('imageByUrl.url'), { method: 'HEAD' })
+                    .then(res => {
+                      if (res.ok) {
+                         
+                      } else {
+                         
+                      }
+                    }).catch(err => console.log('Error:', 
+                    
+                    ));
+                  */
+
+                  $.get($this.get('imageByUrl.url')).done(function () {
+                    $this.set('imageByUrl.imageUrl', $this.get('imageByUrl.url'));
+                    previewImg.one("load", function () {
+                      previewImg.parent().removeClass('is-loading');
+                      $this.set('imageByUrl.uploadable', true);
+                      console.log("image loaded.");
                     });
-                  $this.set('imageByUrl.uploadable', true);
+                  }).fail(function () {
+                    studio.ui.notify(null, "fail to load image from url..", "error");
+                    $this.set('imageByUrl.imageUrl', NO_IMAGE_URL);
+                    previewImg.parent().removeClass('is-loading');
+                  })
                 }
               },
               uploadImageByUrl: function () {
@@ -548,7 +663,7 @@
                   url: studio.services.getApiUrl('/data/secure/mgmt/services/tags/0/objects/save-or-update.json'),
                   method: 'post',
                   headers: headers,
-                  data : JSON.stringify({objectType :11, objectIds : objectIds, tagIds : $this.selectedTags } ),
+                  data: JSON.stringify({ objectType: 11, objectIds: objectIds, tagIds: $this.selectedTags }),
                 }).then(response => {
                   studio.ui.notify(null, "tags has been updated.", "success");
                   observable.set('updated', true);
@@ -605,7 +720,8 @@
                 $this.set('imageByUrl.url', null);
                 $this.set('imageByUrl.imageUrl', 'assets/static/images/no-image.jpg');
                 $this.set('imageByUrl.uploadable', false);
-                if ($this.get('editable')) { 
+                $('#select-tags').data('kendoMultiSelect').value("");
+                if ($this.get('editable')) {
                   if ($this.image.tags != null && $this.image.tags.length > 0) {
                     var ar = $this.image.tags.split(',');
                     $.each(ar, function (index, _tag) {
@@ -625,7 +741,7 @@
                     $this.set('shared', true);
                   } else {
                     $this.set('shared', false);
-                    studio.ui.getImageAsBase64($this.get("imageUrl"), function (data) {
+                    studio.ui.setImageAsBase64($this.get("imageUrl"), function (data) {
                       $this.set("imageUrl", data);
                     });
                   }
@@ -635,36 +751,7 @@
                 }
               }
             });
-
-            var select = $('#select-tags').kendoMultiSelect({
-              filter: "startswith",
-              valuePrimitive: true,
-              placeholder: 'Select tags...',
-              dataTextField: "name",
-              dataValueField: "tagId",
-              dataSource: {
-                transport: {
-                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/services/tags/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
-                  create: { url: studio.services.getApiUrl('/data/secure/mgmt/services/tags/0/create.json'), type: 'post', contentType: "application/json; charset=utf-8" },
-                  parameterMap: function (options, operation) {
-                    return kendo.stringify(options);
-                  }
-                },
-                schema: {
-                  total: "totalCount",
-                  data: "items",
-                  model: {
-                    id: "tagId",
-                    fields: {
-                      tagId: { type: "number", defaultValue: 0 },
-                      name: { type: "string", defaultValue: null }
-                    }
-                  }
-                }
-              },
-              noDataTemplate: $('#no-tag-data-template').html()
-            }).data('kendoMultiSelect');
-
+            var select = createTagSelect($('#select-tags'));
             $("#dropZone").kendoUpload({
               async: {
                 saveUrl: studio.services.getApiUrl('/data/secure/mgmt/images/upload.json'),
@@ -696,6 +783,7 @@
 
             kendo.bind(renderTo, observable);
             renderTo.data('model', observable);
+
             var window = renderTo.kendoWindow({
               width: "900px",
               title: "Image",
@@ -717,6 +805,41 @@
           renderTo.data("kendoWindow").center().open();
         }
 
+        function createTagSelect(renderTo) {
+          if (!renderTo.data('kendoMultiSelect')) {
+            var select = renderTo.kendoMultiSelect({
+              filter: "startswith",
+              valuePrimitive: true,
+              placeholder: 'Select tags...',
+              dataTextField: "name",
+              dataValueField: "tagId",
+              dataSource: {
+                transport: {
+                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/services/tags/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  create: { url: studio.services.getApiUrl('/data/secure/mgmt/services/tags/0/create.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  parameterMap: function (options, operation) {
+                    return kendo.stringify(options);
+                  }
+                },
+                error: studio.ui.handleAjaxError,
+                schema: {
+                  total: "totalCount",
+                  data: "items",
+                  model: {
+                    id: "tagId",
+                    fields: {
+                      tagId: { type: "number", defaultValue: 0 },
+                      name: { type: "string", defaultValue: null }
+                    }
+                  }
+                }
+              },
+              noDataTemplate: $('#no-tag-data-template').html()
+            }).data('kendoMultiSelect');
+          }
+          return renderTo.data('kendoMultiSelect');
+        }
+
         function createPropertyWindowIfNotExist(renderTo, objectId) {
           renderTo = renderTo || $('#property-grid');
           if (!renderTo.data("kendoGrid")) {
@@ -736,12 +859,12 @@
               save: function () {
               }
             }).data("kendoGrid");
-
             renderTo.on("click", "a[data-kind=properties],a[data-action=refresh]", function (e) {
               var $this = $(this);
               grid.dataSource.read();
             });
           }
+
           renderTo.data("kendoGrid").setDataSource(
             new kendo.data.DataSource(
               {
@@ -771,6 +894,7 @@
             )
           );
         }
+
         function addNewTag(widgetId, value) {
           var widget = $("#" + widgetId).getKendoMultiSelect();
           var dataSource = widget.dataSource;
@@ -796,7 +920,20 @@
           </div>
         </div>
       </main>
+      <span id="tags-dialog"></span>
       <span id="delete-dialog"></span>
+      <div id="tags-window" class="g-pa-0 g-height-300 container-fluid" style="display:none;">
+        <div class="g-pa-15">
+          <p class="g-pb-15">
+            <span data-bind="text: selectedImages.length "></span> image has been selected.
+            Add a tag to selected images.
+          </p>
+          <select id="window-select-tags" style="width: 100%;" class="g-brd-0 g-ma-5 g-pa-5"></select>
+          <div class="text-right g-mt-25">
+            <button class="btn btn-md u-btn-blue g-rounded-50 g-mr-10" data-bind="click:addTags">Update</button>
+          </div>
+        </div>
+      </div>
       <div id="image-window" class="g-pa-0 g-height-600 container-fluid" style="display:none;">
         <div class="g-pa-15 g-pa-30--sm">
           <div class="row align-items-end">
@@ -853,7 +990,7 @@
           </div>
           <hr class="g-brd-gray-light-v4 g-mx-minus-30" />
           <div class="row align-items-end">
-            <div class="col-sm-4">
+            <div class="col-sm-4 text-center">
               <img
                 src="data:image/png;base64,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">
               <input name="dropZone" id="dropZone" type="file" />
@@ -861,8 +998,9 @@
             <div class="col-sm-8">
               <div class="row row-cols-2">
                 <div class="col-6">
-                  <figure class="figure g-width-200">
-                    <img id="image-preview-area" data-bind="attr:{src:imageByUrl.imageUrl}" class="figure-img img-fluid rounded" alt="...">
+                  <figure class="figure g-width-200" style="max-height:200px;">
+                    <img id="image-preview-area" data-bind="attr:{src:imageByUrl.imageUrl}"
+                      class="figure-img img-fluid rounded" alt="...">
                     <figcaption class="figure-caption">.</figcaption>
                   </figure>
                 </div>
@@ -981,7 +1119,7 @@
               <figure class="g-pos-rel u-bg-overlay g-bg-black-opacity-0_1--after g-overflow-hidden">
               <img class="g-width-100 g-width-100--md g-width-100 g-height-100--md g-brd-2 g-brd-transparent g-brd-lightblue-v3--parent-opened g-mr-20--sm" 
               #if (imageLink == null) { # 
-              is-secure="true" secure-image="#= studio.ui.getImageUrl(data, {thumbnail:true}) #"
+                data-retry="0" is-secure="true" secure-image="#= studio.ui.getImageUrl(data, {thumbnail:true}) #"
               src="assets/static/images/no-image.jpg"
               #}else{# 
               src="#= studio.ui.getImageUrl(data, {thumbnail:true}) #"   
@@ -995,7 +1133,7 @@
           <div class="media-body g-pl-10">
             <!-- Figure Info -->
             <a class="d-flex align-items-center u-link-v5 u-link-underline g-color-black g-color-lightblue-v3--hover g-color-lightblue-v3--opened" href="\#!" data-action="edit" data-object-id="#=imageId#">
-              <h4 class="g-font-weight-300 g-mb-0">
+              <h5 class="g-font-weight-300 g-mb-0">
               #if ( imageLink!=null && imageLink.publicShared ) { #
               <svg class="bi bi-unlock c-red-500" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z"/>
@@ -1004,7 +1142,7 @@
               <svg class="bi bi-lock c-red-500" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M11.5 8h-7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zm-7-1a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7zm0-3a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z"/>
               </svg>
-              #}# #= name # </h4> 
+              #}# #= name # </h5> 
             </a> 
             #if ( imageLink!=null ) { #
             <div class="input-group">
@@ -1029,7 +1167,14 @@
       <script type="text/x-kendo-template" id="grid-toolbar-template">
       <div class="layer w-100">
         <div class="peers ai-c jc-sb fxw-nw">
-          <div class="peer">
+          <div class="peer"> 
+            <svg class="bi bi-tag" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M.5 2A1.5 1.5 0 0 1 2 .5h4.586a1.5 1.5 0 0 1 1.06.44l7 7a1.5 1.5 0 0 1 0 2.12l-4.585 4.586a1.5 1.5 0 0 1-2.122 0l-7-7A1.5 1.5 0 0 1 .5 6.586V2zM2 1.5a.5.5 0 0 0-.5.5v4.586a.5.5 0 0 0 .146.353l7 7a.5.5 0 0 0 .708 0l4.585-4.585a.5.5 0 0 0 0-.708l-7-7a.5.5 0 0 0-.353-.146H2z"/>
+              <path fill-rule="evenodd" d="M2.5 4.5a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm2-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+            </svg>
+            <select id="tags" style="width:300px;"></select> 
+          </div>
+          <div class="peer"> 
             <button type="button" class="btn cur-p btn-danger k-grid-add" data-bind="click:createImage">
               <svg class="bi bi-cloud-upload" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4.887 6.2l-.964-.165A2.5 2.5 0 1 0 3.5 11H6v1H3.5a3.5 3.5 0 1 1 .59-6.95 5.002 5.002 0 1 1 9.804 1.98A2.501 2.501 0 0 1 13.5 12H10v-1h3.5a1.5 1.5 0 0 0 .237-2.981L12.7 7.854l.216-1.028a4 4 0 1 0-7.843-1.587l-.185.96z"/>
@@ -1037,9 +1182,7 @@
                 <path fill-rule="evenodd" d="M8 6a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 6z"/>
               </svg>
               New Image</button>
-          </div>
-          <div class="peer"> 
-            <button type="button" class="btn cur-p u-btn-outline-blue" data-bind="enabled:selected">
+            <button type="button" class="btn cur-p u-btn-outline-blue" data-bind="enabled:selected, click:setTags">
               <svg class="bi bi-tag" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M.5 2A1.5 1.5 0 0 1 2 .5h4.586a1.5 1.5 0 0 1 1.06.44l7 7a1.5 1.5 0 0 1 0 2.12l-4.585 4.586a1.5 1.5 0 0 1-2.122 0l-7-7A1.5 1.5 0 0 1 .5 6.586V2zM2 1.5a.5.5 0 0 0-.5.5v4.586a.5.5 0 0 0 .146.353l7 7a.5.5 0 0 0 .708 0l4.585-4.585a.5.5 0 0 0 0-.708l-7-7a.5.5 0 0 0-.353-.146H2z"/>
                 <path fill-rule="evenodd" d="M2.5 4.5a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm2-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>

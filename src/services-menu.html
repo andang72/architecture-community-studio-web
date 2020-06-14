@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -132,7 +133,7 @@
               <span class="title">Dashboard</span>
             </a>
           </li>
-          <li class="nav-item dropdown ">
+          <li class="nav-item dropdown">
             <a class="dropdown-toggle" href="javascript:void(0);">
               <span class="icon-holder">
                 <i class="c-orange-500 ti-folder"></i>
@@ -144,7 +145,7 @@
             </a>
             <ul class="dropdown-menu">
               <li>
-                <a class='sidebar-link ' href="settings-properties.html">Properties</a>
+                <a class='sidebar-link' href="settings-properties.html">Properties</a>
               </li>
               <li>
                 <a class='sidebar-link' href="settings-locale.html">Locale</a>
@@ -154,7 +155,7 @@
               </li>
             </ul>
           </li>
-          <li class="nav-item dropdown open">
+          <li class="nav-item dropdown">
             <a class="dropdown-toggle" href="javascript:void(0);">
               <span class="icon-holder">
                 <i class="c-deep-orange-500 ti-folder"></i>
@@ -172,11 +173,11 @@
                 <a class='sidebar-link' href="security-users.html">Users</a>
               </li>
               <li>
-                <a class='sidebar-link actived' href="security-audit.html">Audit</a>
+                <a class='sidebar-link' href="security-audit.html">Audit</a>
               </li>
             </ul>
           </li>
-          <li class="nav-item dropdown">
+          <li class="nav-item dropdown open">
             <a class="dropdown-toggle" href="javascript:void(0);">
               <span class="icon-holder">
                 <i class="c-green-500 ti-folder"></i>
@@ -188,13 +189,13 @@
             </a>
             <ul class="dropdown-menu">
               <li>
-                <a class='sidebar-link' href="services-email.html">Email</a>
+                <a class='sidebar-link ' href="services-email.html">Email</a>
               </li>
               <li>
-                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
+                <a class='sidebar-link ' href="services-sequencer.html">Sequencer</a>
               </li>
               <li>
-                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
+                <a class='sidebar-link actived' href="services-viewcount.html">View Count</a>
               </li>
               <li>
                 <a class='sidebar-link' href="services-menu.html">Menu</a>
@@ -235,12 +236,12 @@
                   </li>
                   <li>
                     <a href="resources-groovys.html">Gloovy</a>
-                  </li>  
+                  </li>
                   <li>
                     <a href="resources-sqls.html">Sql</a>
-                  </li>                                 
+                  </li>
                 </ul>
-              </li> 
+              </li>
               <li>
                 <a class='sidebar-link' href="resources-files.html">Files</a>
               </li>
@@ -258,25 +259,22 @@
       <!-- ### $Topbar ### -->
       <%= require('html-loader!./include-topbar.html') %>
 
-      <!-- ### $App Screen Content ### -->
+      <!-- ### $App Content ### -->
       <script>
         function setup() {
 
           $(document).ajaxSend(function (event, jqXHR, options) {
             jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
-          }); 
-
+          });
           var $window = $(window).on('resize', function () {
             var height = $(document).height() - ($('.header-container').height() + 61)
             $('#grid').height(height);
-          }).trigger('resize'); //on page load 
-
+          }).trigger('resize'); //on page load     
           const headers = {
             Accept: "application/json",
             "Content-Type": "application/json"
           };
           Object.assign(headers, studio.services.accounts.authHeader());
-
           var ServiceConfig = kendo.data.Model.define({
             fields: {
               enabled: { type: "boolean", defaultValue: false }
@@ -284,25 +282,26 @@
             copy: function (target) {
               target.set("enabled", this.get("enabled"));
             }
-          }); 
+          });
+
           var renderTo = $("#mainContent");
           var observable = kendo.observable({
-            editable : false,
             config: new ServiceConfig(),
-            setSource: function (data) {
-              var $this = this;
-              data.copy($this.config);
-            },
+            editable: false,
             settings: function () {
               var $this = this;
               createSettingsWindow($this);
+            },
+            setSource: function (data) {
+              var $this = this;
+              data.copy($this.config);
             },
             load: function () {
               var $this = this;
               kendo.ui.progress(renderTo, true);
               $this.set('editable', false);
               axios({
-                url: studio.services.getApiUrl('/data/secure/mgmt/services/audit/config.json'),
+                url: studio.services.getApiUrl('/data/secure/mgmt/services/viewcounts/config.json'),
                 method: "post",
                 data: JSON.stringify({}),
                 headers: headers
@@ -319,7 +318,7 @@
             },
             saveOrUpdate: function () {
               var $this = this;
-              var template = kendo.template('Are you sure you want to change the audit settings ?');
+              var template = kendo.template('Are you sure you want to change the view count settings ?');
               var dialog = $("#dialog").kendoDialog({
                 title: 'Settings',
                 content: template($this),
@@ -329,9 +328,9 @@
                     action: function (e) {
                       kendo.ui.progress($('.k-dialog'), true);
                       axios({
-                        url: studio.services.getApiUrl('/data/secure/mgmt/services/audit/config/save-or-update.json'),
+                        url: studio.services.getApiUrl('/data/secure/mgmt/services/viewcounts/config/save-or-update.json'),
                         method: "post",
-                        data: JSON.stringify(config),
+                        data: JSON.stringify($this.config),
                         headers: headers
                       })
                         .then(response => {
@@ -348,7 +347,7 @@
                     primary: true
                   },
                   {
-                    text: '취소',
+                    text: 'Cancle',
                     action: function (e) {
                       dialog.close();
                     }
@@ -362,11 +361,11 @@
             if (e.field === 'config.enabled' && observable.get('editable')) {
               observable.saveOrUpdate();
             }
-          });  
-          createAuditTrailGrid(observable);
+          });
+          createViewCountGrid(observable);
           kendo.bind(renderTo, observable);
         }
- 
+
         function createSettingsWindow(observable) {
           var renderTo = $('#settings-window');
           if (!renderTo.data("kendoWindow")) {
@@ -378,28 +377,32 @@
               visible: false,
               modal: true,
               actions: ["Close"], // 
-              open: function () { 
+              open: function () {
                 observable.load();
               },
-              close: function () { }
+              close: function () {
+              }
             }).data('kendoWindow');
-
             kendo.bind(renderTo, observable);
           }
           renderTo.data("kendoWindow").center().open();
         }
 
-        function createAuditTrailGrid(observable) {
+        function createViewCountGrid(observable) {
           var renderTo = $('#grid');
-          if (!renderTo.data("kendoGrid")) {
+          if (!renderTo.data('kendoGrid')) {
             var grid = renderTo.kendoGrid({
               autoBind: false,
               dataSource: {
                 transport: {
-                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/services/audit/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  read: {
+                    url: studio.services.getApiUrl('/data/secure/mgmt/services/viewcounts/stats.json'),
+                    type: 'post',
+                    contentType: "application/json; charset=utf-8"
+                  },
                   parameterMap: function (options, operation) {
                     if (operation !== "read" && options.models) {
-                      JSON.stringify(options.models);
+                      return JSON.stringify(options.models);
                     }
                     return JSON.stringify(options);
                   }
@@ -413,48 +416,37 @@
                   total: "totalCount",
                   data: "items",
                   model: {
-                    id: "AUD_DATE",
                     fields: {
-                      AUD_USER: { type: "string" },
-                      AUD_CLIENT_IP: { type: "string" },
-                      AUD_CLIENT_USERAGENT: { type: "string" },
-                      AUD_SERVER_IP: { type: "string" },
-                      AUD_RESOURCE: { type: "string" },
-                      AUD_ACTION: { type: "string" },
-                      APPLIC_CD: { type: "string" },
-                      AUD_DATE: { type: "date" }
+                      ENTITY_TYPE: { type: "number", defaultValue: 0 },
+                      ENTITY_ID: { type: "number", defaultValue: 0 },
+                      NAME: { type: "string", defaultValue: "N/A" },
+                      DISPLAY_NAME: { type: "string", defaultValue: "N/A" },
+                      VIEWCOUNT: { type: "number", defaultValue: 0 }
                     }
                   }
                 }
               },
               toolbar: [{ template: kendo.template($('#grid-toolbar-template').html()) }],
-              noRecords: {
-                template: "<p class='g-pa-20' >데이터가 로드되지 않았습니다. 잠시 후에 다시 데이터 새로고침 버튼을 클릭하여 주세요.</p>"
-              },
               sortable: true,
               filterable: true,
-              selectable: "row",
-              pageable: {
-                pageSize: 50,
-                refresh: true
-              },
+              pageable: true,
               columns: [
-                { field: "AUD_USER", title: "USER", width: 100 },
-                { field: "AUD_CLIENT_IP", title: "IP", width: 100 },
-                { field: "AUD_RESOURCE", title: "RESOURCE", width: 300 },
-                { field: "AUD_ACTION", title: "ACTION", width: 100 },
-                { field: "AUD_DATE", title: "DATE", width: 100, format: '{0:yyyy-MM-dd HH:mm}' }
+                { field: "NAME", title: "NAME", width: 100, template: '#if(NAME == null){# N/A #}else{# #:NAME# #}#', filterable: false, sortable: false },
+                { field: "DISPLAY_NAME", title: "DISPLAY_NAME", width: 100, template: '#if(DISPLAY_NAME == null){# N/A #}else{# #:DISPLAY_NAME# #}#', filterable: false, sortable: false },
+                { field: "ENTITY_TYPE", title: "ENTITY_TYPE", width: 100 },
+                { field: "ENTITY_ID", title: "ENTITY_ID", width: 100 },
+                { field: "VIEWCOUNT", title: "VIEWCOUNT", width: 100 }
               ],
               change: function (e) {
               }
             }).data('kendoGrid');
           }
-          renderTo.data("kendoGrid").dataSource.read();
+          renderTo.data('kendoGrid').dataSource.read();
         }
 
       </script>
       <main class='main-content bgc-grey-100'>
-        <div id='mainContent'>
+        <div id="mainContent">
           <div class="full-container">
             <div id="grid" style="border:0;"></div>
           </div>
@@ -474,31 +466,32 @@
                 </div>
               </label>
               <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
-                Specify whether or not to use the service. Checking usage records the audit trails history.
+                Specify whether or not to use the service. Checking usage records the view counter history.
               </small>
             </div>
           </div>
         </div>
       </div>
-      <script type="text/x-kendo-template" id="grid-toolbar-template">
+    </div>
+    <script type="text/x-kendo-template" id="grid-toolbar-template">
         <div class="layer w-100">
             <div class="peers ai-c jc-sb fxw-nw">
               <div class="peer">
               </div>
-              <div class="peer">         
+              <div class="peer"> 
                 <a class="btn btn-link u-link-v5 g-mr-10 g-font-size-15 g-color-secondary--hover" data-bind="click:settings">
                   <svg class="bi bi-gear-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"></path>
+                    <path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
                   </svg>
                   <spin class="g-ml-5 g-font-size-12 g-font-weight-300">
-                  Setting</spin></a>
+                  Setting</spin></a> 
               </div>
             </div>
         </div>  
         </script>
-      <!-- ### $App Screen Footer ### -->
-      <%= require('html-loader!./include-footer.html') %>
-    </div>
+    <!-- ### $App Screen Footer ### -->
+    <%= require('html-loader!./include-footer.html') %>
+  </div>
   </div>
 </body>
 

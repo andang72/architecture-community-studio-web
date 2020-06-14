@@ -252,6 +252,9 @@
               <li>
                 <a class='sidebar-link' href="services-viewcount.html">View Count</a>
               </li>
+              <li>
+                <a class='sidebar-link' href="services-menu.html">Menu</a>
+              </li> 
             </ul>
           </li>
           <li class="nav-item dropdown open">
@@ -266,10 +269,10 @@
             </a>
             <ul class="dropdown-menu">
               <li>
-                <a class='sidebar-link' href="resources-page.html">Pages</a>
+                <a class='sidebar-link' href="resources-pages.html">Pages</a>
               </li>
               <li>
-                <a class='sidebar-link' href="resources-api.html">Apis</a>
+                <a class='sidebar-link' href="resources-apis.html">Apis</a>
               </li>
 
               <li class="nav-item dropdown">
@@ -462,10 +465,20 @@
         }
 
         function setImageAsBase64(elemment) {
-          var url = elemment.attr('secure-image');
-          studio.ui.getImageAsBase64(url, function (data) {
+          let url = elemment.attr('secure-image');
+          studio.ui.setImageAsBase64(url, function (data) {
             elemment.attr('src', data);
             elemment.parent().removeClass('is-loading');
+          }, function(){
+            let retry = elemment.data('retry') || 0 ;
+            console.log( retry + ' loading image ' + url )
+            if( retry < 3 ){
+              elemment.data('retry', retry + 1  );
+              studio.ui.sleep(1000);
+              setImageAsBase64(elemment);
+            }else{
+              elemment.parent().removeClass('is-loading');
+            }
           });
         }
 
@@ -883,18 +896,13 @@
                   </div>
                 </div>
                 <div class="col g-mt-25">
-                  <button class="btn u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
+                  <button class="btn btn-md u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
                     data-bind="visible:editable, click:saveOrUpdate">Update</button> 
-                  <button class="g-pos-abs g-right-20 btn u-btn-outline-red g-rounded-50 g-mr-10 g-mb-15"
+                  <button class="btn-md g-pos-abs g-right-20 btn u-btn-outline-red g-rounded-50 g-mr-10 g-mb-15"
                     data-bind="visible:editable">
-                    <svg class="bi bi-x-circle" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
-                      xmlns="http://www.w3.org/2000/svg">
-                      <path fill-rule="evenodd"
-                        d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                      <path fill-rule="evenodd"
-                        d="M11.854 4.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708-.708l7-7a.5.5 0 0 1 .708 0z" />
-                      <path fill-rule="evenodd"
-                        d="M4.146 4.146a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708l-7-7a.5.5 0 0 0-.708 0z" />
+                    <svg class="bi bi-trash" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                      <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
                     </svg>
                     Clear cache
                   </button>
@@ -1036,7 +1044,7 @@
               #if ( sharedLink!=null && sharedLink.publicShared ) { # 
               src="#= studio.ui.getAttachmentUrl(data, {thumbnail:true}) #"   
               #}else{#               
-              is-secure="true" secure-image="#= studio.ui.getAttachmentUrl(data, {thumbnail:true}) #"
+              data-retry="0" is-secure="true" secure-image="#= studio.ui.getAttachmentUrl(data, {thumbnail:true}) #"
               src="assets/static/images/no-image.jpg"
               #}#
               alt="#= name #">

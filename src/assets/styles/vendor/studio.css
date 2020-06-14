@@ -35348,6 +35348,10 @@ svg.g-transition--linear polygon {
   min-height: 4px;
 }
 
+.g-min-height-25 {
+  min-height: 25px;
+}
+
 .g-min-height-35 {
   min-height: 35px;
 }

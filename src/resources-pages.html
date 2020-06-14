@@ -57,14 +57,6 @@
         opacity: 0;
       }
     }
-
-    #grid {
-      margin: 0;
-      padding: 0;
-      border-width: 0;
-      height: 100%;
-      /* DO NOT USE !important for setting the Grid height! */
-    }
   </style>
 </head>
 
@@ -88,6 +80,7 @@
   <div id='loader'>
     <div class="spinner"></div>
   </div>
+
   <script>
     window.addEventListener('load', function load() {
       const loader = document.getElementById('loader');
@@ -96,6 +89,7 @@
       }, 300);
     });
   </script>
+
   <!-- @App Content -->
   <!-- =================================================== -->
   <div>
@@ -139,7 +133,7 @@
               <span class="title">Dashboard</span>
             </a>
           </li>
-          <li class="nav-item dropdown ">
+          <li class="nav-item dropdown">
             <a class="dropdown-toggle" href="javascript:void(0);">
               <span class="icon-holder">
                 <i class="c-orange-500 ti-folder"></i>
@@ -161,7 +155,7 @@
               </li>
             </ul>
           </li>
-          <li class="nav-item dropdown open">
+          <li class="nav-item dropdown">
             <a class="dropdown-toggle" href="javascript:void(0);">
               <span class="icon-holder">
                 <i class="c-deep-orange-500 ti-folder"></i>
@@ -176,10 +170,10 @@
                 <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
               </li>
               <li>
-                <a class='sidebar-link actived' href="security-users.html">Users</a>
+                <a class='sidebar-link' href="security-users.html">Users</a>
               </li>
               <li>
-                <a class='sidebar-link ' href="security-audit.html">Audit</a>
+                <a class='sidebar-link' href="security-audit.html">Audit</a>
               </li>
             </ul>
           </li>
@@ -208,7 +202,7 @@
               </li> 
             </ul>
           </li>
-          <li class="nav-item dropdown">
+          <li class="nav-item dropdown open">
             <a class="dropdown-toggle" href="javascript:void(0);">
               <span class="icon-holder">
                 <i class="c-purple-500 ti-folder"></i>
@@ -220,7 +214,7 @@
             </a>
             <ul class="dropdown-menu">
               <li>
-                <a class='sidebar-link' href="resources-pages.html">Pages</a>
+                <a class='sidebar-link actived' href="resources-pages.html">Pages</a>
               </li>
               <li>
                 <a class='sidebar-link' href="resources-apis.html">Apis</a>
@@ -242,17 +236,17 @@
                   </li>
                   <li>
                     <a href="resources-groovys.html">Gloovy</a>
-                  </li>  
+                  </li>
                   <li>
                     <a href="resources-sqls.html">Sql</a>
-                  </li>                                 
+                  </li>
                 </ul>
-              </li> 
+              </li>
               <li>
                 <a class='sidebar-link' href="resources-files.html">Files</a>
               </li>
               <li>
-                <a class='sidebar-link' href="resources-images.html">Images</a>
+                <a class='sidebar-link ' href="resources-images.html">Images</a>
               </li>
             </ul>
           </li>
@@ -264,164 +258,81 @@
     <div class="page-container">
       <!-- ### $Topbar ### -->
       <%= require('html-loader!./include-topbar.html') %>
-
-      <!-- ### $App Screen Content ### -->
       <script>
         function setup() {
           $(document).ajaxSend(function (event, jqXHR, options) {
             jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
           });
-
           var $window = $(window).on('resize', function () {
             var height = $(document).height() - ($('.header-container').height() + 61)
             $('#grid').height(height);
-          }).trigger('resize'); //on page load  
-
+          }).trigger('resize'); //on page load     
           const headers = {
             Accept: "application/json",
             "Content-Type": "application/json"
           };
           Object.assign(headers, studio.services.accounts.authHeader());
-
           var renderTo = $("#mainContent");
+          var observable = kendo.observable({
 
-          var observable = new kendo.observable({
-            selected: false,
-            deleteUsers: function (e) {
-              var $this = this;
-              var grid = $('#grid').data('kendoGrid');
-              if (grid.selectedKeyNames().length > 0) {
-                var template = kendo.template('선택한 사용자를 영구적으로 제거합니다.<br/> 이동작은 최소할 수 없습니다.');
-                var dialog = $("#dialog").kendoDialog({
-                  title: '선택한 사용자을 삭제하시겠습니까?',
-                  content: template($this),
-                  closable: true,
-                  modal: true,
-                  buttonLayout: "normal",
-                  actions: [
-                    {
-                      text: 'Ok',
-                      action: function (e) {
-                        kendo.ui.progress($('.k-dialog'), true);
-                        axios({
-                          url: studio.services.getApiUrl('/data/secure/mgmt/security/users/delete.json'),
-                          method: "post",
-                          data: JSON.stringify(grid.selectedKeyNames()),
-                          headers: headers
-                        }).then(response => {
-                          let data = response.data;
-                          studio.ui.notify(null, data.count + " deleted.", "success");
-                          grid.dataSource.read();
-                          dialog.close();
-                        }).catch(function (error) {
-
-                        }).then(function () {
-                          // always executed
-                          kendo.ui.progress($('.k-dialog'), false);
-                        });
-                        return false;
-                      },
-                      primary: true
-                    },
-                    { text: 'Cancle' }
-                  ]
-                }).data('kendoDialog');
-                dialog.open();
-              }
-            },
-            selectedRole: null,
-            getSelectedRole: function () {
-              var $this = this;
-              var role = $this.get('selectedRole');
-              if (role != null) {
-                if (typeof role == 'string') {
-                  return role;
-                } else {
-                  return role.name;
-                }
-              }
-              return null;
-            },
-            roleChanged: function () {
-              var $this = this;
-              var grid = $('#grid').data('kendoGrid');
-              grid.dataSource.read();
-            },
-            rolesDataSource: kendo.data.DataSource.create({
-              transport: {
-                read: { url: studio.services.getApiUrl('/data/secure/mgmt/security/roles/list.json') , type: 'post', contentType: "application/json; charset=utf-8"},
-                parameterMap: function (options, operation) {
-                    return JSON.stringify(options);
-                }
-              },
-              schema: {
-                total: "totalCount",
-                data: "items",
-                model: studio.data.model.Role
-              }
-            })
           });
-          createLocalUserGrid(observable);
+          createPageGrid(observable);
           kendo.bind(renderTo, observable);
         }
 
-        function createLocalUserGrid(observable) {
+        function createPageGrid(observable) {
           var renderTo = $('#grid');
-          if (!renderTo.data("kendoWindow")) {
-            renderTo.kendoGrid({
+          if (!renderTo.data('kendoGrid')) {
+            var grid = renderTo.kendoGrid({
               dataSource: {
                 transport: {
-                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/security/users/find.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/pages/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
                   parameterMap: function (options, operation) {
-                    requiredRole = observable.getSelectedRole();
-                    if (requiredRole != null)
-                      options['REQUIRED_ROLE'] = requiredRole;
+                    if (operation !== "read" && options.models) {
+                      return JSON.stringify(options.models);
+                    }
                     return JSON.stringify(options);
                   }
                 },
                 pageSize: 50,
                 serverPaging: true,
-                serverFiltering: true,
-                serverSorting: true,
                 error: studio.ui.handleAjaxError,
                 batch: true,
                 schema: {
-                  total: "totalCount",
                   data: "items",
-                  model: studio.data.model.User
+                  total: "totalCount",
+                  model: studio.data.model.Page
                 }
               },
-              toolbar: [{ name: "create", text: "Create New User", template: kendo.template($('#grid-toolbar-template').html()) }],
-              persistSelection: true,
+              toolbar: [{ name: "create", text: "새로운 페이지 만들기", template: kendo.template($('#grid-toolbar-template').html()) }],
               sortable: true,
-              filterable: true,
-              resizable: true,
+              filterable: false,
               pageable: {
                 refresh: true,
                 pageSizes: [50, 100, 200, 300]
               },
-              change: function (e) {
-                if (this.selectedKeyNames().length > 0) {
-                  observable.set('selected', true);
-                } else {
-                  observable.set('selected', false);
-                }
-              },
               columns: [
-                { selectable: true, width: "50px", headerAttributes: {} },
-                { field: "USER_ID", title: "ID", template: '#: userId #', width: 80, alidation: { required: true } },
-                { field: "USERNAME", title: "Username", template: $('#user-column-template').html(), width: 200, validation: { required: true } },
-                { field: "NAME", title: "Name", template: '#: name #', width: 300, validation: { required: true } },
-                { field: "EMAIL", title: "Email", template: '#: email #', width: 300, validation: { required: true } },
-                { field: "USER_EXTERNAL", title: "External", template: '#: external#', width: 100, validation: { required: true } },
-                { field: "STATUS", title: "Status", template: '#:status#', width: 100, validation: { required: true } },
-                { field: "creationDate", title: "Creation Date", type: "date", format: "{0:yyyy.MM.dd}", width: 100, validation: { required: true }, filterable: { ui: "datetimepicker" } },
-                { field: "modifiedDate", title: "Modified Date", format: "{0:yyyy.MM.dd}", width: 100, validation: { required: true }, filterable: { ui: "datetimepicker" } }
+                { field: "PAGE_ID", title: "ID", filterable: true, sortable: true, width: 100, template: '#= pageId #', attributes: { class: "text-center" } },
+                { field: "NAME", title: "Name", filterable: true, sortable: true, template: $('#name-column-template').html() },
+                { field: "PAGE_STATE", title: "Status", filterable: false, sortable: true, template: '#: pageState #', attributes: { class: "text-center" }, width: 120 },
+                { field: "VERSION_ID", title: "Version", filterable: false, sortable: false, width: 80, template: '#= versionId#', attributes: { class: "text-center" } },
+                { field: "USER_ID", title: "Creator", filterable: false, sortable: true, width: 150, template: $('#user-column-template').html(), attributes: { class: "text-center" } },
+                { field: "CREATION_DATE", title: "Created", filterable: false, sortable: true, width: 100, template: '#: studio.ui.format.date( creationDate ,"yyyy.MM.dd")#', attributes: { class: "text-center" } },
+                { field: "MODIFIED_DATE", title: "Modified", filterable: false, sortable: true, width: 100, template: '#: studio.ui.format.date( modifiedDate ,"yyyy.MM.dd")#', attributes: { class: "text-center" } }
               ]
+            }).data('kendoGrid');
+
+            renderTo.on("click", "a[data-action=edit]", function (e) {
+              var $this = $(this);
+              if (studio.ui.defined($this.data("object-id"))) {
+                var objectId = $this.data("object-id");
+
+              }
             });
           }
         }
       </script>
+      <!-- ### $App Screen Content ### -->
       <main class='main-content bgc-grey-100'>
         <div id='mainContent'>
           <div class="full-container">
@@ -429,48 +340,57 @@
           </div>
         </div>
       </main>
-      <span id="dialog"></span>
-      <script type="text/x-kendo-template" id="grid-toolbar-template">
-        <div class="layer w-100">
-            <div class="peers ai-c jc-sb fxw-nw">
-              <div class="peer">
-                <input data-role="dropdownlist"
-                data-option-label="롤을 선택하세요."
-                data-auto-bind="false"
-                data-text-field="name"
-                data-value-field="name"
-                data-bind="value: selectedRole, source: rolesDataSource, events:{ change : roleChanged }"
-                style="width: 300px;" />                  
-              </div>
-              <div class="peer">
-                <button type="button" class="btn cur-p btn-danger">
-                  <svg class="bi bi-person-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm4.5 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
-                    <path fill-rule="evenodd" d="M13 7.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0v-2z"/>
-                  </svg>
-                  New User</button>
-                <button type="button" class="btn cur-p btn-danger" data-bind="enabled:selected, click:deleteUsers" >
-                  <svg class="bi bi-person-dash" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm2 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
-                  </svg>
-                  Delete
-                </button>
-              </div>
-            </div>
-        </div>  
-      </script>
+
+      <script type="text/x-kendo-template" id="name-column-template">
+          <a class="d-flex align-items-center u-link-v5 g-min-height-25 u-link-underline g-color-black g-color-lightblue-v3--hover g-color-lightblue-v3--opened" href="\#!" data-action="edit" data-object-id="#=pageId#">
+          <h5 class="g-font-weight-300 g-mb-0">
+          #if (secured) { # 
+            <svg class="bi bi-lock c-red-500" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M11.5 8h-7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zm-7-1a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7zm0-3a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z"/>
+            </svg>
+          # } else {# 
+            <svg class="bi bi-unlock c-red-500" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z"/>
+            </svg>
+          #}#
+          #= name # #if(pattern!=null) { #,#= pattern ##}#
+          </h5> 
+          </a>
+          <p class="g-font-weight-300 g-color-gray-dark-v6 g-mt-5 g-ml-10 g-mb-0" >#= title #</p>
+          <ul class="u-list-inline">
+            #if( template != null ){#
+            <li class="list-inline-item g-mr-30">#: template #</li>
+            #}#
+            #if( script != null ){#
+            <li class="list-inline-item g-mr-30">#: script #</li>
+            #}#  
+          </ul> 
+        </script>
       <script type="text/x-kendo-template" id="user-column-template">
-      <div class="media">
-          <div class="d-flex align-self-center">
-            <img class="g-width-36 g-height-36 rounded-circle g-mr-15" src="#= studio.services.accounts.getUserAvatarUrl( username ) #" >
-        </div>
-        <div class="media-body align-self-center text-left">
-        <a class="d-flex align-items-center u-link-v5 u-link-underline g-color-black g-color-lightblue-v3--hover g-color-lightblue-v3--opened" href="\#!" data-action="edit" data-object-id="#=userId#">
-          <h5 class="g-font-weight-100 g-font-size-default g-mb-0">#= username #</h5> 
-        </a> 
-        </div>
-      </div>	
-      </script>
+        <div class="media">
+            <div class="d-flex align-self-center">
+              <img class="g-width-36 g-height-36 rounded-circle g-mr-15" src="#= studio.services.accounts.getUserAvatarUrl( user.username ) #" >
+          </div>
+          <div class="media-body align-self-center text-left">#if ( !user.anonymous && user.name != null ) {# #: user.name # #}#</div>
+        </div>	
+        </script>
+      <script type="text/x-kendo-template" id="grid-toolbar-template">
+          <div class="layer w-100">
+              <div class="peers ai-c jc-sb fxw-nw">
+                <div class="peer">
+                  <button type="button" class="btn cur-p btn-danger k-grid-add">
+                    <svg class="bi bi-file-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8h-1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5V1z"/>
+                      <path fill-rule="evenodd" d="M13.5 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1H13V1.5a.5.5 0 0 1 .5-.5z"/>
+                      <path fill-rule="evenodd" d="M13 3.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0v-2z"/>
+                    </svg>
+                    New Page</button>
+                </div>
+                <div class="peer">
+                </div>
+              </div>
+          </div>  
+          </script>
       <!-- ### $App Screen Footer ### -->
       <%= require('html-loader!./include-footer.html') %>
     </div>

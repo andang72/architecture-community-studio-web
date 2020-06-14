@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title><%= title %></title>
+  <style>
+    #loader {
+      transition: all 0.3s ease-in-out;
+      opacity: 1;
+      visibility: visible;
+      position: fixed;
+      height: 100vh;
+      width: 100%;
+      background: #fff;
+      z-index: 90000;
+    }
+
+    #loader.fadeOut {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: calc(50% - 20px);
+      left: calc(50% - 20px);
+      background-color: #333;
+      border-radius: 100%;
+      -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+      animation: sk-scaleout 1.0s infinite ease-in-out;
+    }
+
+    @-webkit-keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0)
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+
+    @keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body class="app" authenticate-required="true">
+  <!-- @TOC -->
+  <!-- =================================================== -->
+  <!--
+      + @Page Loader
+      + @App Content
+          - #Left Sidebar
+              > $Sidebar Header
+              > $Sidebar Menu
+
+          - #Main
+              > $Topbar
+              > $App Screen Content
+    -->
+
+  <!-- @Page Loader -->
+  <!-- =================================================== -->
+  <div id='loader'>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    window.addEventListener('load', function load() {
+      const loader = document.getElementById('loader');
+      setTimeout(function () {
+        loader.classList.add('fadeOut');
+      }, 300);
+    });
+  </script>
+
+  <!-- @App Content -->
+  <!-- =================================================== -->
+  <div>
+    <!-- #Left Sidebar ==================== -->
+    <div class="sidebar">
+      <div class="sidebar-inner">
+        <!-- ### $Sidebar Header ### -->
+        <div class="sidebar-logo">
+          <div class="peers ai-c fxw-nw">
+            <div class="peer peer-greed">
+              <a class="sidebar-link td-n" href="index.html">
+                <div class="peers ai-c fxw-nw">
+                  <div class="peer">
+                    <div class="logo">
+                      <img src="assets/static/images/logo.png" alt="">
+                    </div>
+                  </div>
+                  <div class="peer peer-greed">
+                    <h5 class="lh-1 mB-0 logo-text">Adminator</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="peer">
+              <div class="mobile-toggle sidebar-toggle">
+                <a href="" class="td-n">
+                  <i class="ti-arrow-circle-left"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ### $Sidebar Menu ### -->
+        <ul class="sidebar-menu scrollable pos-r">
+          <li class="nav-item  mT-30">
+            <a class="sidebar-link" href="index.html">
+              <span class="icon-holder">
+                <i class="c-blue-500 ti-home"></i>
+              </span>
+              <span class="title">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-orange-500 ti-folder"></i>
+              </span>
+              <span class="title">Settings</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="settings-properties.html">Properties</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="settings-locale.html">Locale</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="settings-datasource.html">DataSource</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-deep-orange-500 ti-folder"></i>
+              </span>
+              <span class="title">Security</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="security-users.html">Users</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="security-audit.html">Audit</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown ">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-green-500 ti-folder"></i>
+              </span>
+              <span class="title">Services</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link ' href="services-email.html">Email</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="services-menu.html">Menu</a>
+              </li> 
+            </ul>
+          </li>
+          <li class="nav-item dropdown open">
+            <a class="dropdown-toggle" href="javascript:void(0);">
+              <span class="icon-holder">
+                <i class="c-purple-500 ti-folder"></i>
+              </span>
+              <span class="title">Resources</span>
+              <span class="arrow">
+                <i class="ti-angle-right"></i>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class='sidebar-link' href="resources-pages.html">Pages</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-apis.html">Apis</a>
+              </li>
+
+              <li class="nav-item dropdown open">
+                <a href="javascript:void(0);">
+                  <span>Sources</span>
+                  <span class="arrow">
+                    <i class="ti-angle-right"></i>
+                  </span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a href="resources-decorators.html">Decorators</a>
+                  </li>
+                  <li class="actived">
+                    <a href="resources-templates.html">Templates</a>
+                  </li>
+                  <li >
+                    <a href="resources-groovys.html">Gloovy</a>
+                  </li>
+                  <li >
+                    <a href="resources-sqls.html">Sql</a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-files.html">Files</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-images.html">Images</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- #Main ============================ -->
+    <div class="page-container">
+      <!-- ### $Topbar ### -->
+      <%= require('html-loader!./include-topbar.html') %>
+
+      <!-- ### $App Content ### -->
+      <script>
+
+        function setup() {
+
+          let promise = studio.ui.loadAceEditor();
+          promise.then(script => createEditor(observable));
+
+          var $window = $(window).on('resize', function () {
+            var height = $(document).height() - ($('.header-container').height() + 61)
+            $('#splitter').height(height);
+          }).trigger('resize'); //on page load 
+
+          $(document).ajaxSend(function (event, jqXHR, options) {
+            jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
+          });
+
+          const headers = {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          };
+          Object.assign(headers, studio.services.accounts.authHeader());
+          var renderTo = $("#mainContent");
+          var observable = kendo.observable({
+            visible: false,
+            filename: '',
+            path: '',
+            fullpath: '',
+            folder: true,
+            modifiedDate: null,
+            editor: {
+              type: 'template',
+              editable: false,
+              warp: false,
+              mode: 'ace/mode/html',
+              theme: "ace/theme/chrome"
+            },
+            newSql:function () {
+              var $this = this;
+              
+            },
+            edit: function () {
+              var $this = this;
+              $this.set('editor.editable', true);
+            },
+            cancle: function () {
+              var $this = this;
+              $this.set('editor.editable', false);
+            },
+            saveOrUpdate:function(){
+              var $this = this;
+              var editor = createEditor($this);
+              var template = kendo.template("Update the #:filename #. This operation cannot be canceled.");
+              var dialog = $("#dialog").kendoDialog({
+                width: "450px",
+                closable: true,
+                modal: true,
+                buttonLayout: "normal",
+                title: 'Groovy Script Update',
+                content: template($this),
+                actions: [
+                  {
+                    text: 'Ok',
+                    action: function (e) {
+                      kendo.ui.progress($('.k-dialog'), true);
+                      axios({
+                        url: studio.services.getApiUrl('/data/secure/mgmt/resources/template/save-or-update.json'),
+                        method: "post",
+                        data: JSON.stringify({ path : $this.get('path'), fileContent : editor.getValue() }),
+                        headers: headers
+                      }).then(response => {
+                        let data = response.data;
+                        studio.ui.notify(null, $this.get('filename') + " has been updated.", "success");
+                        $this.cancle();
+                        dialog.close();
+                      }).catch(function (error) {
+                        studio.ui.handleAxiosError(error);
+                      }).then(function () {
+                        // always executed
+                        kendo.ui.progress($('.k-dialog'), false);
+                      });
+                      return false;
+                    },
+                    primary: true
+                  },
+                  { text: 'Cancle' }
+                ]
+              }).data("kendoDialog");
+              dialog.open();             
+            }
+          });
+          observable.bind("change", function (e) {
+            var editor = createEditor(observable); 
+            if (e.field === 'editor.editable') {
+              editor.setReadOnly(!observable.get('editor.editable'));
+            }
+            if (e.field === 'editor.warp') {
+              editor.getSession().setUseWrapMode(observable.get('editor.warp'));
+            }
+          });
+
+          createTreeView(observable);
+          kendo.bind(renderTo, observable);
+        }
+
+        function createEditor(observable) {
+          var renderTo = $("#editor");
+          if (renderTo.contents().length == 0) {
+            var editor = ace.edit(renderTo.attr("id"));
+            editor.getSession().setMode(observable.get('editor.mode'));
+            editor.setTheme(observable.get('editor.theme'));
+            editor.getSession().setUseWrapMode(observable.get('editor.warp'));
+            editor.setReadOnly(!observable.get('editor.editable'));
+          }
+          return ace.edit(renderTo.attr("id"));
+        }
+
+        function createTreeView(observable) {
+          var renderTo = $('#treeview');
+          if (!renderTo.data("kendoTreeView")) {
+            const headers = {
+              Accept: "application/json",
+              "Content-Type": "application/json"
+            };
+            Object.assign(headers, studio.services.accounts.authHeader());
+            var treeview = renderTo.kendoTreeView({
+              dataSource: {
+                transport: {
+                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/resources/template/list.json'), dataType: "json" }
+                },
+                schema: {
+                  model: { id: "path", hasChildren: "directory" }
+                }
+              },
+              autoScroll: true,
+              template: kendo.template($("#treeview-template").html()),
+              dataTextField: "name",
+              dataBound: function (e) {
+                observable.set('visible', true);
+              },
+              change: function (e) {
+                var $this = this;
+                var selectedCells = $this.select();
+                var filePlaceHolder = $this.dataItem($this.select());
+                if (studio.ui.defined(filePlaceHolder)) {
+                  kendo.ui.progress(renderTo, true);
+                  var bodyFormData = new FormData();
+                  bodyFormData.set('path', filePlaceHolder.path);
+                  axios({
+                    url: studio.services.getApiUrl('/data/secure/mgmt/resources/template/get.json'),
+                    method: "post",
+                    data: bodyFormData,
+                    headers: headers
+                  }).then(response => {
+                    let data = response.data; 
+                    observable.set('filename', data.name);
+                    observable.set('fullpath', data.path);
+                    observable.set('path', filePlaceHolder.path);
+                    observable.set('folder', data.directory);
+                    observable.set('size', data.size);
+                    observable.set('modifiedDate', studio.ui.format.date(data.lastModifiedDate, 'yyyy.MM.dd HH:MM' ));
+                    var editor = createEditor(observable);
+                    setMode( editor, data.name );
+                    editor.setValue(data.fileContent);
+                  }).catch(function (error) {
+                    studio.ui.handleAxiosError(error);
+                  }).then(function () {
+                    // always executed
+                    kendo.ui.progress(renderTo, false);
+                  });
+                }
+              }
+            }).data('kendoTreeView');
+          }
+        }
+
+        function setMode( editor , filename ){
+          if( filename.endsWith('.ftl')){
+            editor.getSession().setMode('ace/mode/ftl');
+          }else if ( filename.endsWith('.jsp')){
+            editor.getSession().setMode('ace/mode/jsp');
+          }else if ( filename.endsWith('.html')){
+            editor.getSession().setMode('ace/mode/html');
+          }
+        }
+
+      </script>
+      <main class='main-content bgc-grey-100'>
+        <div id="mainContent">
+          <div class="full-container">
+            <!-- start splitter -->
+            <div id="splitter" data-role="splitter" style="border:0;" data-panes="[
+{ collapsible: true, size: '280px', min: '200px', max: '500px' },
+{ collapsible: false } ]">
+              <div class="pane-content">
+                <div class="h-100 layers">
+                  <div class="p-15 bgc-grey-100 layer w-100">
+                    <button type="button" class="btn cur-p btn-danger k-grid-add" data-bind="click:newSql">
+                      <svg class="bi bi-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                          d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z" />
+                        <path fill-rule="evenodd"
+                          d="M7.5 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8z" />
+                      </svg>
+                      New Template</button>
+                  </div>
+                  <div id="treeview" class="g-height-100x bdT layer w-100"></div>
+                </div>
+
+              </div>
+              <div class="pane-content">
+                <div class="h-100 layers">
+                  <div class="layer w-100">
+                    <div class="bgc-grey-100 peers ai-c jc-sb p-15 fxw-nw">
+                      <div class="peer">
+                        <span class="g-ml-15 g-color-gray-light-v6 g-font-weight-500" data-bind="text:filename"></span>
+                        <span class="g-ml-15 g-color-gray-light-v6 g-font-weight-300" data-bind="text:modifiedDate"></span>
+                      </div>
+                      <div class="peer">
+                        <ul class="u-list-inline" data-bind="invisible:folder"> 
+                          <li class="list-inline-item">
+                            <label class="d-flex align-items-center justify-content-between g-mb-0">
+                              <span class="g-pr-20 g-font-size-12 g-font-weight-300">Word Warp</span>
+                              <div class="u-check">
+                                <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" name="useWarp" value="true"
+                                  data-bind="checked:editor.warp" type="checkbox">
+                                <div class="u-check-icon-radio-v8">
+                                  <i class="fa" data-check-icon=""></i>
+                                </div>
+                              </div>
+                            </label>
+                          </li>                          
+                          <li class="list-inline-item">                       
+                              <a data-bind="invisible:editor.editable, click:edit" class="btn btn-link u-link-v5 g-font-size-20 g-color-secondary--hover">
+                                <svg class="bi bi-lock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                  <path fill-rule="evenodd" d="M11.5 8h-7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zm-7-1a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7zm0-3a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z"/>
+                                </svg>
+                                <spin class="g-ml-5 g-font-size-12 g-font-weight-300">Unlock</spin>
+                              </a>  
+                              <a data-bind="visible:editor.editable, click:cancle" class="btn btn-link u-link-v5 g-font-size-20 g-color-secondary--hover">
+                                <svg class="bi bi-unlock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                  <path fill-rule="evenodd" d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z"/>
+                                </svg> 
+                                <spin class="g-ml-5 g-font-size-12 g-font-weight-300">Lock</spin>
+                              </a>
+                              <a data-bind="visible:editor.editable, click:saveOrUpdate" class="btn btn-link u-link-v5 g-font-size-20 g-color-secondary--hover">
+                                <svg class="bi bi-upload" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                  <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8zM5 4.854a.5.5 0 0 0 .707 0L8 2.56l2.293 2.293A.5.5 0 1 0 11 4.146L8.354 1.5a.5.5 0 0 0-.708 0L5 4.146a.5.5 0 0 0 0 .708z"/>
+                                  <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 2z"/>
+                                </svg>
+                                <spin class="g-ml-5 g-font-size-12 g-font-weight-300">Update</spin>
+                              </a>
+                          </li> 
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div data-bind="visible:folder" class="g-mt-150 text-center" style="display:none;">
+                    <img alt="svgImg"
+                      src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMjQwIiBoZWlnaHQ9IjI0MCIKdmlld0JveD0iMCAwIDEyOCAxMjgiCnN0eWxlPSIgZmlsbDojMDAwMDAwOyI+PHBhdGggZmlsbD0iI0Q4RDRFQSIgZD0iTTEwMC4yLDEwNEgxOWMtNS41LDAtMTAtNC41LTEwLTEwVjI5aDk4LjdjNiwwLDEwLjcsNS4zLDkuOSwxMS4ybC03LjUsNTVDMTA5LjUsMTAwLjIsMTA1LjIsMTA0LDEwMC4yLDEwNCB6Ij48L3BhdGg+PHBhdGggZmlsbD0iI0ZGRiIgZD0iTTEwNCwxMDRIMTljLTUuNSwwLTEwLTQuNS0xMC0xMFYyNGgyNC42YzMuMywwLDYuNSwxLjcsOC4zLDQuNWw0LjEsNi4xYzEuOSwyLjgsNSw0LjUsOC4zLDQuNUg4OSBjNS41LDAsMTAsNC41LDEwLDEwdjQxdjEuOUM5OSw5Ni41LDEwMC44LDEwMC44LDEwNCwxMDRMMTA0LDEwNHoiPjwvcGF0aD48cGF0aCBmaWxsPSIjNDU0QjU0IiBkPSJNMTAwLjIsMTA3SDE5Yy03LjIsMC0xMy01LjgtMTMtMTNWMjRjMC0xLjcsMS4zLTMsMy0zaDI0LjZjNC40LDAsOC40LDIuMiwxMC44LDUuOGw0LjEsNi4xIGMxLjMsMiwzLjUsMy4xLDUuOCwzLjFIODljNy4yLDAsMTMsNS44LDEzLDEzdjM1YzAsMS43LTEuMywzLTMsM3MtMy0xLjMtMy0zVjQ5YzAtMy45LTMuMS03LTctN0g1NC40Yy00LjQsMC04LjQtMi4yLTEwLjgtNS44IGwtNC4xLTYuMWMtMS4zLTItMy41LTMuMS01LjgtMy4xSDEydjY3YzAsMy45LDMuMSw3LDcsN2g4MS4yYzMuNSwwLDYuNS0yLjYsNi45LTYuMWw3LjUtNTVjMC4yLTItMC40LTQtMS43LTUuNSBjLTEuMy0xLjUtMy4yLTIuNC01LjItMi40Yy0xLjcsMC0zLTEuMy0zLTNzMS4zLTMsMy0zYzMuNywwLDcuMywxLjYsOS43LDQuNGMyLjUsMi44LDMuNiw2LjUsMy4yLDEwLjJsLTcuNSw1NSBDMTEyLjMsMTAyLjEsMTA2LjcsMTA3LDEwMC4yLDEwN3oiPjwvcGF0aD48cGF0aCBmaWxsPSIjNDU0QjU0IiBkPSJNMTA3LjcsMzJINDNjLTEuNywwLTMtMS4zLTMtM3MxLjMtMywzLTNoNjQuN2MxLjcsMCwzLDEuMywzLDNTMTA5LjMsMzIsMTA3LjcsMzJ6Ij48L3BhdGg+PC9zdmc+">
+                  </div>
+                  <div id="editor" style="height:100%;width:100%;" class="bdT" data-bind="invisible:folder"></div>
+                </div>
+              </div>
+            </div>
+            <!-- end splitter -->
+          </div>
+        </div>
+      </main>
+      <span id="dialog"></span>
+      <script id="treeview-template" type="text/kendo-ui-template">
+        #if(item.directory){# 
+          <i class="ti-folder"></i> 
+         # }else{#  
+          <i class="ti-file"></i> 
+         #}#
+        <span class="g-ml-5">#: item.name # </span>
+        # if (!item.items) { #
+          <a class='delete-link' href='\#'></a> 
+        # } #
+          </script>
+      <!-- ### $App Screen Footer ### -->
+      <%= require('html-loader!./include-footer.html') %>
+    </div>
+  </div>
+</body>
+
+</html>

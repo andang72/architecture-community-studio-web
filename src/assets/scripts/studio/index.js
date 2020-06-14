@@ -197,6 +197,69 @@ const ImageModel = {
   },
 };
 
+const PageModel = {
+  id: "pageId",
+  fields: {
+    objectType: { type: "number", defaultValue: -1 },
+    objectId: { type: "number", defaultValue: -1 },
+    pageId: { type: "number", defaultValue: 0 },
+    name: { type: "string", defaultValue: "" },
+    versionId: { type: "number", defaultValue: 0 },
+    pageState: { type: "string", defaultValue: "INCOMPLETE" },
+    commentCount: { type: "number", defaultValue: 0 },
+    viewCount: { type: "number", defaultValue: 0 },
+    summary: { type: "string", defaultValue: "" },
+    tagsString: { type: "string", defaultValue: "" },
+    title: { type: "string", defaultValue: "" },
+    template: { type: "string", defaultValue: "" },
+    pattern: { type: "string", defaultValue: "" },
+    script: { type: "string", defaultValue: "" },
+    secured: { type: "boolean", defaultValue: false },
+    properties: { type: "object", defaultValue: {} },
+    bodyText: { type: "string", defaultValue: "" },
+    bodyContent: { type: "object", defaultValue: {} },
+    user: { type: "object", defaultValue: {} },
+    creationDate: { type: "date" },
+    modifiedDate: { type: "date" },
+  },
+  copy: function (target) {
+    target.pageId = this.get("pageId");
+    target.set("objectType", this.get("objectType"));
+    target.set("objectId", this.get("objectId"));
+    target.set("name", this.get("name"));
+    target.set("versionId", this.get("versionId"));
+    target.set("pageState", this.get("pageState"));
+    target.set("commentCount", this.get("commentCount"));
+    target.set("viewCount", this.get("viewCount"));
+    target.set("summary", this.get("summary"));
+    target.set("tagsString", this.get("tagsString"));
+    target.set("title", this.get("title"));
+    target.set("template", this.get("template"));
+    target.set("pattern", this.get("pattern"));
+    target.set("script", this.get("script"));
+    target.set("secured", this.get("secured"));
+    target.set("bodyText", this.get("bodyText"));
+    target.set("modifiedDate", this.get("modifiedDate"));
+    target.set("creationDate", this.get("creationDate"));
+    if (typeof this.get("properties") === "object")
+      target.set("properties", this.get("properties"));
+    if (typeof this.get("user") === "object")
+      target.set("user", this.get("user"));
+    if (typeof this.get("bodyContent") === "object")
+      target.set("bodyContent", this.get("bodyContent"));
+  },
+};
+
+const BodyContentModel = {
+  id: "bodyId",
+  fields: {
+    bodyId: { type: "number", defaultValue: -1 },
+    bodyText: { type: "string", defaultValue: "" },
+    bodyType: { type: "string", defaultValue: "FREEMARKER" },
+    pageId: { type: "number", defaultValue: 0 },
+  },
+};
+
 export const studio = {
   VERSION,
   services: {
@@ -233,16 +296,21 @@ export const studio = {
       Image: ImageModel,
       ImageLink: ImageLinkModel,
       Attachment: AttachmentModel,
+      BodyContent: BodyContentModel,
+      Page: PageModel,
     },
   },
   ui: {
     defined,
+    sleep,
     notify,
     handleAjaxError,
     handleAxiosError,
     getImageUrl,
     getAttachmentUrl,
+    setImageAsBase64,
     getImageAsBase64,
+    loadAceEditor,
     format: {
       date: getFormattedDate,
       number: getFormattedNumber,
@@ -320,13 +388,37 @@ function isFunction(functionToCheck) {
   );
 }
 
-// ES6 : code for retry but it effect entire code ... 
-import axiosRetry from 'axios-retry';
-axiosRetry(axios, { retries: 3, retryDelay: (retryCount) => {
-  return retryCount * 500;
-}});
+// ES6 : code for retry but it effect entire code ...
+/** 
+import axiosRetry from "axios-retry";
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: (retryCount) => {
+    return retryCount * 500;
+  },
+});
+*/
 
-async function getImageAsBase64(url, handler) { 
+function setImageAsBase64(url, successHandler, errorHandler ) {
+  const headers = {};
+  Object.assign(headers, studio.services.accounts.authHeader());
+  axios
+    .get(url, { headers: headers, responseType: "arraybuffer" })
+    .then((response) => {
+      let b64encoded = Buffer.from(response.data, "binary").toString("base64");
+      var prefix = "data:" + response.headers["content-type"] + ";base64,";
+      if (isFunction(successHandler)) successHandler(prefix + b64encoded); 
+    })
+    .then((error) => {
+      if (isFunction(errorHandler)) errorHandler();
+    });
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function getImageAsBase64(url) {
   const headers = {};
   Object.assign(headers, studio.services.accounts.authHeader());
   const data = await axios
@@ -334,8 +426,7 @@ async function getImageAsBase64(url, handler) {
     .then((response) => {
       let b64encoded = Buffer.from(response.data, "binary").toString("base64");
       var prefix = "data:" + response.headers["content-type"] + ";base64,";
-      if (isFunction(handler)) handler(prefix + b64encoded);
-      return prefix + b64encoded ;
+      return prefix + b64encoded;
     });
 }
 
@@ -576,4 +667,14 @@ function notify(renderTo, message, type) {
     })
     .data("kendoNotification");
   notificationWidget.show(message, type);
+}
+
+function loadAceEditor() {
+  return import(
+    /* webpackChunkName: "ace" */ "ace-builds/src-noconflict/ace"
+  ).then(() => {
+    return import(
+      /* webpackChunkName: "ace" */ "ace-builds/webpack-resolver.js"
+    );
+  });
 }

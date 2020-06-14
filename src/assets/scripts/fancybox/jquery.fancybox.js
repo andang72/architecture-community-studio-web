@@ -1954,8 +1954,10 @@
         .appendTo(slide.$content);
 
         if( slide.isSecure ){
-          studio.ui.getImageAsBase64(slide.src, function( data ){
-            slide.$image.attr('src', data );
+          studio.ui.setImageAsBase64(slide.src, function (data) {
+            slide.$image.attr('src', data ); 
+          }, function(){
+            
           });
         }else{
           slide.$image.attr("src", slide.src)
