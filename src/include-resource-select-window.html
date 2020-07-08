@@ -1,0 +1,200 @@
+<script>
+    /**
+     * Reosuce Selection Window.
+     * renderTo : 윈도우를 생성할 대상 
+     * type : template, jsp, script
+     * editor mode : 코드 에디터의 모드 ace/mode/java , ace/mode/ftl, ace/mode/html etc..
+     *
+     */
+    function getResourceSelectorWindow(renderTo, type, callback ) {
+        renderTo = renderTo || $('#resource-select-window');
+        if (!renderTo.data("kendoWindow")) {
+
+            const headers = {
+                Accept: "application/json",
+                "Content-Type": "application/json"
+            };
+            Object.assign(headers, studio.services.accounts.authHeader()); 
+            var observable = kendo.observable({
+                visible: false,
+                selectable: false,
+                filename: '',
+                path: '',
+                fullpath: '',
+                folder: true,
+                modifiedDate: null,
+                type: 'script',
+                editor: {
+                    warp: false,
+                    editable: false,
+                    mode: 'ace/mode/java',
+                    theme: "ace/theme/chrome"
+                },
+                onResize: function () {
+
+                },
+                select:function(){
+                    if( studio.ui.isFunction(callback) ){ 
+                        var selectedCells = treeview.select();	 
+                        var filePlaceHolder = treeview.dataItem( treeview.select() );   
+                        callback( filePlaceHolder.path );
+                        window.close();
+                    } 
+                }
+            });
+
+            var window = renderTo.kendoWindow({
+                width: "950px",
+                title: "Select Resource",
+                animation: false, //{ open: { effects: 'expand:vertical:fadeIn' }, close: { effects:'expand:vertical:fadeIn', reverse: true}},
+                visible: false,
+                scrollable: true,
+                modal: true,
+                actions: ["Close"],
+                open: function () {
+                    treeview.dataSource.read();
+                },
+                close: function () {
+                    treeview.select($()); 
+                    var editor = ace.edit(rightRenderTo.attr("id"))
+                    editor.setValue("");
+                    observable.set('selectable', false);
+                    observable.set('folder', true);
+                    observable.set('filename', null);
+                    observable.set('modifiedDate', null);
+                }
+            }).data('kendoWindow'); 
+            var leftRenderTo = renderTo.find('.pane-content:first div');
+            var rightRenderTo = renderTo.find('.pane-content:last div.editor');
+            var treeview = leftRenderTo.kendoTreeView({
+                autoBind: false,
+                dataSource: {
+                    transport: {
+                        read: { url: studio.services.getApiUrl('/data/secure/mgmt/resources/' + observable.get('type') + '/list.json'), dataType: "json" }
+                    },
+                    schema: {
+                        model: { id: "path", hasChildren: "directory" }
+                    }
+                },
+                template: kendo.template($("#resource-select-window-treeview-template").html()),
+                dataTextField: "name",
+                dataBound: function (e) {
+                    observable.set('visible', true);
+                },
+                change: function (e) {
+                    var $this = this;
+                    var selectedCells = $this.select();
+                    var filePlaceHolder = $this.dataItem($this.select());
+                    if (studio.ui.defined(filePlaceHolder)) {
+                        kendo.ui.progress(leftRenderTo, true);
+                        var bodyFormData = new FormData();
+                        bodyFormData.set('path', filePlaceHolder.path);
+                        axios({
+                            url: studio.services.getApiUrl('/data/secure/mgmt/resources/' + observable.get('type') + '/get.json'),
+                            method: "post",
+                            data: bodyFormData,
+                            headers: headers
+                        }).then(response => {
+                            let data = response.data;
+                            observable.set('filename', data.name);
+                            observable.set('fullpath', data.path);
+                            observable.set('path', filePlaceHolder.path);
+                            observable.set('folder', data.directory);
+                            observable.set('size', data.size);
+                            observable.set('selectable', !data.directory);
+                            observable.set('modifiedDate', studio.ui.format.date(data.lastModifiedDate, 'yyyy.MM.dd HH:MM'));
+                            var editor = ace.edit(rightRenderTo.attr("id"));
+                            editor.setValue(data.fileContent);
+                        }).catch(function (error) {
+                            observable.set('selectable', false);
+                            studio.ui.handleAxiosError(error);
+                        }).then(function () {
+                            // always executed
+                            kendo.ui.progress(leftRenderTo, false);
+                        });
+                    }
+                }
+            }).data('kendoTreeView');
+
+            if (rightRenderTo.contents().length == 0) {
+                var editor = ace.edit(rightRenderTo.attr("id"));
+                editor.getSession().setMode(observable.get('editor.mode'));
+                editor.setTheme(observable.get('editor.theme'));
+                editor.getSession().setUseWrapMode(observable.get('editor.warp'));
+                editor.setReadOnly(!observable.get('editor.editable'));
+            }
+
+            observable.bind("change", function (e) {
+                var editor = ace.edit(rightRenderTo.attr("id"));
+                if (e.field === 'editor.editable') {
+                    editor.setReadOnly(!observable.get('editor.editable'));
+                }
+                if (e.field === 'editor.warp') {
+                    editor.getSession().setUseWrapMode(observable.get('editor.warp'));
+                }
+            });
+
+            kendo.bind(renderTo, observable);
+        }
+        renderTo.data("kendoWindow").center().open();
+    }
+</script>
+<div id="resource-select-window" class="g-height-600 g-pa-0 g-bg-gray-light-v5" style="display:none;">
+    <div class="h-100 layers">
+        <div class="layer w-100">
+            <div class="bgc-grey-100 peers ai-c jc-sb p-15 fxw-nw">
+                <div class="peer">
+                    <span class="g-ml-15 g-font-weight-500" data-bind="text:filename"></span>
+                    <span class="g-ml-15 g-color-gray-light-v6 g-font-weight-300" data-bind="text:modifiedDate"></span>
+                </div>
+                <div class="peer">
+                    <ul class="u-list-inline" data-bind="invisible:folder">
+                        <li class="list-inline-item">
+                            <label class="d-flex align-items-center justify-content-between g-mb-0">
+                                <span class="g-pr-20 g-font-size-12 g-font-weight-300">Word Warp</span>
+                                <div class="u-check">
+                                    <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" name="useWarp"
+                                        value="true" data-bind="checked:editor.warp" type="checkbox">
+                                    <div class="u-check-icon-radio-v8">
+                                        <i class="fa" data-check-icon=""></i>
+                                    </div>
+                                </div>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div data-role="splitter" class="g-mb-15" style="height:100%; width: 100%;" data-panes="[
+                { collapsible: true, size: '280px', min: '200px', max: '500px' },
+                { collapsible: false }
+             ]" data-bind="events: { resize: onResize }">
+            <div class="pane-content">
+                <div style="height:100%; width: 100%;"></div>
+            </div>
+            <div class="pane-content text-center">
+                <img alt="svgImg" data-bind="visible:folder" class="g-mt-100"
+                    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIKdmlld0JveD0iMCAwIDY0IDY0IgpzdHlsZT0iIGZpbGw6IzAwMDAwMDsiPjxyYWRpYWxHcmFkaWVudCBpZD0iT0NQTEV0ZmZScTRuamR3VjRUSlJJYSIgY3g9IjMwLjEyNSIgY3k9IjI3LjEyNSIgcj0iMzMuNjk5IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgc3ByZWFkTWV0aG9kPSJyZWZsZWN0Ij48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNjNWYxZmYiPjwvc3RvcD48c3RvcCBvZmZzZXQ9Ii4zNSIgc3RvcC1jb2xvcj0iI2NkZjNmZiI+PC9zdG9wPjxzdG9wIG9mZnNldD0iLjkwNyIgc3RvcC1jb2xvcj0iI2U0ZmFmZiI+PC9zdG9wPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2U5ZmJmZiI+PC9zdG9wPjwvcmFkaWFsR3JhZGllbnQ+PHBhdGggZmlsbD0idXJsKCNPQ1BMRXRmZlJxNG5qZHdWNFRKUklhKSIgZD0iTTQ1LDhMNDUsOGMyLjIwOSwwLDQtMS43OTEsNC00djBjMC0yLjIwOS0xLjc5MS00LTQtNGgwYy0yLjIwOSwwLTQsMS43OTEtNCw0djAgQzQxLDYuMjA5LDQyLjc5MSw4LDQ1LDh6Ij48L3BhdGg+PHJhZGlhbEdyYWRpZW50IGlkPSJPQ1BMRXRmZlJxNG5qZHdWNFRKUkliIiBjeD0iMzEiIGN5PSIzMiIgcj0iMzEuNTA0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgc3ByZWFkTWV0aG9kPSJyZWZsZWN0Ij48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNjNWYxZmYiPjwvc3RvcD48c3RvcCBvZmZzZXQ9Ii4zNSIgc3RvcC1jb2xvcj0iI2NkZjNmZiI+PC9zdG9wPjxzdG9wIG9mZnNldD0iLjkwNyIgc3RvcC1jb2xvcj0iI2U0ZmFmZiI+PC9zdG9wPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2U5ZmJmZiI+PC9zdG9wPjwvcmFkaWFsR3JhZGllbnQ+PHBhdGggZmlsbD0idXJsKCNPQ1BMRXRmZlJxNG5qZHdWNFRKUkliKSIgZD0iTTYyLDQ3LjVMNjIsNDcuNWMwLTIuNDg1LTIuMDE1LTQuNS00LjUtNC41SDMyYy0xLjEwNSwwLTItMC44OTUtMi0yVjIyYzAtMS4xMDUsMC44OTUtMiwyLTIgaDEwYzIuMjA5LDAsNC0xLjc5MSw0LTR2MGMwLTIuMjA5LTEuNzkxLTQtNC00SDMyYy0xLjEwNSwwLTItMC44OTUtMi0ydjBjMC0xLjEwNSwwLjg5NS0yLDItMmgxYzIuMjA5LDAsNC0xLjc5MSw0LTR2MCBjMC0yLjIwOS0xLjc5MS00LTQtNEg4LjVDNS40NjIsMCwzLDIuNDYyLDMsNS41djBDMyw4LjUzOCw1LjQ2MiwxMSw4LjUsMTFoM2MzLjAzOCwwLDUuNSwyLjQ2Miw1LjUsNS41djAgYzAsMy4wMzgtMi40NjIsNS41LTUuNSw1LjVoLTZDMi40NjIsMjIsMCwyNC40NjIsMCwyNy41djBDMCwzMC41MzgsMi40NjIsMzMsNS41LDMzSDE0YzEuNjU3LDAsMywxLjM0MywzLDN2MGMwLDEuNjU3LTEuMzQzLDMtMywzIEg2LjVDNC4wMTUsMzksMiw0MS4wMTUsMiw0My41djBDMiw0NS45ODUsNC4wMTUsNDgsNi41LDQ4SDE0YzIuMjA5LDAsNCwxLjc5MSw0LDR2MGMwLDIuMjA5LTEuNzkxLDQtNCw0aC0xYy0yLjIwOSwwLTQsMS43OTEtNCw0djAgYzAsMi4yMDksMS43OTEsNCw0LDRoNDBjMi4yMDksMCw0LTEuNzkxLDQtNHYwYzAtMi4yMDktMS43OTEtNC00LTRoLTNjLTEuMTA1LDAtMi0wLjg5NS0yLTJ2MGMwLTEuMTA1LDAuODk1LTIsMi0yaDcuNSBDNTkuOTg1LDUyLDYyLDQ5Ljk4NSw2Miw0Ny41eiI+PC9wYXRoPjxsaW5lYXJHcmFkaWVudCBpZD0iT0NQTEV0ZmZScTRuamR3VjRUSlJJYyIgeDE9IjMwIiB4Mj0iMzAiIHkxPSI1MiIgeTI9IjkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBzcHJlYWRNZXRob2Q9InJlZmxlY3QiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmOGI2NyI+PC9zdG9wPjxzdG9wIG9mZnNldD0iLjg0NyIgc3RvcC1jb2xvcj0iI2ZmYTc2YSI+PC9zdG9wPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmYWQ2YiI+PC9zdG9wPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmYWQ2YiI+PC9zdG9wPjwvbGluZWFyR3JhZGllbnQ+PHBhdGggZmlsbD0idXJsKCNPQ1BMRXRmZlJxNG5qZHdWNFRKUkljKSIgZD0iTTI2LDEzTDI2LDEzYzAtMi4yMDktMS43OTEtNC00LTRIMTJjLTIuMjA5LDAtNCwxLjc5MS00LDR2MzRjMCwyLjc2MSwyLjIzOSw1LDUsNWgzOVYyMCBjMC0yLjIwOS0xLjc5MS00LTQtNEgyOUMyNy4zNDMsMTYsMjYsMTQuNjU3LDI2LDEzeiI+PC9wYXRoPjxsaW5lYXJHcmFkaWVudCBpZD0iT0NQTEV0ZmZScTRuamR3VjRUSlJJZCIgeDE9IjM1LjUiIHgyPSIzNS41IiB5MT0iNTIiIHkyPSIyMyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHNwcmVhZE1ldGhvZD0icmVmbGVjdCI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZjMDUwIj48L3N0b3A+PHN0b3Agb2Zmc2V0PSIuMDA0IiBzdG9wLWNvbG9yPSIjZmZjMDUwIj48L3N0b3A+PHN0b3Agb2Zmc2V0PSIuNjQxIiBzdG9wLWNvbG9yPSIjZmZiZTc1Ij48L3N0b3A+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZiZDg1Ij48L3N0b3A+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZiZDg1Ij48L3N0b3A+PC9saW5lYXJHcmFkaWVudD48cGF0aCBmaWxsPSJ1cmwoI09DUExFdGZmUnE0bmpkd1Y0VEpSSWQpIiBkPSJNMTksNTJoMzNjMy4zMTQsMCw2LTIuNjg2LDYtNlYyN2MwLTIuMjA5LTEuNzkxLTQtNC00SDIyYy0yLjIwOSwwLTQsMS43OTEtNCw0djIwIGMwLDIuNzYxLTIuMjM5LDUtNSw1SDE5eiI+PC9wYXRoPjxsaW5lYXJHcmFkaWVudCBpZD0iT0NQTEV0ZmZScTRuamR3VjRUSlJJZSIgeDE9IjMxIiB4Mj0iMzEiIHkxPSI1MiIgeTI9IjIzIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgc3ByZWFkTWV0aG9kPSJyZWZsZWN0Ij48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmM5NmEiPjwvc3RvcD48c3RvcCBvZmZzZXQ9Ii4wMDQiIHN0b3AtY29sb3I9IiNmZmM5NmEiPjwvc3RvcD48c3RvcCBvZmZzZXQ9Ii41NzgiIHN0b3AtY29sb3I9IiNmZmM4ODciPjwvc3RvcD48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZmM3OTciPjwvc3RvcD48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZmM3OTciPjwvc3RvcD48L2xpbmVhckdyYWRpZW50PjxwYXRoIGZpbGw9InVybCgjT0NQTEV0ZmZScTRuamR3VjRUSlJJZSkiIGQ9Ik0xOCwyN3YyMGMwLDIuNzYxLTIuMjM5LDUtNSw1aDBoMjJjMS42NTcsMCwzLTEuMzQzLDMtM3YwYzAtMS42NTctMS4zNDMtMy0zLTNoLTQgYy0xLjY1NywwLTMtMS4zNDMtMy0zdjBjMC0xLjY1NywxLjM0My0zLDMtM2g0LjVjMS4zODEsMCwyLjUtMS4xMTksMi41LTIuNXYwYzAtMS4zODEtMS4xMTktMi41LTIuNS0yLjVIMzRjLTEuNjU3LDAtMy0xLjM0My0zLTMgdjBjMC0xLjY1NywxLjM0My0zLDMtM2gxMmMxLjY1NywwLDMtMS4zNDMsMy0zdjBjMC0xLjY1Ny0xLjM0My0zLTMtM0gyMkMxOS43OTEsMjMsMTgsMjQuNzkxLDE4LDI3eiI+PC9wYXRoPjxsaW5lYXJHcmFkaWVudCBpZD0iT0NQTEV0ZmZScTRuamR3VjRUSlJJZiIgeDE9IjQ1LjUiIHgyPSI0NS41IiB5MT0iNDAiIHkyPSIzNSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHNwcmVhZE1ldGhvZD0icmVmbGVjdCI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZjOTZhIj48L3N0b3A+PHN0b3Agb2Zmc2V0PSIuMDA0IiBzdG9wLWNvbG9yPSIjZmZjOTZhIj48L3N0b3A+PHN0b3Agb2Zmc2V0PSIuNTc4IiBzdG9wLWNvbG9yPSIjZmZjODg3Ij48L3N0b3A+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZjNzk3Ij48L3N0b3A+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZjNzk3Ij48L3N0b3A+PC9saW5lYXJHcmFkaWVudD48cGF0aCBmaWxsPSJ1cmwoI09DUExFdGZmUnE0bmpkd1Y0VEpSSWYpIiBkPSJNNDUuNSw0MEw0NS41LDQwYzEuMzgxLDAsMi41LTEuMTE5LDIuNS0yLjV2MGMwLTEuMzgxLTEuMTE5LTIuNS0yLjUtMi41aDAgYy0xLjM4MSwwLTIuNSwxLjExOS0yLjUsMi41djBDNDMsMzguODgxLDQ0LjExOSw0MCw0NS41LDQweiI+PC9wYXRoPjwvc3ZnPg==">
+                <div id="resource-select-window-editor"
+                    class="editor g-brd-gray-light-v6 g-brd-top-1 g-brd-left-0 g-brd-right-0 g-brd-style-solid g-brd-0"
+                    style="height:100%;width:100%;" data-bind="invisible:folder"></div>
+            </div>
+        </div>
+        <div class="text-right g-mr-25" style="width:100%;">
+            <button data-bind="click:select,enabled:selectable"
+                class="btn btn-md g-rounded-50 u-btn-3d u-btn-primary g-mb-10 g-font-size-default g-ml-5">Select</button>
+        </div>
+    </div>
+</div>
+
+<script id="resource-select-window-treeview-template" type="text/kendo-ui-template">
+	#if(item.directory){# 
+        <i class="ti-folder"></i> 
+	 # }else{#  
+        <i class="ti-file"></i> 
+	 #}#
+	<span class="g-ml-5">#: item.name # </span>
+	# if (!item.items) { #
+		<a class='delete-link' href='\#'></a> 
+    # } #
+    </script>

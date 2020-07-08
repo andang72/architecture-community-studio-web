@@ -57,6 +57,28 @@
         opacity: 0;
       }
     }
+
+    button[data-toggle=collapse][aria-expanded=false] .bi-chevron-down {
+      visibility: show;
+    }
+
+    button[data-toggle=collapse][aria-expanded=false] .bi-chevron-up {
+      visibility: hidden;
+      display: none;
+    }
+
+    button[data-toggle=collapse][aria-expanded=true] .bi-chevron-down {
+      visibility: hidden;
+      display: none;
+    }
+
+    button[data-toggle=collapse][aria-expanded=true] .bi-chevron-up {
+      visibility: show;
+    }
+
+    .tab-pane-grid .k-grid-toolbar {
+      background: #fff;
+    }
   </style>
 </head>
 
@@ -219,7 +241,6 @@
               <li>
                 <a class='sidebar-link' href="resources-apis.html">Apis</a>
               </li>
-
               <li class="nav-item dropdown">
                 <a href="javascript:void(0);">
                   <span>Sources</span>
@@ -248,6 +269,9 @@
               <li>
                 <a class='sidebar-link ' href="resources-images.html">Images</a>
               </li>
+              <li>
+                <a class='sidebar-link' href="resources-albums.html">Albums</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -263,18 +287,76 @@
           $(document).ajaxSend(function (event, jqXHR, options) {
             jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
           });
+
+          let promise = studio.ui.loadAceEditor();
+          promise.then(script => { });
+
           var $window = $(window).on('resize', function () {
             var height = $(document).height() - ($('.header-container').height() + 61)
             $('#grid').height(height);
           }).trigger('resize'); //on page load     
-          const headers = {
-            Accept: "application/json",
-            "Content-Type": "application/json"
-          };
-          Object.assign(headers, studio.services.accounts.authHeader());
+
           var renderTo = $("#mainContent");
           var observable = kendo.observable({
-            edit: function () {
+            selected: false,
+            selectedPages: [],
+            selectedPageCount: 0,
+            setSelectedPages: function () {
+              var $this = this;
+              $this.set('selectedPages', []);
+              var grid = $('#grid').data('kendoGrid');
+              grid.select().each(function () {
+                $this.selectedPages.push(grid.dataItem(this));
+              });
+              $this.set('selectedPageCount', $this.get('selectedPages').length);
+            },
+            delete: function (e) {
+              var $this = this;
+              $this.setSelectedPages();
+              var grid = $('#grid').data('kendoGrid');
+              var template = kendo.template('Permanently remove the selected pages (#= selectedPageCount #).<br/> This action cannot be undone.');
+              var dialog = $("#delete-dialog").kendoDialog({
+                title: 'Are you sure you want to delete the page?',
+                content: template($this),
+                actions: [
+                  {
+                    text: 'Ok',
+                    action: function (e) {
+                      kendo.ui.progress($('.k-dialog'), true);
+                      axios({
+                        url: studio.services.getApiUrl('/data/secure/mgmt/pages/delete.json'),
+                        method: "post",
+                        data: JSON.stringify($this.selectedPages),
+                        headers: headers
+                      })
+                        .then(response => {
+                          const data = response.data;
+                          grid.clearSelection();
+                          grid.dataSource.read();
+                          studio.ui.notify(null, data.count + " pages has been deleted.", "success");
+                        }).catch(function (error) {
+                          studio.ui.handleAxiosError(error);
+                        })
+                        .then(function () {
+                          kendo.ui.progress($('.k-dialog'), false);
+                          dialog.close();
+                        });
+                      return false;
+                    },
+                    primary: true
+                  },
+                  {
+                    text: 'Cancle',
+                    action: function (e) {
+                      $('#grid').data('kendoGrid').clearSelection();
+                      return true;
+                    }
+                  }
+                ]
+              }).data('kendoDialog');
+              dialog.open();
+            },
+            create: function () {
               getPageEditorWindow();
             }
           });
@@ -306,14 +388,23 @@
                   model: studio.data.model.Page
                 }
               },
+              change: function (e) {
+                if (this.selectedKeyNames().length > 0) {
+                  observable.set('selected', true);
+                } else {
+                  observable.set('selected', false);
+                }
+              },
               toolbar: [{ name: "create", text: "새로운 페이지 만들기", template: kendo.template($('#grid-toolbar-template').html()) }],
               sortable: true,
+              persistSelection: true,
               filterable: false,
               pageable: {
                 refresh: true,
                 pageSizes: [50, 100, 200, 300]
               },
               columns: [
+                { selectable: true, width: "50px", headerAttributes: { "class": "text-center" }, attributes: { "class": "text-center" } },
                 { field: "PAGE_ID", title: "ID", filterable: true, sortable: true, width: 100, template: '#= pageId #', attributes: { class: "text-center" } },
                 { field: "NAME", title: "Name", filterable: true, sortable: true, template: $('#name-column-template').html() },
                 { field: "PAGE_STATE", title: "Status", filterable: false, sortable: true, template: '#: pageState #', attributes: { class: "text-center" }, width: 120 },
@@ -336,16 +427,112 @@
         function getPageEditorWindow(item) {
           var renderTo = $('#page-window');
           if (!renderTo.data("kendoWindow")) {
+            const headers = {
+              Accept: "application/json",
+              "Content-Type": "application/json"
+            };
+            Object.assign(headers, studio.services.accounts.authHeader());
             const PageModel = kendo.data.Model.define(studio.data.model.Page);
+            var validator = $("#pageForm").kendoValidator({}).data('kendoValidator');
             var observable = kendo.observable({
+              updated: false,
               page: new PageModel(),
+              unlocked: true,
               editable: false,
+              editor: {
+                type: 'template',
+                warp: false,
+                editable: true,
+                mode: 'ace/mode/html',
+                theme: "ace/theme/chrome",
+                edit: function () {
+                  var $this = this;
+                  $this.set('editor.editable', true);
+                },
+                cancle: function () {
+                  var $this = this;
+                  $this.set('editor.editable', false);
+                }
+              },
+              select: function () {
+                var $this = this;
+                getResourceSelectorWindow(null, null, function (data) {
+                  $this.set('page.script', data);
+                });
+              },
+              saveOrUpdate: function () {
+                var $this = this;
+                if (validator.validate()) {
+                  var template = kendo.template("Update the #: page.name #. This operation cannot be canceled.");
+                  var dialog = $("#dialog").kendoDialog({
+                    width: "450px",
+                    closable: true,
+                    modal: true,
+                    buttonLayout: "normal",
+                    title: 'Update',
+                    content: template($this),
+                    actions: [
+                      {
+                        text: 'Ok',
+                        action: function (e) {
+                          var saveOrUpdateUrl = '/data/secure/mgmt/pages/save-or-update.json';
+                          var editor = createEditor($this);
+                          if (editor.getValue() != null) {
+                            $this.page.bodyContent.bodyText = editor.getValue();
+                          }
+                          if ($this.page.bodyContent.bodyText != null) {
+                            saveOrUpdateUrl = saveOrUpdateUrl + '?fields=bodyContent';
+                          }
+                          kendo.ui.progress($('.k-dialog'), true);
+                          axios({
+                            url: studio.services.getApiUrl(saveOrUpdateUrl),
+                            method: "post",
+                            data: JSON.stringify($this.page),
+                            headers: headers
+                          }).then(response => {
+                            let data = response.data;
+                            studio.ui.notify(null, $this.get('filename') + " has been updated.", "success");
+                            $this.setSource(new PageModel(data.data.item));
+                            $this.set('updated', true);
+                          }).catch(function (error) {
+                            studio.ui.handleAxiosError(error);
+                          }).then(function () {
+                            // always executed 
+                            kendo.ui.progress($('.k-dialog'), false);
+                            dialog.close();
+                          });
+                          return false;
+                        },
+                        primary: true
+                      },
+                      { text: 'Cancle' }
+                    ]
+                  }).data("kendoDialog");
+                  dialog.open();
+                }
+              },
               setSource: function (data) {
                 var $this = this;
                 data = data || new PageModel();
                 data.copy($this.page);
                 $this.set('editable', $this.page.pageId > 0 ? true : false);
+                if ($this.get('editable')) {
+                  studio.ui.propertyGrid(null, "pages", data.pageId);
+                }
+                var editor = createEditor($this);
+                if ($this.page.bodyContent != null && $this.page.bodyContent.bodyText != null) {
+                  editor.setValue($this.page.bodyContent.bodyText);
+                } else {
+                  editor.setValue("");
+                }
+                $this.set('editor.editable', $this.page.pageId > 0 ? false : true);
               },
+              contentTypes: [
+                { text: "HTML", value: "text/html;charset=UTF-8" },
+                { text: "JSON", value: "application/json;charset=UTF-8" },
+                { text: "JS", value: "text/javascript;charset=UTF-8" },
+                { text: "CSS", value: "text/plain;charset=UTF-8" }
+              ],
               objectTypeDataSource: kendo.data.DataSource.create({
                 transport: {
                   read: { url: studio.services.getApiUrl('/data/secure/mgmt/services/sequencers/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
@@ -368,11 +555,20 @@
                 }
               }),
             });
+            observable.bind("change", function (e) {
+              var editor = createEditor(observable);
+              if (e.field === 'editor.editable') {
+                editor.setReadOnly(!observable.get('editor.editable'));
+              }
+              if (e.field === 'editor.warp') {
+                editor.getSession().setUseWrapMode(observable.get('editor.warp'));
+              }
+            });
             kendo.bind(renderTo, observable);
             renderTo.data('model', observable);
             var window = renderTo.kendoWindow({
-              animation: false,
-              width: "900px",
+              //animation: false,
+              width: "950px",
               title: "Page",
               visible: false,
               scrollable: true,
@@ -380,14 +576,32 @@
               actions: ["Close"], // 
               open: function () {
                 this.title(observable.page.name);
+                observable.set('updated', false);
+                $('#pageForm input:first').focus();
               },
               close: function () {
+                if (observable.get('updated')){
+                  $('#grid').data('kendoGrid').dataSource.read();
+                }
               }
             }).data('kendoWindow');
           }
           renderTo.data('model').setSource(item);
           renderTo.data("kendoWindow").center().open();
         }
+
+        function createEditor(observable) {
+          var renderTo = $("#editor");
+          if (renderTo.contents().length == 0) {
+            var editor = ace.edit(renderTo.attr("id"));
+            editor.getSession().setMode(observable.get('editor.mode'));
+            editor.setTheme(observable.get('editor.theme'));
+            editor.getSession().setUseWrapMode(observable.get('editor.warp'));
+            editor.setReadOnly(!observable.get('editor.editable'));
+          }
+          return ace.edit(renderTo.attr("id"));
+        }
+
       </script>
       <!-- ### $App Screen Content ### -->
       <main class='main-content bgc-grey-100'>
@@ -397,168 +611,269 @@
           </div>
         </div>
       </main>
-      <div id="page-window" class="g-height-600 container-fluid" style="display:none;">
-        <div class="form-row g-mb-25">
-          <div class="form-group col-md-6">
-            <label class="g-mb-10 g-font-weight-400" for="input-page-name">Name <span
-                class="text-danger">*</span></label>
-            <div class="g-pos-rel">
-              <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
-                <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
-              </span>
-              <input id="input-page-name" name="input-page-name"
-                class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text" placeholder="파일명을 입력하세요"
-                data-bind="value: page.name, enabled:editable" required validationMessage="이름을 입력하여 주세요." autofocus>
-              <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
-                이 페이지를 호출할때 사용되는 이름입니다. ex) /display/pages/<span data-bind="text: page.name"></span>
-              </small>
-            </div>
-            <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-page-name" role="alert"
-              style="display:none;"></span>
-          </div>
-          <div class="form-group col-md-6">
-            <label class="g-mb-10 g-font-weight-400" for="input-page-title">Title<span
-                class="text-danger">*</span></label>
-            <div class="g-pos-rel">
-              <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
-                <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
-              </span>
-              <input id="input-page-title" name="input-page-title"
-                class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text" placeholder="파일명을 입력하세요"
-                placeholder="페이지 타이틀을 입력하세요." data-bind="value: page.title, enabled:editable" required
-                validationMessage="페이지 타이틀을 입력하여 주세요.">
-              <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">The title used as the title of
-                the page.</small>
-            </div>
-            <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-page-title" role="alert"
-              style="display:none;"></span>
-          </div>
-        </div>
-        <div class="form-row g-mb-25">
-          <div class="form-group col-md-6">
-            <label class="g-mb-10 g-font-weight-400" for="input-page-name">Pattern</label>
-            <div class="g-pos-rel">
-              <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
-                <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
-              </span>
-              <input id="input-page-name" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
-                placeholder="패턴을 입력하세요" data-bind="value: page.pattern, enabled:editable">
-              <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
-                Call the page based on the pattern. ex) /display/pages<span data-bind="text: page.pattern"></span>
-              </small>
-            </div>
-          </div>
-          <div class="form-group col-md-6">
-            <label class="g-mb-10 g-font-weight-400" for="input-page-description">Description</label>
-            <textarea id="input-page-description" class="form-control form-control-md g-resize-none g-rounded-4"
-              rows="3" placeholder="간략하게 페이지에 대한 설명을 입력하세요."
-              data-bind="value:page.description, enabled:editable"></textarea>
-          </div>
-        </div>
-        <hr/>
-        <div class="form-row">
-          <div class="col-md-4">
-            <label class="g-mb-10 g-font-weight-400">OBEJCT TYPE</label>
-            <div class="form-group g-pos-rel g-rounded-4 mb-0">
-              <input data-role="dropdownlist" data-option-label="서비스를 소유하는 객체 유형을 선택하세요." data-auto-bind="true"
-                data-value-primitive="true" data-text-field="name" data-value-field="sequencerId"
-                data-bind="value: page.objectType, enabled:editable, source: objectTypeDataSource"
-                style="width: 100%;" />
-            </div>
-          </div>
-          <div class="col-md-4">
-            <label class="g-mb-10 g-font-weight-400">OBEJCT ID</label>
-            <div class="form-group g-pos-rel g-rounded-4 mb-0">
-              <input data-role="numerictextbox" placeholder="OBJECT ID" class="form-control form-control-md"
-                type="number" data-min="-1" step="1" data-format="##" data-bind="value:page.objectId, enabled:editable"
-                style="width: 100%" />
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="form-group">
-              <label class="g-mb-10 g-font-weight-400">State</label>
-              <div class="g-pos-rel">
-                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
-                  <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
-                </span>
-                <select class="form-control g-pos-rel" data-role="dropdownlist"
-                  data-bind="value:page.pageState,enabled:editable" style="width: 100%" class="form-control">
-                  <option value="INCOMPLETE">INCOMPLETE</option>
-                  <option value="APPROVAL">APPROVAL</option>
-                  <option value="PUBLISHED">PUBLISHED</option>
-                  <option value="REJECTED">REJECTED</option>
-                  <option value="ARCHIVED">ARCHIVED</option>
-                  <option value="DELETED">DELETED</option>
-                  <option value="NONE">NONE</option>
-                </select>
+
+      <span id="delete-dialog"></span>
+      <span id="dialog"></span>
+      <div id="page-window" class="g-pa-0 g-height-600 container-fluid" style="display:none;">
+        <div class="g-pa-15 g-pa-30--sm">
+          <form id="pageForm" onsubmit="return false">
+            <div class="form-row g-mb-25">
+              <div class="form-group col-md-6">
+                <label class="g-mb-10 g-font-weight-400" for="input-page-name">Name <span
+                    class="text-danger">*</span></label>
+                <div class="g-pos-rel">
+                  <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                    <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                  </span>
+                  <input id="input-page-name" name="input-page-name"
+                    class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
+                    placeholder="Please enter your name." data-bind="value: page.name, enabled:unlocked" required
+                    validationMessage="Please enter your name." autofocus>
+                  <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                    This is the name used when calling this page. ex) /display/pages/<span
+                      data-bind="text: page.name"></span>
+                  </small>
+                </div>
+                <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-page-name"
+                  role="alert" style="display:none;"></span>
               </div>
-            </div>
-          </div>
-        </div>
-        <hr>
-        <div class="form-row g-mb-25">
-          <div class="form-group col-md-4">
-            <label class="g-font-weight-400 g-mb-10">Version<span class="text-danger">*</span></label>
-            <div class="g-pos-rel">
-              <input class="form-control form-control-md" data-role="numerictextbox" type="number" data-format="###"
-                data-min="0" step="1" data-max="100" placeholder="버전 정보를 입력하세요"
-                data-bind="value: page.versionId,enabled:editable" style="width: 100%">
-            </div>
-          </div>
-          <div class="form-group col-md-4">
-            <label class="g-mb-10 g-font-weight-400">Content Type</label>
-            <div class="g-pos-rel">
-              <input data-role="dropdownlist" data-option-label="콘텐츠 유형을 선택하세요." data-auto-bind="true"
-                data-value-primitive="true" data-text-field="text" data-value-field="value"
-                data-bind="value: page.contentType, enabled:editable, source: contentTypes" style="width: 100%;" />
-            </div>
-          </div>
-          <div class="col-md-4">
-            <label class="d-flex align-items-center justify-content-between g-mb-15">
-              <span class="g-pr-20 g-font-weight-400">인증필요</span>
-              <div class="u-check">
-                <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" name="api-secured" value="true"
-                  data-bind="checked: source.secured,  enabled:editable" type="checkbox">
-                <div class="u-check-icon-radio-v8">
-                  <i class="fa" data-check-icon=""></i>
+              <div class="form-group col-md-6">
+                <label class="g-mb-10 g-font-weight-400" for="input-page-name">Pattern</label>
+                <div class="g-pos-rel">
+                  <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                    <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                  </span>
+                  <input id="input-page-name" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10"
+                    type="text" placeholder="Enter the URL pattern" data-bind="value: page.pattern, enabled:unlocked">
+                  <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                    Call the page based on the pattern. ex) /display/pages<span data-bind="text: page.pattern"></span>
+                  </small>
                 </div>
               </div>
-            </label>
-            <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
-              ON 상태인 경우 접근권한이 허용된 사용자만 이용할 수 있습니다.
-            </small>
-          </div>
+            </div>
+            <div class="form-row g-mb-25">
+              <div class="form-group col-md-6">
+                <label class="g-mb-10 g-font-weight-400" for="input-page-title">Title<span
+                    class="text-danger">*</span></label>
+                <div class="g-pos-rel">
+                  <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                    <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                  </span>
+                  <input id="input-page-title" name="input-page-title"
+                    class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
+                    placeholder="Please enter the page title." data-bind="value: page.title, enabled:unlocked" required
+                    validationMessage="Please enter the page title.">
+                  <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">The title used as the
+                    title
+                    of the page.</small>
+                </div>
+                <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-page-title"
+                  role="alert" style="display:none;"></span>
+              </div>
+              <div class="form-group col-md-6">
+                <label class="g-mb-10 g-font-weight-400" for="input-page-description">Description</label>
+                <textarea id="input-page-description" class="form-control form-control-md g-resize-none g-rounded-4"
+                  rows="3" placeholder="Briefly enter a description for the page."
+                  data-bind="value:page.description, enabled:unlocked"></textarea>
+              </div>
+            </div>
+            <div class="form-row g-mb-25">
+              <div class="form-group col-md-6">
+                <label class="g-mb-10 g-font-weight-400" for="input-page-template">Template (or redirect/forward
+                  command)</label>
+                <div class="g-pos-rel">
+                  <a class="d-flex align-items-center u-link-v5 g-color-gray-light-v6 g-color-secondary--hover g-ml-10 g-ml-15--sm g-ml-30--xl"
+                    href="#!" data-bind="click:select, visible:editable" data-type="template">
+                    <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-1 g-opacity-1--success"><i
+                        class="hs-admin-search g-absolute-centered g-font-size-default"></i></span>
+                  </a>
+                  <input id="input-page-template" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10"
+                    type="text" placeholder="Enter the file path to use as a template."
+                    data-bind="value: page.template, enabled:unlocked">
+                </div>
+                <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">ex) redirect:/xxx/xx,
+                  forward:/xxx/xx</small>
+              </div>
+              <div class="form-group col-md-6">
+                <label class="g-mb-10 g-font-weight-400" for="input-page-template">Script Source</label>
+                <div class="g-pos-rel">
+                  <a class="d-flex align-items-center u-link-v5 g-color-gray-light-v6 g-color-sec	ondary--hover g-ml-10 g-ml-15--sm g-ml-30--xl"
+                    href="#!" data-bind="click:select" data-type="script">
+                    <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-1 g-opacity-1--success">
+                      <i class="fa fa-search g-absolute-centered g-font-size-default"></i>
+                    </span>
+                  </a>
+                  <input id="input-api-script" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10"
+                    type="text" placeholder="Enter the server script file path."
+                    data-bind="value: page.script, enabled:unlocked">
+                </div>
+                <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                  Select a server script.
+                </small>
+              </div>
+            </div>
+            <button class="btn u-btn-outline-pink g-mr-10 g-mb-15" type="button" data-toggle="collapse"
+              data-target="#collapseAdvanced" aria-expanded="false" aria-controls="collapseAdvanced">
+              Advanced
+              <svg class="bi bi-chevron-down" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
+              </svg>
+              <svg class="bi bi-chevron-up" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />
+              </svg>
+            </button>
+            <div class="collapse" id="collapseAdvanced">
+              <div class="card card-body g-mb-25 bgc-grey-100 ">
+                <div class="form-row">
+                  <div class="col-md-4">
+                    <label class="g-mb-10 g-font-weight-400">Object Type</label>
+                    <div class="form-group g-pos-rel g-rounded-4 mb-0">
+                      <input data-role="dropdownlist"
+                        data-option-label="Choose the type of object that owns the service." data-auto-bind="true"
+                        data-value-primitive="true" data-text-field="name" data-value-field="sequencerId"
+                        data-bind="value: page.objectType, enabled:unlocked, source: objectTypeDataSource"
+                        style="width: 100%;" />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="g-mb-10 g-font-weight-400">Object Id</label>
+                    <div class="form-group g-pos-rel g-rounded-4 mb-0">
+                      <input data-role="numerictextbox" placeholder="OBJECT ID" class="form-control form-control-md"
+                        type="number" data-min="-1" step="1" data-format="##"
+                        data-bind="value:page.objectId, enabled:unlocked" style="width: 100%" />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label class="g-mb-10 g-font-weight-400">State</label>
+                      <div class="g-pos-rel">
+                        <span
+                          class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                          <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                        </span>
+                        <select class="form-control g-pos-rel" data-role="dropdownlist"
+                          data-bind="value:page.pageState, enabled:unlocked" style="width: 100%" class="form-control">
+                          <option value="INCOMPLETE">INCOMPLETE</option>
+                          <option value="APPROVAL">APPROVAL</option>
+                          <option value="PUBLISHED">PUBLISHED</option>
+                          <option value="REJECTED">REJECTED</option>
+                          <option value="ARCHIVED">ARCHIVED</option>
+                          <option value="DELETED">DELETED</option>
+                          <option value="NONE">NONE</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row g-mb-25">
+                  <div class="form-group col-md-4">
+                    <label class="g-font-weight-400 g-mb-10">Version<span class="text-danger">*</span></label>
+                    <div class="g-pos-rel">
+                      <input class="form-control form-control-md" data-role="numerictextbox" type="number"
+                        data-format="###" data-min="0" step="1" data-max="100"
+                        placeholder="Please enter version information"
+                        data-bind="value: page.versionId,enabled:unlocked" style="width: 100%">
+                    </div>
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label class="g-mb-10 g-font-weight-400">Content Type</label>
+                    <div class="g-pos-rel">
+                      <input data-role="dropdownlist" data-option-label="Please select a content type."
+                        data-auto-bind="true" data-value-primitive="true" data-text-field="text"
+                        data-value-field="value"
+                        data-bind="value: page.contentType, enabled:unlocked, source: contentTypes"
+                        style="width: 100%;" />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="d-flex align-items-center justify-content-between g-mb-15">
+                      <span class="g-pr-20 g-font-weight-400">Authentication required</span>
+                      <div class="u-check">
+                        <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" name="page-secured" value="true"
+                          data-bind="checked: page.secured,  enabled:unlocked" type="checkbox">
+                        <div class="u-check-icon-radio-v8">
+                          <i class="fa" data-check-icon=""></i>
+                        </div>
+                      </div>
+                    </label>
+                    <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
+                      In the ON state, only users who are granted access permission can use it.
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 text-right"><button class="btn btn-md u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
+                  data-bind="visible:unlocked, click:saveOrUpdate">Update</button>
+              </div>
+            </div>
+          </form>
         </div>
-        <div class="form-row"> 
-          <div class="form-group col-md-6">
-            <label class="g-mb-10 g-font-weight-400" for="input-page-template">Template (or redirect/forward command)
-              <span class="text-danger">*</span></label>
-            <div class="g-pos-rel">
-              <a class="d-flex align-items-center u-link-v5 g-color-gray-light-v6 g-color-secondary--hover g-ml-10 g-ml-15--sm g-ml-30--xl"
-                href="#!" data-bind="click:select, visible:editable" data-type="template">
-                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-1 g-opacity-1--success"><i
-                    class="hs-admin-search g-absolute-centered g-font-size-default"></i></span>
-              </a>
-              <input id="input-page-template" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10"
-                type="text" placeholder="템플릿으로 사용할 파일 경로를 입력하세요." data-bind="value: page.template, enabled:editable">
-            </div>
-            <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">값이 지정되지 않으면 디폴트 템플릿이 적용됩니다. ex)
-              redirect:/xxx/xx, forward:/xxx/xx</small>
+        <nav data-bind="visible:editable">
+          <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active g-ml-15" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
+              aria-controls="nav-home" aria-selected="true">Body</a>
+            <a class="nav-item nav-link" id="nav-property-tab" data-toggle="tab" href="#nav-property" role="tab"
+              aria-controls="nav-property" aria-selected="false">Prpperties</a>
+            <a class="nav-item nav-link" id="nav-perms-tab" data-toggle="tab" href="#nav-perms" role="tab"
+              aria-controls="nav-perms" aria-selected="false">Permissions</a>
           </div>
-          <div class="form-group col-md-6">
-            <label class="g-mb-10 g-font-weight-400" for="input-page-template">Groovy Script Source<span
-                class="text-danger">*</span></label>
-            <div class="g-pos-rel">
-              <a class="d-flex align-items-center u-link-v5 g-color-gray-light-v6 g-color-sec	ondary--hover g-ml-10 g-ml-15--sm g-ml-30--xl"
-                href="#!" data-bind="click:select" data-type="script">
-                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-1 g-opacity-1--success"><i
-                    class="hs-admin-search g-absolute-centered g-font-size-default"></i></span>
-              </a>
-              <input id="input-page-script" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
-                placeholder="서버 스크립트 파일 경로를 입력하세요" data-bind="value: page.script, enabled:editable">
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+          <div class="tab-pane fade show active g-height-500" id="nav-home" role="tabpanel"
+            aria-labelledby="nav-home-tab">
+            <div class="layer w-100">
+              <div class="peers ai-c jc-sb p-15 fxw-nw">
+                <div class="peer"></div>
+                <div class="peer">
+                  <ul class="u-list-inline">
+                    <li class="list-inline-item">
+                      <label class="d-flex align-items-center justify-content-between g-mb-0">
+                        <span class="g-pr-20 g-font-size-12 g-font-weight-300">Word Warp</span>
+                        <div class="u-check">
+                          <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" name="useWarp" value="true"
+                            data-bind="checked:editor.warp" type="checkbox">
+                          <div class="u-check-icon-radio-v8">
+                            <i class="fa" data-check-icon=""></i>
+                          </div>
+                        </div>
+                      </label>
+                    </li>
+                    <li class="list-inline-item">
+                      <a data-bind="invisible:editor.editable, click:editor.edit"
+                        class="btn btn-link u-link-v5 g-font-size-20 g-color-secondary--hover">
+                        <svg class="bi bi-lock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd"
+                            d="M11.5 8h-7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zm-7-1a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7zm0-3a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                        </svg>
+                        <spin class="g-ml-5 g-font-size-12 g-font-weight-300">Unlock</spin>
+                      </a>
+                      <a data-bind="visible:editor.editable, click:editor.cancle"
+                        class="btn btn-link u-link-v5 g-font-size-20 g-color-secondary--hover">
+                        <svg class="bi bi-unlock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd"
+                            d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                        </svg>
+                        <spin class="g-ml-5 g-font-size-12 g-font-weight-300">Lock</spin>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
+            <div id="editor" style="height:100%;width:100%;"></div>
           </div>
-
+          <div class="tab-pane fade" id="nav-property" role="tabpanel" aria-labelledby="nav-property-tab">
+            <div id="property-grid" class="g-brd-0 tab-pane-grid"></div>
+          </div>
+          <div class="tab-pane fade" id="nav-perms" role="tabpanel" aria-labelledby="nav-perms-tab">...</div>
         </div>
       </div>
       <script type="text/x-kendo-template" id="name-column-template">
@@ -573,7 +888,7 @@
               <path fill-rule="evenodd" d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z"/>
             </svg>
           #}#
-          #= name # #if(pattern!=null) { #,#= pattern ##}#
+          #= name # #if(pattern!=null) { #,#= pattern ##}# 
           </h5> 
           </a>
           <p class="g-font-weight-300 g-color-gray-dark-v6 g-mt-5 g-ml-10 g-mb-0" >#= title #</p>
@@ -584,6 +899,15 @@
             #if( script != null ){#
             <li class="list-inline-item g-mr-30">#: script #</li>
             #}#  
+            <li class="list-inline-item g-mr-30"> 
+              <a class="btn btn-link u-link-v5 g-mr-10 g-font-size-15 g-color-secondary--hover" href="#= studio.services.getApiUrl('/display/pages/' + name ) #" target="blank;">
+                <svg class="bi bi-eye" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.134 13.134 0 0 0 1.66 2.043C4.12 11.332 5.88 12.5 8 12.5c2.12 0 3.879-1.168 5.168-2.457A13.134 13.134 0 0 0 14.828 8a13.133 13.133 0 0 0-1.66-2.043C11.879 4.668 10.119 3.5 8 3.5c-2.12 0-3.879 1.168-5.168 2.457A13.133 13.133 0 0 0 1.172 8z"/>
+                  <path fill-rule="evenodd" d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                </svg>
+                <spin class="g-ml-5 g-font-size-12 g-font-weight-300">
+                Preview</spin></a>
+            </li>
           </ul> 
         </script>
       <script type="text/x-kendo-template" id="user-column-template">
@@ -598,7 +922,7 @@
           <div class="layer w-100">
               <div class="peers ai-c jc-sb fxw-nw">
                 <div class="peer">
-                  <button type="button" class="btn cur-p btn-danger k-grid-add">
+                  <button type="button" class="btn cur-p btn-danger k-grid-add" data-bind="click:create">
                     <svg class="bi bi-file-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path d="M9 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8h-1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5V1z"/>
                       <path fill-rule="evenodd" d="M13.5 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1H13V1.5a.5.5 0 0 1 .5-.5z"/>
@@ -607,10 +931,18 @@
                     New Page</button>
                 </div>
                 <div class="peer">
+                  <button type="button" class="btn cur-p u-btn-pink" data-bind="enabled:selected, click:delete">
+                    <svg class="bi bi-trash" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                      <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg>
+                    Delete</button>
                 </div>
               </div>
           </div>  
-          </script>
+      </script>
+
+      <%= require('html-loader!./include-resource-select-window.html') %>
       <!-- ### $App Screen Footer ### -->
       <%= require('html-loader!./include-footer.html') %>
     </div>

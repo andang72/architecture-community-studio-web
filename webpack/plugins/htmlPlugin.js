@@ -28,6 +28,7 @@ const titles = {
   "resources-apis": "Apis",
   "resources-files": "Files",
   "resources-images": "Images",
+  "resources-albums": "Albums",
   "resources-groovys": "Groovys",
   "resources-sqls": "Sqls",
   "resources-decorators": "Layout Decorators",
@@ -38,6 +39,7 @@ const titles = {
   //  'ui': 'UI',
   //  'vector-maps': 'Vector Maps',
   "404": "404",
+  "YourAccount" : "Your Account"
   //  '500': '500',
   //  'basic-table': 'Basic Table',
 };

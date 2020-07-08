@@ -303,6 +303,9 @@
               <li>
                 <a class='sidebar-link ' href="resources-images.html">Images</a>
               </li>
+              <li>
+                <a class='sidebar-link' href="resources-albums.html">Albums</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -440,7 +443,7 @@
                 });
               },
               columns: [
-                { selectable: true, width: "50px", headerAttributes: {} },
+                { selectable: true, width: "50px", headerAttributes: { "class": "text-center" }, attributes: { "class": "text-center" } },
                 { field: "ATTACHMENT_ID", title: "ID", filterable: false, sortable: true, width: 80, template: '#= attachmentId #', attributes: { class: "text-center" } },
                 { field: "OBJECT_TYPE", title: "OBJECT TYPE", filterable: true, sortable: true, width: 120, template: '#= objectType #', attributes: { class: "text-center" } },
                 { field: "OBJECT_ID", title: "OBJECT ID", filterable: true, sortable: true, width: 120, template: '#= objectId #', attributes: { class: "text-center" } },
@@ -486,11 +489,13 @@
           var renderTo = $('#attachment-window');
           if (!renderTo.data("kendoWindow")) {
             var AttachmentModel = kendo.data.Model.define(studio.data.model.Attachment);
+            
             const headers = {
               Accept: "application/json",
               "Content-Type": "application/json"
             };
             Object.assign(headers, studio.services.accounts.authHeader());
+
             var grid = $('#grid').data('kendoGrid');
             var observable = kendo.observable({
               updated: false,

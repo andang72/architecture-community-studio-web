@@ -1,6 +1,6 @@
 import '../styles/index.scss';
 
-import './masonry';
+//import './masonry';
 //import './charts';
 import './popover';
 import './scrollbar';

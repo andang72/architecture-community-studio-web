@@ -80,6 +80,7 @@
     .tab-pane-grid .k-grid-toolbar {
       background: #fff;
     }
+
   </style>
 </head>
 
@@ -271,6 +272,9 @@
               <li>
                 <a class='sidebar-link actived' href="resources-images.html">Images</a>
               </li>
+              <li>
+                <a class='sidebar-link' href="resources-albums.html">Albums</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -460,14 +464,16 @@
                     // $(this).trigger('load'); // For jQuery >= 3.0 
                   }
                 });
+                var delay = 600 ;
                 $("#grid figure img[is-secure]").each(function () {
                   var $this = $(this);
+                  delay = delay + 50 ;
                   $this.parent().addClass('is-loading');
-                  setImageAsBase64($this, 600);
+                  studio.ui.setSecureImage($this, delay);
                 });
               },
               columns: [
-                { selectable: true, width: "50px", headerAttributes: {} },
+                { selectable: true, width: "50px", headerAttributes: { "class": "text-center" }, attributes: { "class": "text-center" } },
                 { field: "IMAGE_ID", title: "ID", filterable: true, sortable: true, width: 80, template: '#= imageId #', attributes: { class: "text-center" } },
                 { field: "OBJECT_TYPE", title: "OBJECT TYPE", filterable: true, sortable: true, width: 120, template: '#= objectType #', attributes: { class: "text-center" } },
                 { field: "OBJECT_ID", title: "OBJECT ID", filterable: true, sortable: true, width: 120, template: '#= objectId #', attributes: { class: "text-center" } },
@@ -499,10 +505,13 @@
             elemment.attr('src', data);
             elemment.parent().removeClass('is-loading');
           }, function () {
-            let maxRetry = elemment.data('max-retry') || 3;
-            let retry = elemment.data('retry') || 0;
-            let delay = delay || 1000;
-            console.log(retry + ' loading image ' + url)
+            let maxRetry = 3, retry = 0, delay = delay || 1000;
+            if (studio.ui.defined(elemment.data('max-retry'))) {
+              maxRetry = elemment.data('max-retry');
+            }
+            if (studio.ui.defined(elemment.data('retry'))) {
+              retry = elemment.data('retry')
+            }
             if (retry < maxRetry) {
               elemment.data('retry', retry + 1);
               studio.ui.sleep(delay);
@@ -543,7 +552,7 @@
               "Content-Type": "application/json"
             };
             Object.assign(headers, studio.services.accounts.authHeader());
-            const NO_IMAGE_URL = 'assets/static/images/no-image.jpg';
+            const NO_IMAGE_URL = 'assets/static/images/no-image_2.jpg';
             var grid = $('#grid').data('kendoGrid');
             var observable = kendo.observable({
               updated: false,
@@ -562,32 +571,16 @@
                 var previewImg = $('#image-preview-area');
                 if ($this.get('imageByUrl.url') != null) {
                   previewImg.parent().addClass('is-loading');
-
-                  /**
-                  fetch($this.get('imageByUrl.url'), { method: 'HEAD' })
-                    .then(res => {
-                      if (res.ok) {
-                         
-                      } else {
-                         
-                      }
-                    }).catch(err => console.log('Error:', 
-                    
-                    ));
-                  */
-
-                  $.get($this.get('imageByUrl.url')).done(function () {
-                    $this.set('imageByUrl.imageUrl', $this.get('imageByUrl.url'));
-                    previewImg.one("load", function () {
-                      previewImg.parent().removeClass('is-loading');
-                      $this.set('imageByUrl.uploadable', true);
-                      console.log("image loaded.");
-                    });
-                  }).fail(function () {
+                  $this.set('imageByUrl.imageUrl', $this.get('imageByUrl.url'));
+                  previewImg.one("load", function () {
+                    previewImg.parent().removeClass('is-loading');
+                    $this.set('imageByUrl.uploadable', true);
+                  });
+                  previewImg.one('error', function () {
                     studio.ui.notify(null, "fail to load image from url..", "error");
                     $this.set('imageByUrl.imageUrl', NO_IMAGE_URL);
                     previewImg.parent().removeClass('is-loading');
-                  })
+                  });
                 }
               },
               uploadImageByUrl: function () {
@@ -712,13 +705,18 @@
                   }
                 }
               }),
+              clear: function () {
+                var $this = this;
+                renderTo.data("kendoWindow").title("Upload new image");
+                $this.setSource();
+              },
               setSource: function (data) {
                 var $this = this;
                 data = data || new ImageModel();
                 data.copy($this.image);
                 $this.set('editable', $this.image.imageId > 0 ? true : false);
                 $this.set('imageByUrl.url', null);
-                $this.set('imageByUrl.imageUrl', 'assets/static/images/no-image.jpg');
+                $this.set('imageByUrl.imageUrl', NO_IMAGE_URL);
                 $this.set('imageByUrl.uploadable', false);
                 $('#select-tags').data('kendoMultiSelect').value("");
                 if ($this.get('editable')) {
@@ -745,9 +743,9 @@
                       $this.set("imageUrl", data);
                     });
                   }
-                  createPropertyWindowIfNotExist(null, data.imageId);
+                  studio.ui.propertyGrid(null, "images", data.imageId);
                 } else {
-                  $this.set('imageUrl', 'assets/static/images/no-image.jpg');
+                  $this.set('imageUrl', NO_IMAGE_URL);
                 }
               }
             });
@@ -770,10 +768,10 @@
                 if (xhr) {
                   xhr.addEventListener("readystatechange", function onUploadReady(e) {
                     if (xhr.readyState == 1 /* OPENED */) {
-                      xhr.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']); 
+                      xhr.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
                     }
                   });
-                } 
+                }
               },
               success: function (e) {
                 const data = e.response;
@@ -846,80 +844,7 @@
             }).data('kendoMultiSelect');
           }
           return renderTo.data('kendoMultiSelect');
-        }
-
-        function createPropertyWindowIfNotExist(renderTo, objectId) {
-          renderTo = renderTo || $('#property-grid');
-          if (!renderTo.data("kendoGrid")) {
-            var grid = renderTo.kendoGrid({
-              dataSource: [],
-              height: 400,
-              sortable: true,
-              filterable: false,
-              pageable: false,
-              editable: "inline",
-              columns: [
-                { field: "name", title: "Name", width: 250, validation: { required: true } },
-                { field: "value", title: "Value", validation: { required: true } },
-                { command: ["destroy"], title: "&nbsp;", width: "250px" }
-              ],
-              toolbar: kendo.template('<a href="\\#"class="btn u-btn-outline-lightgray g-mr-5 k-grid-add"><span class="k-icon k-i-plus"></span>Add Property</a><a href="\\#"class="btn u-btn-outline-lightgray g-mr-5 k-grid-save-changes"><span class="k-icon k-i-check"></span> Save</a><a href="\\#"class="btn u-btn-outline-lightgray g-mr-5 k-grid-cancel-changes"><span class="k-icon k-i-cancel"></span> Cancle</a><a class="pull-right hs-admin-reload u-link-v5 g-font-size-20 g-color-gray-light-v3 g-color-secondary--hover g-mt-7 g-mr-5" data-kind="properties" data-action="refresh"></a>'),
-              save: function () {
-              }
-            }).data("kendoGrid");
-            renderTo.on("click", "a[data-kind=properties],a[data-action=refresh]", function (e) {
-              var $this = $(this);
-              grid.dataSource.read();
-            });
-          }
-
-          renderTo.data("kendoGrid").setDataSource(
-            new kendo.data.DataSource(
-              {
-                transport: {
-                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/images/') + objectId + '/properties/list.json', type: 'post', contentType: "application/json" },
-                  create: { url: studio.services.getApiUrl('/data/secure/mgmt/images/') + objectId + '/properties/update.json', type: 'post', contentType: "application/json" },
-                  update: { url: studio.services.getApiUrl('/data/secure/mgmt/images/') + objectId + '/properties/update.json', type: 'post', contentType: "application/json" },
-                  destroy: { url: studio.services.getApiUrl('/data/secure/mgmt/images/') + objectId + '/properties/delete.json', type: 'post', contentType: "application/json" },
-                  parameterMap: function (options, operation) {
-                    if (operation !== "read" && options.models) {
-                      return JSON.stringify(options.models);
-                    }
-                    return JSON.stringify(options);
-                  }
-                },
-                batch: true,
-                schema: {
-                  model: {
-                    id: "name",
-                    fields: {
-                      name: { type: "string", defaultValue: "" },
-                      value: { type: "string", defaultValue: "" }
-                    }
-                  }
-                }
-              }
-            )
-          );
-        }
-
-        function addNewTag(widgetId, value) {
-          var widget = $("#" + widgetId).getKendoMultiSelect();
-          var dataSource = widget.dataSource;
-          if (confirm("Are you sure?")) {
-            dataSource.add({ tagId: 0, name: value });
-            dataSource.one("requestEnd", function (args) {
-              if (args.type !== "create") {
-                return;
-              }
-              var newValue = args.tagId;
-              dataSource.one("sync", function () {
-                widget.value(widget.value().concat([newValue]));
-              });
-            });
-            dataSource.sync();
-          }
-        }        
+        } 
       </script>
       <main class='main-content bgc-grey-100'>
         <div id='mainContent'>
@@ -1006,13 +931,21 @@
             <div class="col-sm-8">
               <div class="row row-cols-2">
                 <div class="col-6">
-                  <figure class="figure g-width-200" style="max-height:200px;">
+                  <figure class="figure g-width-200" style="max-height:200px;overflow:hidden;">
                     <img id="image-preview-area" data-bind="attr:{src:imageByUrl.imageUrl}"
                       class="figure-img img-fluid rounded" alt="...">
                     <figcaption class="figure-caption">.</figcaption>
                   </figure>
                 </div>
-                <div class="col-6"></div>
+                <div class="col-6">
+
+                  <button data-bind="visible:editable, click:clear"
+                    class="btn btn-xl u-btn-outline-darkpurple u-btn-hover-v1-3 g-letter-spacing-0_5 text-uppercase g-rounded-50 g-px-30 g-mr-10 g-mb-15"><span
+                      class="pull-left">New Image <span class="d-block g-font-size-11">Upload new iamge</span>
+                    </span><i class="fa fa-picture-o float-right g-font-size-32 g-ml-15"
+                      aria-hidden="true"></i></button>
+
+                </div>
                 <div class="col-12">
                   <div class="input-group">
                     <input type="text" class="form-control g-brd-gray-light-v7 g-brd-gray-light-v3 g-px-14 g-py-10"
@@ -1041,7 +974,6 @@
         </nav>
         <div class="tab-content" id="nav-tabContent" data-bind="visible:editable">
           <div class="tab-pane fade show active g-pa-20" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab">
-
             <!-- Tag Input -->
             <div class="form-group g-mb-65" data-bind="visible:editable" style="display:none;">
               <label class="g-mb-10" for="inputGroup1_1">① Tags</label>
@@ -1128,7 +1060,7 @@
               <img class="g-width-100 g-width-100--md g-width-100 g-height-100--md g-brd-2 g-brd-transparent g-brd-lightblue-v3--parent-opened g-mr-20--sm" 
               #if (imageLink == null) { # 
                 data-retry="0" is-secure="true" secure-image="#= studio.ui.getImageUrl(data, {thumbnail:true}) #"
-              src="assets/static/images/no-image.jpg"
+              src="assets/static/images/no-image_2.jpg"
               #}else{# 
               src="#= studio.ui.getImageUrl(data, {thumbnail:true}) #"   
               #}#

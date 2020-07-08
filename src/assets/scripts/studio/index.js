@@ -27,6 +27,8 @@ const VERSION = "1.0.0",
 import * as $ from "jquery";
 import * as kendo from "@progress/kendo-ui";
 
+// Pace init
+
 const user = JSON.parse(localStorage.getItem("user"));
 const initialState = user
   ? { status: { loggedIn: true }, user }
@@ -61,6 +63,7 @@ const UserModel = {
     emailVisible: { type: "boolean", defaultValue: false },
     anonymous: { type: "boolean", defaultValue: true },
     enabled: { type: "boolean", defaultValue: false },
+    external: { type: "boolean", defaultValue: false },
     creationDate: { type: "date" },
     modifiedDate: { type: "date" },
     status: { type: "string", defaultValue: "NONE" },
@@ -128,7 +131,7 @@ const AttachmentModel = {
     contentType: { type: "string", defaultValue: "" },
     downloadCount: { type: "number", defaultValue: 0 },
     size: { type: "number", defaultValue: 0 },
-    user: { type: "object", defaultValue: {} },
+    user: { type: "object", defaultValue: { userId: 0 } },
     properties: { type: "object", defaultValue: {} },
     sharedLink: { type: "object", defaultValue: {} },
     creationDate: { type: "date" },
@@ -173,7 +176,7 @@ const ImageModel = {
     size: { type: "number", defaultValue: 0 },
     thumbnailContentType: { type: "string", defaultValue: "" },
     thumbnailSize: { type: "number", defaultValue: 0 },
-    user: { type: "object", defaultValue: {} },
+    user: { type: "object", defaultValue: { userId: 0 } },
     imageLink: {
       type: "object",
       defaultValue: {},
@@ -213,6 +216,34 @@ const ImageModel = {
   },
 };
 
+const AlbumModel = {
+  id: "albumId", // the identifier of the model
+  fields: {
+    albumId: { type: "number", editable: false, defaultValue: 0 },
+    name: { type: "string", editable: true },
+    description: { type: "string", editable: true, defaultValue: "" },
+    collaborate: { type: "boolean", editable: true, defaultValue: "" },
+    shared: { type: "boolean", editable: true, defaultValue: false },
+    properties: { type: "object", defaultValue: {} },
+    user: { type: "object", defaultValue: { userId: 0 } },
+    modifiedDate: { type: "date" },
+    creationDate: { type: "date" },
+  },
+  copy: function (target) {
+    target.albumId = this.get("albumId");
+    target.set("name", this.get("name"));
+    target.set("description", this.get("description"));
+    target.set("collaborate", this.get("collaborate"));
+    target.set("shared", this.get("shared"));
+    if (typeof this.get("properties") === "object")
+      target.set("properties", this.get("properties"));
+    if (typeof this.get("user") === "object")
+      target.set("user", this.get("user"));
+    target.set("creationDate", this.get("creationDate"));
+    target.set("modifiedDate", this.get("modifiedDate"));
+  },
+};
+
 const PageModel = {
   id: "pageId",
   fields: {
@@ -233,8 +264,16 @@ const PageModel = {
     secured: { type: "boolean", defaultValue: false },
     properties: { type: "object", defaultValue: {} },
     bodyText: { type: "string", defaultValue: "" },
-    bodyContent: { type: "object", defaultValue: {} },
-    user: { type: "object", defaultValue: {} },
+    bodyContent: {
+      type: "object",
+      defaultValue: {
+        bodyId: 0,
+        bodyText: "",
+        bodyType: "FREEMARKER",
+        pageId: 0,
+      },
+    },
+    user: { type: "object", defaultValue: { userId: 0 } },
     creationDate: { type: "date" },
     modifiedDate: { type: "date" },
   },
@@ -331,6 +370,7 @@ export const studio = {
       authHeader,
       getCurrentUser,
       getUserAvatarUrl,
+      verify: verifyToken,
     },
   },
   data: {
@@ -339,6 +379,7 @@ export const studio = {
       User: UserModel,
       Image: ImageModel,
       ImageLink: ImageLinkModel,
+      Album: AlbumModel,
       Attachment: AttachmentModel,
       BodyContent: BodyContentModel,
       Page: PageModel,
@@ -347,15 +388,22 @@ export const studio = {
   },
   ui: {
     defined,
+    isFunction,
     sleep,
     notify,
     handleAjaxError,
     handleAxiosError,
+    headerWithAuth,
     getImageUrl,
     getAttachmentUrl,
+    setSecureImage,
     setImageAsBase64,
     getImageAsBase64,
     loadAceEditor,
+    propertyGrid: createPropertyGrid,
+    aceEditor: createAceEditor,
+    dropzone: createDropzone,
+    masonry: createMasonry,
     format: {
       date: getFormattedDate,
       number: getFormattedNumber,
@@ -394,6 +442,17 @@ function authHeader() {
   }
 }
 
+const DEFAULT_JSON_HEADER = {
+  Accept: "application/json",
+  "Content-Type": "application/json",
+};
+
+function headerWithAuth(headers) {
+  headers = headers || DEFAULT_JSON_HEADER;
+  Object.assign(headers, authHeader());
+  return headers;
+}
+
 function isUserLoggedIn() {
   let _user = JSON.parse(localStorage.getItem("user"));
   if (_user) {
@@ -407,7 +466,7 @@ function getUserAvatarUrl(username) {
   const _user = getCurrentUser();
   if (_user == null) return "@/assets/images/no-avatar.png";
   else username = username || _user.username;
-  return `${API_ROOT_URL}/download/avatar/` + username;
+  return `${API_ROOT_URL}/download/avatar/${username}`;
 }
 
 function getCurrentUser() {
@@ -444,14 +503,46 @@ axiosRetry(axios, {
 });
 */
 
-function setImageAsBase64(url, successHandler, errorHandler) {
+function setSecureImage(elemment, delay, callback) {
+  var delay = delay || 1000;
+  let url = elemment.attr("secure-image");
+  setImageAsBase64(
+    url,
+    function (data) {
+      elemment.attr("src", data);
+      elemment.parent().removeClass("is-loading");
+      if (isFunction(callback)) callback();
+    },
+    function () {
+      let maxRetry = 3,
+        retry = 0;
+      if (defined(elemment.data("max-retry"))) {
+        maxRetry = elemment.data("max-retry");
+      }
+      if (defined(elemment.data("retry"))) {
+        retry = elemment.data("retry");
+      }
+      if (retry < maxRetry) {
+        elemment.data("retry", retry + 1);
+        sleep(delay);
+        console.log("retry " + retry + " for " + url);
+        setSecureImage(elemment);
+      } else {
+        elemment.parent().removeClass("is-loading");
+      }
+    }
+  );
+}
+
+async function setImageAsBase64(url, successHandler, errorHandler) {
   const headers = {};
   Object.assign(headers, studio.services.accounts.authHeader());
   axios
     .get(url, { headers: headers, responseType: "arraybuffer" })
     .then((response) => {
-      let b64encoded = Buffer.from(response.data, "binary").toString("base64");
-      var prefix = "data:" + response.headers["content-type"] + ";base64,";
+      var mineType = response.headers["content-type"].toLowerCase();
+      var b64encoded = Buffer.from(response.data, "binary").toString("base64");
+      var prefix = "data:" + mineType + ";base64,";
       if (isFunction(successHandler)) successHandler(prefix + b64encoded);
     })
     .then((error) => {
@@ -469,8 +560,9 @@ async function getImageAsBase64(url) {
   const data = await axios
     .get(url, { headers: headers, responseType: "arraybuffer" })
     .then((response) => {
-      let b64encoded = Buffer.from(response.data, "binary").toString("base64");
-      var prefix = "data:" + response.headers["content-type"] + ";base64,";
+      var mineType = response.headers["content-type"].toLowerCase();
+      var b64encoded = Buffer.from(response.data, "binary").toString("base64");
+      var prefix = "data:" + mineType + ";base64,";
       return prefix + b64encoded;
     });
 }
@@ -537,6 +629,44 @@ function getUser(options) {
     .then(handleResponse)
     .then((user) => {
       localStorage.setItem("user", JSON.stringify(user));
+    });
+}
+
+function verifyToken(options) {
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+  Object.assign(headers, studio.services.accounts.authHeader());
+  options = options || {};
+  if (!defined(options.url)) {
+    options.url = `${API_ROOT_URL}/data/accounts/jwt/verify`;
+  }
+  axios
+    .get(options.url, { headers: headers })
+    .then((response) => {
+      const data = response.data;
+      console.log(data);
+    })
+    .catch(function (error) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        const data = error.response.data;
+        if (error.response.status == 401 && data.anonymous) {
+          notify(null, "The authentication token has expired.", "error");
+          logout();
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        console.log(error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log("Error", error.message);
+      }
+      console.log(error.config);
     });
 }
 
@@ -714,6 +844,161 @@ function notify(renderTo, message, type) {
   notificationWidget.show(message, type);
 }
 
+const DEFAULT_ACE_OPTIONS = {
+  mode: "ace/mode/html",
+  theme: "ace/theme/chrome",
+  warp: false,
+  editable: true,
+};
+
+function createDialog(renderTo, options) {
+  options = options || {};
+  if (renderTo == null || renderTo.length == 0) {
+    var guid = kendo.guid();
+    $("body").append('<span id="' + guid + '"></span>');
+    renderTo = $("'#" + guid + "'");
+  }
+}
+
+function createAceEditor(renderTo, options) {
+  renderTo = renderTo || $("#editor");
+  options = options || {};
+  var settings = $.extend(true, {}, DEFAULT_ACE_OPTIONS, options);
+  if (renderTo.contents().length == 0) {
+    var editor = ace.edit(renderTo.attr("id"));
+    editor.getSession().setMode(settings.mode);
+    editor.setTheme(settings.theme);
+    editor.getSession().setUseWrapMode(settings.warp);
+    editor.setReadOnly(!settings.editable);
+  }
+  return ace.edit(renderTo.attr("id"));
+}
+
+function createPropertyGrid(renderTo, type, objectId) {
+  renderTo = renderTo || $("#property-grid");
+  if (!renderTo.data("kendoGrid")) {
+    var grid = renderTo
+      .kendoGrid({
+        dataSource: [],
+        height: 300,
+        sortable: true,
+        filterable: false,
+        pageable: false,
+        editable: "inline",
+        columns: [
+          {
+            field: "name",
+            title: "Name",
+            width: 250,
+            validation: { required: true },
+          },
+          { field: "value", title: "Value", validation: { required: true } },
+          { command: ["destroy"], title: "&nbsp;", width: "250px" },
+        ],
+        toolbar: kendo.template(
+          '<a href="\\#"class="btn u-btn-outline-lightgray g-mr-5 k-grid-add"><span class="k-icon k-i-plus"></span>Add Property</a><a href="\\#"class="btn u-btn-outline-lightgray g-mr-5 k-grid-save-changes"><span class="k-icon k-i-check"></span> Save</a><a href="\\#"class="btn u-btn-outline-lightgray g-mr-5 k-grid-cancel-changes"><span class="k-icon k-i-cancel"></span> Cancle</a><a class="pull-right hs-admin-reload u-link-v5 g-font-size-20 g-color-gray-light-v3 g-color-secondary--hover g-mt-7 g-mr-5" data-kind="properties" data-action="refresh"></a>'
+        ),
+        save: function () {},
+      })
+      .data("kendoGrid");
+    renderTo.on(
+      "click",
+      "a[data-kind=properties],a[data-action=refresh]",
+      function (e) {
+        var $this = $(this);
+        grid.dataSource.read();
+      }
+    );
+  }
+  if (type == "users") {
+    renderTo.data("kendoGrid").setDataSource(
+      new kendo.data.DataSource({
+        transport: {
+          read: {
+            url: `${API_ROOT_URL}/data/secure/mgmt/security/${type}/${objectId}/properties/list.json`,
+            type: "post",
+            contentType: "application/json",
+          },
+          create: {
+            url: `${API_ROOT_URL}/data/secure/mgmt/security/${type}/${objectId}/properties/update.json`,
+            type: "post",
+            contentType: "application/json",
+          },
+          update: {
+            url: `${API_ROOT_URL}/data/secure/mgmt/security/${type}/${objectId}/properties/update.json`,
+            type: "post",
+            contentType: "application/json",
+          },
+          destroy: {
+            url: `${API_ROOT_URL}/data/secure/mgmt/security/${type}/${objectId}/properties/delete.json`,
+            type: "post",
+            contentType: "application/json",
+          },
+          parameterMap: function (options, operation) {
+            if (operation !== "read" && options.models) {
+              return JSON.stringify(options.models);
+            }
+            return JSON.stringify(options);
+          },
+        },
+        batch: true,
+        schema: {
+          model: {
+            id: "name",
+            fields: {
+              name: { type: "string", defaultValue: "" },
+              value: { type: "string", defaultValue: "" },
+            },
+          },
+        },
+      })
+    );
+  } else {
+    renderTo.data("kendoGrid").setDataSource(
+      new kendo.data.DataSource({
+        transport: {
+          read: {
+            url: `${API_ROOT_URL}/data/secure/mgmt/${type}/${objectId}/properties/list.json`,
+            type: "post",
+            contentType: "application/json",
+          },
+          create: {
+            url: `${API_ROOT_URL}/data/secure/mgmt/${type}/${objectId}/properties/update.json`,
+            type: "post",
+            contentType: "application/json",
+          },
+          update: {
+            url: `${API_ROOT_URL}/data/secure/mgmt/${type}/${objectId}/properties/update.json`,
+            type: "post",
+            contentType: "application/json",
+          },
+          destroy: {
+            url: `${API_ROOT_URL}/data/secure/mgmt/${type}/${objectId}/properties/delete.json`,
+            type: "post",
+            contentType: "application/json",
+          },
+          parameterMap: function (options, operation) {
+            if (operation !== "read" && options.models) {
+              return JSON.stringify(options.models);
+            }
+            return JSON.stringify(options);
+          },
+        },
+        batch: true,
+        schema: {
+          model: {
+            id: "name",
+            fields: {
+              name: { type: "string", defaultValue: "" },
+              value: { type: "string", defaultValue: "" },
+            },
+          },
+        },
+      })
+    );
+  }
+}
+
 function loadAceEditor() {
   return import(
     /* webpackChunkName: "ace" */ "ace-builds/src-noconflict/ace"
@@ -722,4 +1007,34 @@ function loadAceEditor() {
       /* webpackChunkName: "ace" */ "ace-builds/webpack-resolver.js"
     );
   });
+}
+
+import Dropzone from "dropzone";
+
+function createDropzone(renderTo, options) {
+  var myDropzone = new Dropzone(renderTo, options);
+  return myDropzone;
+}
+
+
+import Masonry from "masonry-layout"; 
+import jQueryBridget from "jquery-bridget";  
+
+// make Masonry a jQuery plugin
+jQueryBridget( 'masonry', Masonry, $ );
+
+
+const DEFAULT_MASONRY_OPTIONS = {
+  itemSelector: '.masonry-item',
+  columnWidth: '.masonry-sizer',
+ 
+  // columnWidth: '.masonry-sizer',
+  percentPosition: true
+};
+
+function createMasonry(renderTo, options) {
+  options = options || {};
+  var settings = $.extend(true, {}, DEFAULT_MASONRY_OPTIONS, options);
+  renderTo.masonry(settings);
+  //return new Masonry(renderTo, settings);
 }

@@ -57,6 +57,28 @@
         opacity: 0;
       }
     }
+
+    button[data-toggle=collapse][aria-expanded=false] .bi-chevron-down {
+      visibility: show;
+    }
+
+    button[data-toggle=collapse][aria-expanded=false] .bi-chevron-up {
+      visibility: hidden;
+      display: none;
+    }
+
+    button[data-toggle=collapse][aria-expanded=true] .bi-chevron-down {
+      visibility: hidden;
+      display: none;
+    }
+
+    button[data-toggle=collapse][aria-expanded=true] .bi-chevron-up {
+      visibility: show;
+    }
+
+    .tab-pane-grid .k-grid-toolbar {
+      background: #fff;
+    }
   </style>
 </head>
 
@@ -199,7 +221,7 @@
               </li>
               <li>
                 <a class='sidebar-link' href="services-menu.html">Menu</a>
-              </li> 
+              </li>
             </ul>
           </li>
           <li class="nav-item dropdown open">
@@ -248,6 +270,9 @@
               <li>
                 <a class='sidebar-link ' href="resources-images.html">Images</a>
               </li>
+              <li>
+                <a class='sidebar-link' href="resources-albums.html">Albums</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -267,14 +292,79 @@
             var height = $(document).height() - ($('.header-container').height() + 61)
             $('#grid').height(height);
           }).trigger('resize'); //on page load     
+
+          let promise = studio.ui.loadAceEditor();
+          promise.then(script => { });
+
           const headers = {
             Accept: "application/json",
             "Content-Type": "application/json"
           };
           Object.assign(headers, studio.services.accounts.authHeader());
+
           var renderTo = $("#mainContent");
           var observable = kendo.observable({
-
+            selected: false,
+            selectedApis: [],
+            selectedApiCount: 0,
+            setSelectedApis: function () {
+              var $this = this;
+              $this.set('selectedPages', []);
+              var grid = $('#grid').data('kendoGrid');
+              grid.select().each(function () {
+                $this.selectedApis.push(grid.dataItem(this));
+              });
+              $this.set('selectedApiCount', $this.get('selectedApis').length);
+            },
+            delete: function (e) {
+              var $this = this;
+              $this.setSelectedPages();
+              var grid = $('#grid').data('kendoGrid');
+              var template = kendo.template('Permanently remove the selected apis (#= selectedApiCount #).<br/> This action cannot be undone.');
+              var dialog = $("#delete-dialog").kendoDialog({
+                title: 'Are you sure you want to delete the api?',
+                content: template($this),
+                actions: [
+                  {
+                    text: 'Ok',
+                    action: function (e) {
+                      kendo.ui.progress($('.k-dialog'), true);
+                      axios({
+                        url: studio.services.getApiUrl('/data/secure/mgmt/apis/delete.json'),
+                        method: "post",
+                        data: JSON.stringify($this.selectedPages),
+                        headers: headers
+                      })
+                        .then(response => {
+                          const data = response.data;
+                          grid.clearSelection();
+                          grid.dataSource.read();
+                          studio.ui.notify(null, data.count + " apis has been deleted.", "success");
+                        }).catch(function (error) {
+                          studio.ui.handleAxiosError(error);
+                        })
+                        .then(function () {
+                          kendo.ui.progress($('.k-dialog'), false);
+                          dialog.close();
+                        });
+                      return false;
+                    },
+                    primary: true
+                  },
+                  {
+                    text: 'Cancle',
+                    action: function (e) {
+                      $('#grid').data('kendoGrid').clearSelection();
+                      return true;
+                    }
+                  }
+                ]
+              }).data('kendoDialog');
+              dialog.open();
+            },
+            create: function () {
+              getApiEditorWindow();
+            }
           });
           createApiGrid(observable);
           kendo.bind(renderTo, observable);
@@ -304,14 +394,23 @@
                   model: studio.data.model.Api
                 }
               },
+              change: function (e) {
+                if (this.selectedKeyNames().length > 0) {
+                  observable.set('selected', true);
+                } else {
+                  observable.set('selected', false);
+                }
+              },
               toolbar: [{ name: "create", text: "새로운 페이지 만들기", template: kendo.template($('#grid-toolbar-template').html()) }],
               sortable: true,
               filterable: false,
+              persistSelection: true,
               pageable: {
                 refresh: true,
                 pageSizes: [50, 100, 200, 300]
               },
               columns: [
+                { selectable: true, width: "50px", headerAttributes: { "class": "text-center" }, attributes: { "class": "text-center" } },
                 { field: "API_ID", title: "ID", filterable: false, sortable: true, width: 100, template: '#= apiId #', attributes: { class: "text-center" } },
                 { field: "NAME", title: "Name", filterable: false, sortable: true, template: $('#name-column-template').html() },
                 { field: "VERSION_ID", title: "Version", filterable: false, sortable: false, width: 120, template: '#= version#', attributes: { class: "text-center" } },
@@ -326,12 +425,142 @@
               var $this = $(this);
               if (studio.ui.defined($this.data("object-id"))) {
                 var objectId = $this.data("object-id");
-
+                var dataItem = grid.dataSource.get(objectId);
+                getApiEditorWindow(dataItem);
               }
             });
           }
         }
-
+        function getApiEditorWindow(item) {
+          var renderTo = $('#api-window');
+          if (!renderTo.data("kendoWindow")) {
+            const headers = {
+              Accept: "application/json",
+              "Content-Type": "application/json"
+            };
+            Object.assign(headers, studio.services.accounts.authHeader());
+            const ApiModel = kendo.data.Model.define(studio.data.model.Api);
+            var validator = $("#pageForm").kendoValidator({}).data('kendoValidator');
+            var observable = kendo.observable({
+              updated: false,
+              api: new ApiModel(),
+              unlocked: true,
+              editable: false,
+              select: function () {
+                var $this = this;
+                getResourceSelectorWindow(null, null, function (data) {
+                  $this.set('api.scriptSource', data);
+                });
+              },
+              saveOrUpdate: function () {
+                var $this = this;
+                if (validator.validate()) {
+                  var template = kendo.template("Update the #: api.name #. This operation cannot be canceled.");
+                  var dialog = $("#dialog").kendoDialog({
+                    width: "450px",
+                    closable: true,
+                    modal: true,
+                    buttonLayout: "normal",
+                    title: 'Update',
+                    content: template($this),
+                    actions: [
+                      {
+                        text: 'Ok',
+                        action: function (e) {
+                          var saveOrUpdateUrl = '/data/secure/mgmt/apis/save-or-update.json';
+                          var editor = createEditor($this);
+                          if (editor.getValue() != null) {
+                            $this.page.bodyContent.bodyText = editor.getValue();
+                          }
+                          if ($this.page.bodyContent.bodyText != null) {
+                            saveOrUpdateUrl = saveOrUpdateUrl + '?fields=bodyContent';
+                          }
+                          kendo.ui.progress($('.k-dialog'), true);
+                          axios({
+                            url: studio.services.getApiUrl(saveOrUpdateUrl),
+                            method: "post",
+                            data: JSON.stringify($this.page),
+                            headers: headers
+                          }).then(response => {
+                            let data = response.data;
+                            studio.ui.notify(null, $this.get('filename') + " has been updated.", "success");
+                            $this.setSource(new PageModel(data.item));
+                            $this.set('updated', true);
+                          }).catch(function (error) {
+                            studio.ui.handleAxiosError(error);
+                          }).then(function () {
+                            // always executed 
+                            kendo.ui.progress($('.k-dialog'), false);
+                            dialog.close();
+                          });
+                          return false;
+                        },
+                        primary: true
+                      },
+                      { text: 'Cancle' }
+                    ]
+                  }).data("kendoDialog");
+                  dialog.open();
+                }
+              },
+              setSource: function (data) {
+                var $this = this;
+                data = data || new ApiModel();
+                data.copy($this.api);
+                $this.set('editable', $this.api.apiId > 0 ? true : false);
+                if ($this.get('editable')) {
+                  studio.ui.propertyGrid( null, "apis", data.apiId);
+                }
+              },
+              contentTypes: [
+                { text: "HTML", value: "text/html;charset=UTF-8" },
+                { text: "JSON", value: "application/json;charset=UTF-8" }
+              ],
+              objectTypeDataSource: kendo.data.DataSource.create({
+                transport: {
+                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/services/sequencers/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  parameterMap: function (options, operation) {
+                    return JSON.stringify(options);
+                  }
+                },
+                schema: {
+                  total: "totalCount",
+                  data: "items",
+                  model: {
+                    id: "sequencerId",
+                    fields: {
+                      sequencerId: { type: "number", defaultValue: 0 },
+                      name: { type: "string" },
+                      displayName: { type: "string" },
+                      value: { type: "number", defaultValue: 0 }
+                    }
+                  }
+                }
+              }),
+            });
+            kendo.bind(renderTo, observable);
+            renderTo.data('model', observable);
+            var window = renderTo.kendoWindow({
+              width: "950px",
+              title: "Page",
+              visible: false,
+              scrollable: true,
+              modal: true,
+              actions: ["Close"], // 
+              open: function () {
+                this.title(observable.api.name);
+                observable.set('updated', false);
+                $('#pageForm input:first').focus();
+              },
+              close: function () {
+                if (observable.get('updated'))
+                  grid.dataSource.read();
+              }
+            }).data('kendoWindow');
+          }
+          renderTo.data('model').setSource(item);
+          renderTo.data("kendoWindow").center().open();
+        }  
       </script>
       <!-- ### $App Screen Content ### -->
       <main class='main-content bgc-grey-100'>
@@ -341,6 +570,210 @@
           </div>
         </div>
       </main>
+      <span id="delete-dialog"></span>
+      <span id="dialog"></span>
+      <div id="api-window" class="g-pa-0 g-height-600 container-fluid" style="display:none;">
+        <form id="pageForm" class="g-pa-15 g-pa-30--sm">
+          <div class="form-row g-mb-25">
+            <div class="form-group col-md-6">
+              <label class="g-mb-10 g-font-weight-400" for="input-api-name">Name <span
+                  class="text-danger">*</span></label>
+              <div class="g-pos-rel">
+                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                  <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                </span>
+                <input id="input-api-name" name="input-api-name"
+                  class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
+                  placeholder="Please enter your name." data-bind="value: api.name, enabled:unlocked" required
+                  validationMessage="Please enter your name." autofocus>
+                <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                  This is the name used when calling this api. ex) /data/apis/<span data-bind="text: api.name"></span>
+                </small>
+              </div>
+              <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-api-name" role="alert"
+                style="display:none;"></span>
+            </div>
+            <div class="form-group col-md-6">
+              <label class="g-mb-10 g-font-weight-400" for="input-api-pattern">Pattern</label>
+              <div class="g-pos-rel">
+                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                  <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                </span>
+                <input id="input-api-pattern" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10"
+                  type="text" placeholder="패턴을 입력하세요" data-bind="value: api.pattern, enabled:unlocked">
+                <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                  Call the api based on the pattern. ex) /data/apis/<span data-bind="text: api.pattern"></span>
+                </small>
+              </div>
+            </div>
+          </div>
+          <div class="form-row g-mb-25">
+            <div class="form-group col-md-6">
+              <label class="g-mb-10 g-font-weight-400" for="input-api-title">Title <span
+                  class="text-danger">*</span></label>
+              <div class="g-pos-rel">
+                <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                  <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                </span>
+                <input id="input-api-title" name="input-api-title"
+                  class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
+                  placeholder="Please enter the page title." data-bind="value: api.title, enabled:unlocked" required
+                  validationMessage="Please enter the page title.">
+                <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                  Name used as title. By name You can easily see what api is.</small>
+              </div>
+              <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-api-title"
+                role="alert" style="display:none;"></span>
+            </div>
+            <div class="form-group col-md-6">
+              <label class="g-mb-10 g-font-weight-400" for="input-api-description">Description</label>
+              <textarea id="input-api-description" class="form-control form-control-md g-resize-none g-rounded-4"
+                rows="3" placeholder="Briefly enter a description for the api."
+                data-bind="value:api.description, enabled:unlocked"></textarea>
+            </div>
+          </div>
+          <button class="btn u-btn-outline-pink g-mr-10 g-mb-15" type="button" data-toggle="collapse"
+            data-target="#collapseAdvanced" aria-expanded="false" aria-controls="collapseAdvanced">
+            Advanced
+            <svg class="bi bi-chevron-down" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd"
+                d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
+            </svg>
+            <svg class="bi bi-chevron-up" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd"
+                d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />
+            </svg>
+          </button>
+          <div class="collapse" id="collapseAdvanced">
+            <div class="card card-body g-mb-25 bgc-grey-100 ">
+              <div class="form-row g-mb-25">
+                <div class="col-md-4">
+                  <label class="g-mb-10 g-font-weight-400">Object Type</label>
+                  <div class="form-group g-pos-rel g-rounded-4 mb-0">
+                    <input data-role="dropdownlist" data-option-label="Choose the type of object that owns the service."
+                      data-auto-bind="true" data-value-primitive="true" data-text-field="name"
+                      data-value-field="sequencerId"
+                      data-bind="value: api.objectType, enabled:unlocked, source: objectTypeDataSource"
+                      style="width: 100%;" />
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label class="g-mb-10 g-font-weight-400">Object Id</label>
+                  <div class="form-group g-pos-rel g-rounded-4 mb-0">
+                    <input data-role="numerictextbox" placeholder="OBJECT ID" class="form-control form-control-md"
+                      type="number" data-min="-1" step="1" data-format="##"
+                      data-bind="value:api.objectId, enabled:unlocked" style="width: 100%" />
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="g-font-weight-400 g-mb-10">Version<span class="text-danger">*</span></label>
+                    <div class="g-pos-rel">
+                      <input class="form-control form-control-md" data-role="numerictextbox" type="number"
+                        data-format="###" data-min="0" step="1" data-max="100"
+                        placeholder="Please enter version information" data-bind="value: api.versionId,enabled:unlocked"
+                        style="width: 100%">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row g-mb-25">
+                <div class="form-group col-md-4">
+                  <label class="g-mb-10 g-font-weight-400">Content Type</label>
+                  <div class="g-pos-rel">
+                    <input data-role="dropdownlist" data-option-label="Please select a content type."
+                      data-auto-bind="true" data-value-primitive="true" data-text-field="text" data-value-field="value"
+                      data-bind="value: page.contentType, enabled:unlocked, source: contentTypes"
+                      style="width: 100%;" />
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label class="d-flex align-items-center justify-content-between g-mb-0">
+                    <span class="g-pr-20 g-font-weight-500">Authentication required</span>
+                    <div class="u-check">
+                      <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" name="api-secured" id="api-secured"
+                        value="true" data-bind="checked: api.secured,  enabled:unlocked" type="checkbox">
+                      <div class="u-check-icon-radio-v8">
+                        <i class="fa" data-check-icon=""></i>
+                      </div>
+                    </div>
+                  </label>
+                  <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
+                    In the ON state, only users who are granted access permission can use it.
+                  </small>
+                </div>
+                <div class="col-md-4">
+                  <label class="d-flex align-items-center justify-content-between g-mb-0">
+                    <span class="g-pr-20 g-font-weight-500">Enabled</span>
+                    <div class="u-check">
+                      <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" name="api-enabled" id="api-enabled"
+                        value="true" data-bind="checked: api.enabled,  enabled:unlocked" type="checkbox">
+                      <div class="u-check-icon-radio-v8">
+                        <i class="fa" data-check-icon=""></i>
+                      </div>
+                    </div>
+                  </label>
+                  <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
+                    In the ON state, it's working.
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row g-mb-25">
+            <div class="form-group col-md-6">
+              <label class="g-mb-10 g-font-weight-400" for="input-api-template">Script<span
+                  class="text-danger">*</span></label>
+              <div class="g-pos-rel">
+                <a class="d-flex align-items-center u-link-v5 g-color-gray-light-v6 g-color-sec	ondary--hover g-ml-10 g-ml-15--sm g-ml-30--xl"
+                  href="#!" data-bind="click:select" data-type="script">
+                  <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-1 g-opacity-1--success">
+                    <i class="fa fa-search g-absolute-centered g-font-size-default"></i>
+                  </span>
+                </a>
+                <input id="input-api-script" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10"
+                  type="text" placeholder="Enter the server script file path"
+                  data-bind="value: api.scriptSource, enabled:unlocked">
+              </div>
+              <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5">
+                Select a server script or create a new script to use.
+              </small>
+            </div>
+            <div class="col-md-6 text-center">
+              <button
+                class="btn btn-xl u-btn-outline-darkpurple u-btn-hover-v1-3 g-letter-spacing-0_5 text-uppercase g-rounded-50 g-px-30 g-mr-10 g-mb-15">
+                <span class="pull-left">Create Script
+                  <span class="d-block g-font-size-11">Generate code to run.</span>
+                </span>
+                <i class="fa fa-code float-right g-font-size-32 g-ml-15"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-12 text-right"><button class="btn btn-md u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
+                data-bind="visible:unlocked, click:saveOrUpdate">Update</button>
+            </div>
+          </div>
+        </form>
+        <div data-bind="visible:editable">
+          <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+              <a class="nav-item nav-link" id="nav-property-tab" data-toggle="tab" href="#nav-property" role="tab"
+                aria-controls="nav-property" aria-selected="false">Prpperties</a>
+              <a class="nav-item nav-link" id="nav-perms-tab" data-toggle="tab" href="#nav-perms" role="tab"
+                aria-controls="nav-perms" aria-selected="false">Permissions</a>
+            </div>
+          </nav>
+          <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-property" role="tabpanel" aria-labelledby="nav-property-tab">
+              <div id="property-grid" class="g-brd-0 tab-pane-grid"></div>
+            </div>
+            <div class="tab-pane fade" id="nav-perms" role="tabpanel" aria-labelledby="nav-perms-tab">...</div>
+          </div>
+        </div>
+      </div>
       <script type="text/x-kendo-template" id="name-column-template">
         <a class="d-flex align-items-center u-link-v5 g-min-height-25 u-link-underline g-color-black g-color-lightblue-v3--hover g-color-lightblue-v3--opened" href="\#!" data-action="edit" data-object-id="#=apiId#">
         <h5 class="g-font-weight-300 g-mb-0">
@@ -383,7 +816,7 @@
         <div class="layer w-100">
           <div class="peers ai-c jc-sb fxw-nw">
             <div class="peer">
-              <button type="button" class="btn cur-p btn-danger k-grid-add">
+              <button type="button" class="btn cur-p btn-danger k-grid-add" data-bind="click:create">
                 <svg class="bi bi-file-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8h-1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5V1z"/>
                   <path fill-rule="evenodd" d="M13.5 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1H13V1.5a.5.5 0 0 1 .5-.5z"/>
@@ -396,6 +829,7 @@
           </div>
       </div>  
       </script>
+      <%= require('html-loader!./include-resource-select-window.html') %>
 
       <!-- ### $App Screen Footer ### -->
       <%= require('html-loader!./include-footer.html') %>

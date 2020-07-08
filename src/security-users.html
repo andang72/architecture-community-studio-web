@@ -65,6 +65,10 @@
       height: 100%;
       /* DO NOT USE !important for setting the Grid height! */
     }
+
+    .tab-pane-grid .k-grid-toolbar {
+      background: #fff;
+    }
   </style>
 </head>
 
@@ -205,7 +209,7 @@
               </li>
               <li>
                 <a class='sidebar-link' href="services-menu.html">Menu</a>
-              </li> 
+              </li>
             </ul>
           </li>
           <li class="nav-item dropdown">
@@ -242,17 +246,20 @@
                   </li>
                   <li>
                     <a href="resources-groovys.html">Gloovy</a>
-                  </li>  
+                  </li>
                   <li>
                     <a href="resources-sqls.html">Sql</a>
-                  </li>                                 
+                  </li>
                 </ul>
-              </li> 
+              </li>
               <li>
                 <a class='sidebar-link' href="resources-files.html">Files</a>
               </li>
               <li>
                 <a class='sidebar-link' href="resources-images.html">Images</a>
+              </li>
+              <li>
+                <a class='sidebar-link' href="resources-albums.html">Albums</a>
               </li>
             </ul>
           </li>
@@ -284,7 +291,6 @@
           Object.assign(headers, studio.services.accounts.authHeader());
 
           var renderTo = $("#mainContent");
-
           var observable = new kendo.observable({
             selected: false,
             deleteUsers: function (e) {
@@ -349,9 +355,9 @@
             },
             rolesDataSource: kendo.data.DataSource.create({
               transport: {
-                read: { url: studio.services.getApiUrl('/data/secure/mgmt/security/roles/list.json') , type: 'post', contentType: "application/json; charset=utf-8"},
+                read: { url: studio.services.getApiUrl('/data/secure/mgmt/security/roles/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
                 parameterMap: function (options, operation) {
-                    return JSON.stringify(options);
+                  return JSON.stringify(options);
                 }
               },
               schema: {
@@ -368,7 +374,7 @@
         function createLocalUserGrid(observable) {
           var renderTo = $('#grid');
           if (!renderTo.data("kendoWindow")) {
-            renderTo.kendoGrid({
+            var grid = renderTo.kendoGrid({
               dataSource: {
                 transport: {
                   read: { url: studio.services.getApiUrl('/data/secure/mgmt/security/users/find.json'), type: 'post', contentType: "application/json; charset=utf-8" },
@@ -408,7 +414,7 @@
                 }
               },
               columns: [
-                { selectable: true, width: "50px", headerAttributes: {} },
+                { selectable: true, width: "50px", headerAttributes: { "class": "text-center" }, attributes: { "class": "text-center" } },
                 { field: "USER_ID", title: "ID", template: '#: userId #', width: 80, alidation: { required: true } },
                 { field: "USERNAME", title: "Username", template: $('#user-column-template').html(), width: 200, validation: { required: true } },
                 { field: "NAME", title: "Name", template: '#: name #', width: 300, validation: { required: true } },
@@ -418,8 +424,185 @@
                 { field: "creationDate", title: "Creation Date", type: "date", format: "{0:yyyy.MM.dd}", width: 100, validation: { required: true }, filterable: { ui: "datetimepicker" } },
                 { field: "modifiedDate", title: "Modified Date", format: "{0:yyyy.MM.dd}", width: 100, validation: { required: true }, filterable: { ui: "datetimepicker" } }
               ]
+            }).data('kendoGrid');
+
+            renderTo.on("click", "a[data-action=edit]", function (e) {
+              var $this = $(this);
+              if (studio.ui.defined($this.data("object-id"))) {
+                var objectId = $this.data("object-id");
+                var dataItem = grid.dataSource.get(objectId);
+                getUserEditorWindow(dataItem);
+              }
             });
           }
+        }
+
+        function getUserEditorWindow(item) {
+          var renderTo = $('#user-window');
+          if (!renderTo.data("kendoWindow")) {
+            const headers = {
+              Accept: "application/json",
+              "Content-Type": "application/json"
+            };
+            Object.assign(headers, studio.services.accounts.authHeader());
+            const UserModel = kendo.data.Model.define(studio.data.model.User);
+            const NO_AVATA_IMAGE = 'assets/static/images/no-avatar.png';
+            var observable = kendo.observable({
+              updated: false,
+              user: new UserModel(),
+              unlocked: true,
+              editable: false,
+              prifileImgUrl: NO_AVATA_IMAGE,
+              passwd: function () {
+                var $this = this;
+                var passwdRenderTo = $('#passwd-window');
+                if (!passwdRenderTo.data('kendoWindow')) {
+                  var window = passwdRenderTo.kendoWindow({
+                    width: "300px",
+                    title: "Change Password",
+                    visible: false,
+                    modal: true,
+                    actions: ["Close"], // 
+                    open: function () {
+                    },
+                    close: function () {
+                    }
+                  }).data('kendoWindow');
+                  kendo.bind(passwdRenderTo, $this);
+                }
+                passwdRenderTo.data('kendoWindow').center().open();
+              },
+              select: function () {
+                $('#dropZone').click();
+              },
+              updatePassword: function () {
+                var $this = this;
+                var template = kendo.template('Will you change password?');
+                var dialog = $("#dialog").kendoDialog({
+                  width: "300px",
+                  closable: true,
+                  modal: true,
+                  buttonLayout: "normal",
+                  title: 'Confirm',
+                  content: template($this),
+                  actions: [
+                    {
+                      text: 'Ok',
+                      action: function (e) {
+                        return false;
+                      },
+                      primary: true
+                    },
+                    { text: 'Cancle' }
+                  ]
+                }).data("kendoDialog");
+                dialog.open();
+              },
+              saveOrUpdate: function (e) {
+                var $this = this;
+                var template = kendo.template('Will you change user ?');
+                var dialog = $("#dialog").kendoDialog({
+                  width: "300px",
+                  closable: true,
+                  modal: true,
+                  buttonLayout: "normal",
+                  title: 'Confirm',
+                  content: template($this),
+                  actions: [
+                    {
+                      text: 'Ok',
+                      action: function (e) {
+
+                        kendo.ui.progress(renderTo, true);
+                        axios({
+                          url: studio.services.getApiUrl('/data/secure/mgmt/security/users/save-or-update.json'),
+                          method: 'post',
+                          headers: headers,
+                          data: JSON.stringify($this.user)
+                        }).then(response => {
+                          $this.setSource(new UserModel(response.data.data.item));
+                          observable.set('updated', true);
+                        }).then(function () {
+                          kendo.ui.progress(renderTo, false);
+                        });
+
+                        return false;
+                      },
+                      primary: true
+                    },
+                    { text: 'Cancle' }
+                  ]
+                }).data("kendoDialog");
+                dialog.open();
+              },
+              setSource: function (data) {
+                var $this = this;
+                var $this = this;
+                data = data || new UserModel();
+                data.copy($this.user);
+                $this.set('editable', $this.user.userId > 0 ? true : false);
+                if ($this.get('editable')) {
+                  $this.set('prifileImgUrl', studio.services.accounts.getUserAvatarUrl(data.username));
+                  $("#dropZone").data("kendoUpload").options.async.saveUrl =
+                    studio.services.getApiUrl('/data/secure/mgmt/security/users/') + data.userId + '/avatar/upload.json';
+                  studio.ui.propertyGrid(null, "users", data.userId);
+                } else {
+                  $this.set('prifileImgUrl', NO_AVATA_IMAGE);
+                }
+              },
+            });
+            $("#dropZone").kendoUpload({
+              async: {
+                saveUrl: studio.services.getApiUrl('/data/secure/mgmt/security/users/0/avatar/upload.json'),
+                autoUpload: true
+              },
+              validation: {
+                allowedExtensions: [".jpg", ".jpeg", ".png", ".bmp", ".gif"]
+              },
+              upload: function (e) {
+                var xhr = e.XMLHttpRequest;
+                if (xhr) {
+                  xhr.addEventListener("readystatechange", function onUploadReady(e) {
+                    if (xhr.readyState == 1 /* OPENED */) {
+                      xhr.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
+                    }
+                  });
+                }
+              },
+              success: function (e) {
+                const data = e.response;
+                observable.set('updated', true);
+              },
+              multiple: false,
+              showFileList: false,
+              localization: {
+                dropFilesHere: "DROP FILE HERE"
+              },
+              dropZone: ".dropZoneElement"
+            });
+
+            kendo.bind(renderTo, observable);
+            renderTo.data('model', observable);
+            var window = renderTo.kendoWindow({
+              width: "950px",
+              title: "User",
+              visible: false,
+              scrollable: false,
+              modal: true,
+              actions: ["Close"], // 
+              open: function () {
+                this.title(observable.user.username);
+                observable.set('updated', false);
+              },
+              close: function () {
+                if (observable.get('updated')) {
+                  $('#grid').data('kendoGrid').dataSource.read();
+                }
+              }
+            }).data('kendoWindow');
+          }
+          renderTo.data('model').setSource(item);
+          renderTo.data("kendoWindow").center().open();
         }
       </script>
       <main class='main-content bgc-grey-100'>
@@ -430,6 +613,214 @@
         </div>
       </main>
       <span id="dialog"></span>
+      <div id="user-window" class="g-pa-0 g-height-600 container-fluid" style="display:none;">
+        <div class="g-pa-15 g-pa-30--sm">
+          <div class="row g-mb-25 align-items-end">
+            <div class="col-sm-4">
+              <div class="d-inline-block g-pos-rel g-mb-30">
+                <a class="u-badge-v2--lg u-badge--bottom-right g-width-32 g-height-32 g-bg-lightblue-v3 g-bg-primary--hover g-mb-20 g-mr-20"
+                  href="#!" data-bind="click:select,enabled:editable">
+                  <svg class="bi bi-cloud-upload g-absolute-centered g-font-size-16 g-color-white" width="1em"
+                    height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M4.887 6.2l-.964-.165A2.5 2.5 0 1 0 3.5 11H6v1H3.5a3.5 3.5 0 1 1 .59-6.95 5.002 5.002 0 1 1 9.804 1.98A2.501 2.501 0 0 1 13.5 12H10v-1h3.5a1.5 1.5 0 0 0 .237-2.981L12.7 7.854l.216-1.028a4 4 0 1 0-7.843-1.587l-.185.96z" />
+                    <path fill-rule="evenodd"
+                      d="M5 8.854a.5.5 0 0 0 .707 0L8 6.56l2.293 2.293A.5.5 0 1 0 11 8.146L8.354 5.5a.5.5 0 0 0-.708 0L5 8.146a.5.5 0 0 0 0 .708z" />
+                    <path fill-rule="evenodd" d="M8 6a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 6z" />
+                  </svg>
+                </a>
+                <figure class="g-max-width-200 dropZoneElement">
+                  <img
+                    class="img-fluid rounded-circle g-brd-2 g-brd-transparent g-brd-lightblue-v3--parent-opened g-mr-20--sm"
+                    src="assets/static/images/no-avatar.png" data-bind="attr:{src: prifileImgUrl }">
+                </figure>
+              </div>
+              <input name="dropZone" id="dropZone" type="file" data-bind="enabled:editable, visible:editable" />
+            </div>
+            <div class="col-sm-8">
+              <div class="row g-mb-15">
+                <div class="col-md-6">
+                  <label class="g-mb-10 g-font-weight-600" for="input-user-username">Username <span
+                      class="text-danger">*</span></label>
+                  <div class="g-pos-rel">
+                    <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 g-opacity-1--success">
+                      <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                    </span>
+                    <input id="input-user-username" name="input-user-username"
+                      class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
+                      placeholder="아디디을 입력하세요" data-bind="value:user.username, enabled:editable" required
+                      validationMessage="아이디을 입력하여 주세요." autofocus>
+                  </div>
+                  <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-user-username"
+                    role="alert" style="display:none;"></span>
+                </div>
+                <div class="col"><span class="u-label g-bg-pink g-rounded-20 g-px-15 g-mr-10 g-mb-15"
+                    data-bind="visible:user.external">External</span></div>
+              </div>
+              <div class="row g-mb-15">
+                <div class="col-md-6">
+                  <label class="g-mb-10 g-font-weight-400" for="input-user-name">Name <span
+                      class="text-danger">*</span></label>
+                  <div class="g-pos-rel">
+                    <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                      <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                    </span>
+                    <input id="input-user-name" name="input-user-name"
+                      class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="text"
+                      placeholder="이름을 입력하세요" data-bind="value:user.name, enabled:editable" required
+                      validationMessage="이름을 입력하여 주세요." autofocus>
+                  </div>
+                  <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-user-name"
+                    role="alert" style="display:none;"></span>
+                </div>
+                <div class="col-md-6">
+                  <label class="g-mb-10 g-font-weight-400" for="input-user-email">Email <span
+                      class="text-danger">*</span></label>
+                  <div class="g-pos-rel">
+                    <span class="g-pos-abs g-top-0 g-right-0 d-block g-width-40 h-100 opacity-0 g-opacity-1--success">
+                      <i class="hs-admin-check g-absolute-centered g-font-size-default g-color-lightblue-v3"></i>
+                    </span>
+                    <input id="input-user-email" name="input-user-email"
+                      class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" type="email"
+                      placeholder="메일주소를 입력하세요" data-bind="value:user.email, enabled:editable" required
+                      validationMessage="메일주소를 입력하여 주세요." autofocus>
+                  </div>
+                  <span class="k-widget k-tooltip k-tooltip-validation k-invalid-msg" data-for="input-user-email"
+                    role="alert" style="display:none;"></span>
+                </div>
+              </div>
+              <div class="row g-mb-15">
+                <div class="col-md-6">
+                  <label class="g-mb-10 g-font-weight-600" for="input-user-status">상태</label>
+                  <div class="form-group g-mb-30">
+                    <select data-role="dropdownlist" data-bind="value: user.status, enabled:editable"
+                      id="input-user-status" style="width: 100%">
+                      <option value="NONE">NONE</option>
+                      <option value="APPROVED">APPROVED</option>
+                      <option value="REJECTED">REJECTED</option>
+                      <option value="VALIDATED">VALIDATED</option>
+                      <option value="REGISTERED">REGISTERED</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-mb-25">
+                <div class="col">
+                  <label class="d-flex align-items-center justify-content-between g-mb-0" for="input-user-namevisible">
+                    <span class="g-pr-20 g-font-weight-500">이름공개여부</span>
+                    <div class="u-check">
+                      <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="input-user-namevisible"
+                        name="input-user-namevisible" value="true"
+                        data-bind="checked: user.nameVisible,  enabled:editable" type="checkbox">
+                      <div class="u-check-icon-radio-v8">
+                        <i class="fa" data-check-icon=""></i>
+                      </div>
+                    </div>
+                  </label>
+                  <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
+                    이름을 공개합니다.
+                  </small>
+                </div>
+                <div class="col">
+                  <div class="form-group g-mb-30">
+                    <div class="col-auto">
+                      <label class="d-flex align-items-center justify-content-between g-mb-0"
+                        for="input-user-emailvisible">
+                        <span class="g-pr-20 g-font-weight-500">메일공개여부</span>
+                        <div class="u-check">
+                          <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="input-user-emailvisible"
+                            name="input-user-emailvisible" data-bind="checked: user.emailVisible, enabled:editable"
+                            type="checkbox">
+                          <div class="u-check-icon-radio-v8">
+                            <i class="fa" data-check-icon=""></i>
+                          </div>
+                        </div>
+                      </label>
+                      <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
+                        메일주소를 공개합니다.
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group g-mb-30">
+                    <div class="col-auto">
+                      <label class="d-flex align-items-center justify-content-between g-mb-0" for="input-user-enabled">
+                        <span class="g-pr-20 g-font-weight-500">사용여부</span>
+                        <div class="u-check">
+                          <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="input-user-enabled"
+                            name="input-user-enabled" data-bind="checked: user.enabled, enabled:editable"
+                            type="checkbox">
+                          <div class="u-check-icon-radio-v8">
+                            <i class="fa" data-check-icon=""></i>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col text-right">
+              <button class="btn btn-md u-btn-outline-red g-rounded-50 g-mr-10 g-mb-15"
+                data-bind="visible:editable, click:passwd">
+                <svg class="bi bi-shield-lock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd"
+                    d="M5.443 1.991a60.17 60.17 0 0 0-2.725.802.454.454 0 0 0-.315.366C1.87 7.056 3.1 9.9 4.567 11.773c.736.94 1.533 1.636 2.197 2.093.333.228.626.394.857.5.116.053.21.089.282.11A.73.73 0 0 0 8 14.5c.007-.001.038-.005.097-.023.072-.022.166-.058.282-.111.23-.106.525-.272.857-.5a10.197 10.197 0 0 0 2.197-2.093C12.9 9.9 14.13 7.056 13.597 3.159a.454.454 0 0 0-.315-.366c-.626-.2-1.682-.526-2.725-.802C9.491 1.71 8.51 1.5 8 1.5c-.51 0-1.49.21-2.557.491zm-.256-.966C6.23.749 7.337.5 8 .5c.662 0 1.77.249 2.813.525a61.09 61.09 0 0 1 2.772.815c.528.168.926.623 1.003 1.184.573 4.197-.756 7.307-2.367 9.365a11.191 11.191 0 0 1-2.418 2.3 6.942 6.942 0 0 1-1.007.586c-.27.124-.558.225-.796.225s-.526-.101-.796-.225a6.908 6.908 0 0 1-1.007-.586 11.192 11.192 0 0 1-2.417-2.3C2.167 10.331.839 7.221 1.412 3.024A1.454 1.454 0 0 1 2.415 1.84a61.11 61.11 0 0 1 2.772-.815z" />
+                  <path d="M9.5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
+                  <path
+                    d="M7.411 8.034a.5.5 0 0 1 .493-.417h.156a.5.5 0 0 1 .492.414l.347 2a.5.5 0 0 1-.493.585h-.835a.5.5 0 0 1-.493-.582l.333-2z" />
+                </svg>
+                Change Password
+              </button>
+
+              <button class="btn btn-md u-btn-blue g-rounded-50 g-mr-10 g-mb-15"
+                data-bind="click:saveOrUpdate">Save</button>
+            </div>
+          </div>
+          <form id="pageForm" onsubmit="return false">
+          </form>
+        </div>
+        <nav data-bind="visible:editable">
+          <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active g-ml-15" id="nav-property-tab" data-toggle="tab" href="#nav-property"
+              role="tab" aria-controls="nav-property" aria-selected="true">Prpperties</a>
+            <a class="nav-item nav-link" id="nav-perms-tab" data-toggle="tab" href="#nav-perms" role="tab"
+              aria-controls="nav-perms" aria-selected="false">Permissions</a>
+          </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+          <div class="tab-pane fade show active" id="nav-property" role="tabpanel" aria-labelledby="nav-property-tab">
+            <div id="property-grid" class="g-brd-0 tab-pane-grid"></div>
+          </div>
+          <div class="tab-pane fade" id="nav-perms" role="tabpanel" aria-labelledby="nav-perms-tab">...</div>
+        </div>
+      </div>
+      <div id="passwd-window" class="g-pa-15 g-height-300 container" style="display:none;">
+        <form>
+          <div class="form-group">
+            <label for="formGroupExampleInput">Password</label>
+            <input type="password" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" id="passwordInput"
+              placeholder="Password">
+            <small id="passwordHelpBlock" class="form-text text-muted">
+              Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces,
+              special characters, or emoji.
+            </small>
+          </div>
+          <div class="form-group">
+            <label for="formGroupExampleInput2">Comfirm Password</label>
+            <input type="password" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10" id="passwordInput2"
+              placeholder="Confirm Password">
+          </div>
+          <div class="text-right">
+            <a href="#" class="btn u-btn-darkgray g-mr-10 g-mb-15" data-bind="click:updatePassword">Change Password</a>
+          </div>
+        </form>
+      </div>
+
       <script type="text/x-kendo-template" id="grid-toolbar-template">
         <div class="layer w-100">
             <div class="peers ai-c jc-sb fxw-nw">
