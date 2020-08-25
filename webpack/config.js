@@ -75,7 +75,11 @@ module.exports = {
     runtimeChunk: {
       name: entrypoint => `runtimechunk~${entrypoint.name}`
     },
-    splitChunks: {
+    splitChunks: {/*
+      splitChunks: {
+        chunks: 'all',
+        name: 'vendors'
+      },*/
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/]/,

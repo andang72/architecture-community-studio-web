@@ -72,14 +72,35 @@
         var renderTo = $('form[name=form-signin]');
         var observable = new kendo.observable({
           username : null,
-          password : null
+          password : null,
+          changeWallpaper(wallpaper){  
+       	    document.getElementById('wallpaper').style.backgroundImage = "url('"+ studio.services.getApiUrl('/download/images/') + wallpaper.LINK_ID + "')";; 
+          },
+          autoChangeWallpaper : async function(){
+            let self = this;  
+            axios.get(studio.services.getApiUrl('/data/v1/wallpapers'))
+            .then((response) => {  
+              const data = response.data;
+              data.items.forEach((wallpaper, i) =>{ 
+              console.log( wallpaper );
+              let delay = i ++;
+              setTimeout(function() {
+                self.changeWallpaper(wallpaper);
+              }, i * 10000); 
+              });  
+            }) 
+            .catch(function (error) { 
+            });
+          }
          });
-        var validator = renderTo.kendoValidator({
+        
+         observable.autoChangeWallpaper();
+         kendo.bind( renderTo , observable ); 
+
+         var validator = renderTo.kendoValidator({
           errorTemplate: "<p class='text-danger g-font-size-14'><i class='fa fa-info-circle'></i> #=message#</p>"
         }).data("kendoValidator");;
         
-        kendo.bind( renderTo , observable ); 
-
         renderTo.submit(function(e) {
 			    e.preventDefault();		
 			    if( validator.validate() ){ 
@@ -116,6 +137,7 @@
       } 
     </script>
     <style>
+
     .field-icon {
       float: right;
       margin-left: -25px;
@@ -123,13 +145,23 @@
       margin-top: -25px;
       position: relative;
       z-index: 2;
-    }  
+    } 
+
+    #wallpaper{
+      opacity: 1.0;
+      -webkit-transition: background 1.5s linear;
+      -moz-transition: background 1.5s linear;
+      -o-transition: background 1.5s linear;
+      -ms-transition: background 1.5s linear;
+      transition: background 1.5s linear;  
+    }
+
     </style>
     <div class="peers ai-s fxw-nw h-100vh">
-      <div class="d-n@sm- peer peer-greed h-100 pos-r bgr-n bgpX-c bgpY-c bgsz-cv" style='background-image: url("assets/static/images/bg.jpg")'>
+      <div id="wallpaper" class="d-n@sm- peer peer-greed h-100 pos-r bgr-n bgpX-c bgpY-c bgsz-cv" style='background-image: url("assets/static/images/bg/bg-img2.jpg")'>
         <div class="pos-a centerXY">
           <div class="bgc-white bdrs-50p pos-r" style='width: 120px; height: 120px;'>
-            <img class="pos-a centerXY" src="assets/static/images/logo.png" alt="">
+            <img class="pos-a centerXY" width="160" src="assets/static/images/logo.svg" alt="">
           </div>
         </div>
       </div>
@@ -139,12 +171,13 @@
           <div class="form-group">
             <label class="text-normal text-dark">Username</label>
             <input type="text" id="username" name="username" data-bind="value:username" class="form-control" placeholder="ID" validationMessage="아이디 또는 이메일 주소를 입력하여 주세요." required autofocus>
+            <span class="k-invalid-msg" data-for="username"></span>
           </div>
           <div class="form-group">
             <label class="text-normal text-dark">Password</label>
             <input id="password" type="password" data-bind="value:password" class="form-control" placeholder="Password" required validationMessage="비밀번호를 입력하여 주세요.">
             <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span> 
-            <span class="k-invalid-msg" data-for="password"></span>
+            <span class="k-invalid-msg" data-for="#password"></span>
           </div>
           <div class="form-group">
             <div class="peers ai-c jc-sb fxw-nw">

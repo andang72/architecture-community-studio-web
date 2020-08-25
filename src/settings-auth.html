@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title><%= title %></title>
+  <style>
+    #loader {
+      transition: all 0.3s ease-in-out;
+      opacity: 1;
+      visibility: visible;
+      position: fixed;
+      height: 100vh;
+      width: 100%;
+      background: #fff;
+      z-index: 90000;
+    }
+
+    #loader.fadeOut {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: calc(50% - 20px);
+      left: calc(50% - 20px);
+      background-color: #333;
+      border-radius: 100%;
+      -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+      animation: sk-scaleout 1.0s infinite ease-in-out;
+    }
+
+    @-webkit-keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0)
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+
+    @keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body class="app" authenticate-required="true">
+  <!-- @TOC -->
+  <!-- =================================================== -->
+  <!--
+      + @Page Loader
+      + @App Content
+          - #Left Sidebar
+              > $Sidebar Header
+              > $Sidebar Menu
+
+          - #Main
+              > $Topbar
+              > $App Screen Content
+    -->
+
+  <!-- @Page Loader -->
+  <!-- =================================================== -->
+  <div id='loader'>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    window.addEventListener('load', function load() {
+      const loader = document.getElementById('loader');
+      setTimeout(function () {
+        loader.classList.add('fadeOut');
+      }, 300);
+    });
+  </script>
+
+  <!-- @App Content -->
+  <!-- =================================================== -->
+  <div>
+    <!-- #Left Sidebar ==================== -->
+    <%= require('html-loader!./include-sidebar.html') %>
+    <!-- #Main ============================ -->
+    <div class="page-container">
+      <!-- ### $Topbar ### -->
+      <%= require('html-loader!./include-topbar.html') %>
+
+      <!-- ### $App Content ### -->
+      <script>
+        function setup() {
+
+          const sidebar_nav_item = $('.sidebar .nav-item a[href="settings-auth.html"]');
+          if( sidebar_nav_item.hasClass('sidebar-link')){
+            sidebar_nav_item.addClass('actived');
+          }else{
+            sidebar_nav_item.parent().addClass('actived');
+          }
+          sidebar_nav_item.parents('li.nav-item.dropdown').addClass('open'); 
+
+          $(document).ajaxSend(function (event, jqXHR, options) {
+            jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
+          });
+          const headers = {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          };
+          Object.assign(headers, studio.services.accounts.authHeader());
+
+          var renderTo = $("#mainContent");
+          var observable = kendo.observable({
+            locale: "ko-KR",
+            timezone: "Asia/Seoul",
+            settings: {
+              allowPageSignup: true,
+              allowPageSignin: true,
+              loginRequired: false,
+              userRegistration: 0 ,
+              passwordMinLength: 8,
+              passwordRequiredCharClasses:[],
+              passwordMaxAge:0
+            },
+            load: function () {
+              var $this = this;
+              kendo.ui.progress(renderTo, true);
+              axios({
+                url: studio.services.getApiUrl('/data/secure/mgmt/settings/security'),
+                method: "get", 
+                headers: headers
+              }).then(response => {
+                  const data = response.data;
+                  $this.setSource(data);
+                }).catch(function (error) {
+                  studio.ui.handleAxiosError(error);
+                }).then(function () {
+                  kendo.ui.progress(renderTo, false);
+                });
+            },
+            setSource: function (data) {
+              var $this = this;
+              $this.settings.allowPageSignup = data.allowPageSignup ;
+              $this.settings.allowPageSignin = data.allowPageSignin ;
+              $this.settings.loginRequired = data.loginRequired ;
+              $this.settings.userRegistration = data.userRegistration ;
+              $this.settings.passwordMinLength = data.passwordMinLength ;
+              $this.settings.passwordRequiredCharClasses = data.passwordRequiredCharClasses ;
+              $this.settings.passwordMaxAge = data.passwordMaxAge ;
+            },  
+            saveOrUpdate: function () {
+              var $this = this;
+              var template = kendo.template('Will you update authentication settings follow ?  <br><br> <span class="g-color-blue" ><code>#= JSON.stringify(settings) #</code></span>');
+              var dialog = $("#dialog").kendoDialog({
+                width: "450px",
+                closable: true,
+                modal: true,
+                buttonLayout: "normal",
+                title: 'Settings Authentication',
+                content: template($this),
+                actions: [
+                  {
+                    text: 'Ok',
+                    action: function (e) {
+                      kendo.ui.progress($('.k-dialog'), true);
+                      axios({
+                        url: studio.services.getApiUrl('/data/secure/mgmt/settings/security'),
+                        method: "post",
+                        data: JSON.stringify( $this.settings ),
+                        headers: headers
+                      }).then(response => {
+                        let data = response.data;
+                        dialog.close();
+                      }).catch(function (error) {
+                        studio.ui.handleAxiosError(error);
+                      }).then(function () {
+                        // always executed
+                        kendo.ui.progress($('.k-dialog'), false);
+                      });
+                      return false;
+                    },
+                    primary: true
+                  },
+                  { text: 'Cancle' }
+                ]
+              }).data("kendoDialog");
+              dialog.open();
+            }
+          });
+          kendo.bind(renderTo, observable);
+          observable.load();
+          createUserRegistrationDownList(observable); 
+          createPasswordMaxAgeDownList(observable); 
+        }
+
+        function createUserRegistrationDownList(observable) {
+          var renderTo = $('#settings_user_registration');
+          if (!renderTo.data("kendoWindow")) {
+            renderTo.kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "value", 
+            dataSource: [
+            { text: "Disabled", value: 0 },
+            { text:"Activate your account by mail", value:1 },
+            { text:"Manual account activation", value:2 },
+            { text:"Automatic account activation", value:3 }
+            ],
+            index: 0
+          }); 
+          }
+        }
+ 
+        function createPasswordMaxAgeDownList(observable) {
+          var renderTo = $('#settings_password_max_age');
+          if (!renderTo.data("kendoWindow")) {
+            renderTo.kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "value", 
+            dataSource: [
+            { text: "Disabled", value: 0 },
+            { text:"7 days", value:7 },
+            { text:"30 days", value:30 },
+            { text:"60 days", value:60 },
+            { text:"90 days", value:90 },
+            { text:"180 days", value:180 },
+            { text:"365 days", value:365 },
+            ],
+            index: 0
+          }); 
+          }
+        }
+      </script>
+      <main class='main-content bgc-grey-100'>
+        <div id="mainContent" class="container">
+          <div class="row gap-20 pos-r">
+            <div class="col-md-12">
+              <div class="bgc-white p-20 bd">
+                <h6 class="c-grey-900">Authentication</h6>
+                <div class="mT-30">
+                  <form>
+                    <div class="form-group row">
+                      <div class="col-sm-3"> 
+                        <h6 class="c-grey-900">Signin & Singup</h6>
+                      </div>
+                      <div class="col-sm-9"> 
+                        <label class="d-flex align-items-center justify-content-between g-mb-0"
+                          for="settings_allow_page_signin">
+                          <span class="g-pr-20 g-font-weight-500">Allow page login</span>
+                          <div class="u-check">
+                            <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="settings_allow_page_signin"
+                              name="settings_allow_page_signin" data-bind="checked:settings.allowPageSignin"
+                              type="checkbox">
+                            <div class="u-check-icon-radio-v8">
+                              <i class="fa" data-check-icon=""></i>
+                            </div>
+                          </div>
+                        </label>
+                        <small class="form-text text-muted">Web page login is supported.</small>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-sm-3">
+
+                      </div>
+                      <div class="col-sm-9"> 
+                        <label class="d-flex align-items-center justify-content-between g-mb-0"
+                          for="settings_allow_page_signup">
+                          <span class="g-pr-20 g-font-weight-500">Allow page signup</span>
+                          <div class="u-check">
+                            <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="settings_allow_page_signup"
+                              name="settings_allow_page_signup" data-bind="checked:settings.allowPageSignup"
+                              type="checkbox">
+                            <div class="u-check-icon-radio-v8">
+                              <i class="fa" data-check-icon=""></i>
+                            </div>
+                          </div>
+                        </label>
+                        <small class="form-text text-muted">Member registration page is supported.</small>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label">Authentication required</label>
+                      <div class="col-sm-9">
+                        <label class="d-flex align-items-center justify-content-between g-mb-0"
+                          for="settings_login_required">
+                          <span class="g-pr-20 g-font-weight-500">Authentication required</span>
+                          <div class="u-check">
+                            <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="settings_login_required"
+                              name="settings_login_required" data-bind="checked:settings.loginRequired"
+                              type="checkbox">
+                            <div class="u-check-icon-radio-v8">
+                              <i class="fa" data-check-icon=""></i>
+                            </div>
+                          </div>
+                        </label>
+                        <small class="form-text text-muted">When not requiring authentication, contents are openly
+                          available on the network. can edit the applicable permissions.</small>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label">Setting user Registration</label>
+                      <div class="col-sm-9">
+                        <input class="form-control" id="settings_user_registration" placeholder="Setting User Registration" data-bind="value:settings.userRegistration">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label">Minimum password length</label>
+                      <div class="col-sm-9">
+                        <input class="form-control" id="settings_password_min_length" aria-describedby="settings_password_min_length_help" placeholder="Password min length" type="number" min="8" step="1" data-bind="value:settings.passwordMinLength">
+                        <small id="settings_password_min_length_help" class="form-text text-muted">Please enter at least 8 digits..</small>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label">Required character classes for passwords</label>
+                      <div class="col-sm-9">
+                        
+                        <label class="k-checkbox-label">
+                          <input type="checkbox" class="k-checkbox" name="settings_password_required_char_classes" value="uppercase" data-bind="checked: settings.passwordRequiredCharClasses" />uppercase letters
+                        </label>
+                        <label class="k-checkbox-label">
+                          <input type="checkbox" class="k-checkbox" name="settings_password_required_char_classes" value="lowercase" data-bind="checked: settings.passwordRequiredCharClasses" />lowercase letters
+                        </label>
+                        <label class="k-checkbox-label">
+                          <input type="checkbox" class="k-checkbox" name="settings_password_required_char_classes" value="digits" data-bind="checked: settings.passwordRequiredCharClasses" />digits
+                        </label>
+                        <label class="k-checkbox-label">
+                          <input type="checkbox" class="k-checkbox" name="settings_password_required_char_classes" value="special_chars" data-bind="checked: settings.passwordRequiredCharClasses" />special characters
+                        </label>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label">Password max age</label>
+                      <div class="col-sm-9">
+                        <input class="form-control" id="settings_password_max_age" placeholder="Password max age" data-bind="value:settings.passwordMaxAge">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label">Forgot your password</label>
+                      <div class="col-sm-9">
+                        <label class="d-flex align-items-center justify-content-between g-mb-0"
+                        for="settings_lost_password">
+                        <span class="g-pr-20 g-font-weight-500">Retrieve password</span>
+                        <div class="u-check">
+                          <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="settings_lost_password"
+                            name="input-user-enabled" data-bind="checked:settings.lostPassword"
+                            type="checkbox">
+                          <div class="u-check-icon-radio-v8">
+                            <i class="fa" data-check-icon=""></i>
+                          </div>
+                        </div>
+                      </label> 
+                      <small class="form-text text-muted">A page for resetting the password is supported.</small>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <button type="button" data-bind="click:saveOrUpdate" class="btn btn-primary">Save</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+      </main>
+      <span id="dialog"></span>
+      <!-- ### $App Screen Footer ### -->
+      <%= require('html-loader!./include-footer.html') %>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
-# A Dashbard
-A dashboard for managing a community studio server.
+# DATA APIs Studio Dashbard
+A dashboard for managing a community version of DATA APIs Studio.
 
 # Based on Adminator HTML5 Admin Template
 This project based on **Adminator**.
@@ -21,8 +21,8 @@ This project based on **Adminator**.
 In order to run **dashboard** on your local machine all what you need to do is to have the prerequisites stated below installed on your machine and follow the installation steps down below.
 
 #### Prerequisites
-  - node.js
-  - Community Studio Server (local or remote)
+  - node.js & npm
+  - DATA APIs Studio Server (local or remote)
   - Tools (Visual Studio Code .. )
 
 #### Installing & Local Development

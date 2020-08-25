@@ -97,166 +97,7 @@
   <!-- =================================================== -->
   <div>
     <!-- #Left Sidebar ==================== -->
-    <div class="sidebar">
-      <div class="sidebar-inner">
-        <!-- ### $Sidebar Header ### -->
-        <div class="sidebar-logo">
-          <div class="peers ai-c fxw-nw">
-            <div class="peer peer-greed">
-              <a class="sidebar-link td-n" href="index.html">
-                <div class="peers ai-c fxw-nw">
-                  <div class="peer">
-                    <div class="logo">
-                      <img src="assets/static/images/logo.png" alt="">
-                    </div>
-                  </div>
-                  <div class="peer peer-greed">
-                    <h5 class="lh-1 mB-0 logo-text">Adminator</h5>
-                  </div>
-                </div>
-              </a>
-            </div>
-            <div class="peer">
-              <div class="mobile-toggle sidebar-toggle">
-                <a href="" class="td-n">
-                  <i class="ti-arrow-circle-left"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ### $Sidebar Menu ### -->
-        <ul class="sidebar-menu scrollable pos-r">
-          <li class="nav-item  mT-30">
-            <a class="sidebar-link active" href="index.html">
-              <span class="icon-holder">
-                <i class="c-blue-500 ti-home"></i>
-              </span>
-              <span class="title">Dashboard</span> 
-            </a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-orange-500 ti-folder"></i>
-              </span>
-              <span class="title">Settings</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="settings-properties.html">Properties</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="settings-locale.html">Locale</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="settings-datasource.html">DataSource</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-deep-orange-500 ti-folder"></i>
-              </span>
-              <span class="title">Security</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="security-users.html">Users</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="security-audit.html">Audit</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown ">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-green-500 ti-folder"></i>
-              </span>
-              <span class="title">Services</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link ' href="services-email.html">Email</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-menu.html">Menu</a>
-              </li>              
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-purple-500 ti-folder"></i>
-              </span>
-              <span class="title">Resources</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="resources-pages.html">Pages</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-apis.html">Apis</a>
-              </li>
-
-              <li class="nav-item dropdown">
-                <a href="javascript:void(0);">
-                  <span>Sources</span>
-                  <span class="arrow">
-                    <i class="ti-angle-right"></i>
-                  </span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a href="resources-decorators.html">Decorators</a>
-                  </li>
-                  <li>
-                    <a href="resources-templates.html">Templates</a>
-                  </li>
-                  <li >
-                    <a href="resources-groovys.html">Gloovy</a>
-                  </li>
-                  <li >
-                    <a href="resources-sqls.html">Sql</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-files.html">Files</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-images.html">Images</a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-
+    <%= require('html-loader!./include-sidebar.html') %>
     <!-- #Main ============================ -->
     <div class="page-container">
       <!-- ### $Topbar ### -->
@@ -385,325 +226,319 @@
         }
       </script>
       <main class='main-content bgc-grey-100'>
-        <div id="mainContent">
- 
+        <div id="mainContent"> 
             <div class="container"> 
-            <div class="col-lg-12">
-                <!-- User Block -->
-                <div class="g-brd-around g-brd-gray-light-v4 g-pa-20 g-mb-40">
-                  <div class="row">
-                    <div class="col-lg-4 g-mb-40 g-mb-0--lg">
-                      <!-- User Image -->
-                      <div class="u-block-hover g-pos-rel g-mb-25">
-                        <figure>
-                          <img class="img-fluid w-100 u-block-hover__main--zoom-v1" 
-                          src="assets/static/images/no-avatar.png" data-bind="attr:{src: prifileImgUrl }" alt="Image Description">
-                        </figure>
-          
-                        <!-- Figure Caption -->
-                        <figcaption class="u-block-hover__additional--fade g-bg-black-opacity-0_5 g-pa-30">
-                          <div class="u-block-hover__additional--fade u-block-hover__additional--fade-up g-flex-middle">
-                            <!-- Figure Social Icons -->
-                            <ul class="list-inline text-center g-flex-middle-item--bottom g-mb-20">
-                              <li class="list-inline-item align-middle g-mx-7">
-                                <a class="u-icon-v1 u-icon-size--md g-color-white" href="#" data-bind="click:select, enabled:editable">
-                                    <svg class="bi bi-cloud-upload" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4.887 6.2l-.964-.165A2.5 2.5 0 1 0 3.5 11H6v1H3.5a3.5 3.5 0 1 1 .59-6.95 5.002 5.002 0 1 1 9.804 1.98A2.501 2.501 0 0 1 13.5 12H10v-1h3.5a1.5 1.5 0 0 0 .237-2.981L12.7 7.854l.216-1.028a4 4 0 1 0-7.843-1.587l-.185.96z"></path>
-                                        <path fill-rule="evenodd" d="M5 8.854a.5.5 0 0 0 .707 0L8 6.56l2.293 2.293A.5.5 0 1 0 11 8.146L8.354 5.5a.5.5 0 0 0-.708 0L5 8.146a.5.5 0 0 0 0 .708z"></path>
-                                        <path fill-rule="evenodd" d="M8 6a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 6z"></path>
-                                      </svg>
-                                </a>
-                              </li>
-                            </ul>
-                            <!-- End Figure Social Icons -->
-                          </div>
-                        </figcaption>
-                        <!-- End Figure Caption -->
-          
-                        <!-- User Info -->
-                        <span class="g-pos-abs g-top-20 g-left-0">
-                            <a class="btn btn-sm u-btn-primary rounded-0" href="#">Johne Doe</a>
-                            <small class="d-block g-bg-black g-color-white g-pa-5">Project Manager</small>
-                          </span>
-                        <!-- End User Info -->
+              <div class="row">
+                <div class="col-md-12">
+                  <!-- User Block -->
+                  <div class="g-brd-around g-brd-gray-light-v4 g-pa-20 g-mb-40 bg-white">
+                    <div class="row">
+                      <div class="col-lg-4 g-mb-40 g-mb-0--lg">
+                        <!-- User Image -->
+                        <div class="u-block-hover g-pos-rel g-mb-25">
+                          <figure>
+                            <img class="img-fluid w-100 u-block-hover__main--zoom-v1" 
+                            src="assets/static/images/no-avatar.png" data-bind="attr:{src: prifileImgUrl }" alt="Image Description">
+                          </figure>
+            
+                          <!-- Figure Caption -->
+                          <figcaption class="u-block-hover__additional--fade g-bg-black-opacity-0_5 g-pa-30">
+                            <div class="u-block-hover__additional--fade u-block-hover__additional--fade-up g-flex-middle">
+                              <!-- Figure Social Icons -->
+                              <ul class="list-inline text-center g-flex-middle-item--bottom g-mb-20">
+                                <li class="list-inline-item align-middle g-mx-7">
+                                  <a class="u-icon-v1 u-icon-size--md g-color-white" href="#" data-bind="click:select, enabled:editable">
+                                      <svg class="bi bi-cloud-upload" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                          <path d="M4.887 6.2l-.964-.165A2.5 2.5 0 1 0 3.5 11H6v1H3.5a3.5 3.5 0 1 1 .59-6.95 5.002 5.002 0 1 1 9.804 1.98A2.501 2.501 0 0 1 13.5 12H10v-1h3.5a1.5 1.5 0 0 0 .237-2.981L12.7 7.854l.216-1.028a4 4 0 1 0-7.843-1.587l-.185.96z"></path>
+                                          <path fill-rule="evenodd" d="M5 8.854a.5.5 0 0 0 .707 0L8 6.56l2.293 2.293A.5.5 0 1 0 11 8.146L8.354 5.5a.5.5 0 0 0-.708 0L5 8.146a.5.5 0 0 0 0 .708z"></path>
+                                          <path fill-rule="evenodd" d="M8 6a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 6z"></path>
+                                        </svg>
+                                  </a>
+                                </li>
+                              </ul>
+                              <!-- End Figure Social Icons -->
+                            </div>
+                          </figcaption>
+                          <!-- End Figure Caption -->
+            
+                          <!-- User Info -->
+                          <span class="g-pos-abs g-top-20 g-left-0">
+                              <a class="btn btn-sm u-btn-primary rounded-0" href="#">Johne Doe</a>
+                              <small class="d-block g-bg-black g-color-white g-pa-5">Project Manager</small>
+                            </span>
+                          <!-- End User Info -->
+                        </div>
+                        <!-- User Image -->
+      
+                        <!-- User Image Upload Buttons -->
+                        <input name="dropZone" id="dropZone" type="file" data-bind="enabled:editable, visible:editable"/> 
+                        <button class="btn btn-md u-btn-outline-red g-rounded-50 g-mr-10 g-mb-15 g-mt-25" 
+                          data-bind="visible:editable, click:passwd" 
+                          style=""><svg class="bi bi-shield-lock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.443 1.991a60.17 60.17 0 0 0-2.725.802.454.454 0 0 0-.315.366C1.87 7.056 3.1 9.9 4.567 11.773c.736.94 1.533 1.636 2.197 2.093.333.228.626.394.857.5.116.053.21.089.282.11A.73.73 0 0 0 8 14.5c.007-.001.038-.005.097-.023.072-.022.166-.058.282-.111.23-.106.525-.272.857-.5a10.197 10.197 0 0 0 2.197-2.093C12.9 9.9 14.13 7.056 13.597 3.159a.454.454 0 0 0-.315-.366c-.626-.2-1.682-.526-2.725-.802C9.491 1.71 8.51 1.5 8 1.5c-.51 0-1.49.21-2.557.491zm-.256-.966C6.23.749 7.337.5 8 .5c.662 0 1.77.249 2.813.525a61.09 61.09 0 0 1 2.772.815c.528.168.926.623 1.003 1.184.573 4.197-.756 7.307-2.367 9.365a11.191 11.191 0 0 1-2.418 2.3 6.942 6.942 0 0 1-1.007.586c-.27.124-.558.225-.796.225s-.526-.101-.796-.225a6.908 6.908 0 0 1-1.007-.586 11.192 11.192 0 0 1-2.417-2.3C2.167 10.331.839 7.221 1.412 3.024A1.454 1.454 0 0 1 2.415 1.84a61.11 61.11 0 0 1 2.772-.815z"></path><path d="M9.5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M7.411 8.034a.5.5 0 0 1 .493-.417h.156a.5.5 0 0 1 .492.414l.347 2a.5.5 0 0 1-.493.585h-.835a.5.5 0 0 1-.493-.582l.333-2z"></path></svg> Change Password</button>
+                        <!-- End User Image Upload Buttons -->
                       </div>
-                      <!-- User Image -->
-    
-                      <!-- User Image Upload Buttons -->
-                      <input name="dropZone" id="dropZone" type="file" data-bind="enabled:editable, visible:editable"/> 
-                      <button class="btn btn-md u-btn-outline-red g-rounded-50 g-mr-10 g-mb-15 g-mt-25" 
-                        data-bind="visible:editable, click:passwd" 
-                        style=""><svg class="bi bi-shield-lock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.443 1.991a60.17 60.17 0 0 0-2.725.802.454.454 0 0 0-.315.366C1.87 7.056 3.1 9.9 4.567 11.773c.736.94 1.533 1.636 2.197 2.093.333.228.626.394.857.5.116.053.21.089.282.11A.73.73 0 0 0 8 14.5c.007-.001.038-.005.097-.023.072-.022.166-.058.282-.111.23-.106.525-.272.857-.5a10.197 10.197 0 0 0 2.197-2.093C12.9 9.9 14.13 7.056 13.597 3.159a.454.454 0 0 0-.315-.366c-.626-.2-1.682-.526-2.725-.802C9.491 1.71 8.51 1.5 8 1.5c-.51 0-1.49.21-2.557.491zm-.256-.966C6.23.749 7.337.5 8 .5c.662 0 1.77.249 2.813.525a61.09 61.09 0 0 1 2.772.815c.528.168.926.623 1.003 1.184.573 4.197-.756 7.307-2.367 9.365a11.191 11.191 0 0 1-2.418 2.3 6.942 6.942 0 0 1-1.007.586c-.27.124-.558.225-.796.225s-.526-.101-.796-.225a6.908 6.908 0 0 1-1.007-.586 11.192 11.192 0 0 1-2.417-2.3C2.167 10.331.839 7.221 1.412 3.024A1.454 1.454 0 0 1 2.415 1.84a61.11 61.11 0 0 1 2.772-.815z"></path><path d="M9.5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M7.411 8.034a.5.5 0 0 1 .493-.417h.156a.5.5 0 0 1 .492.414l.347 2a.5.5 0 0 1-.493.585h-.835a.5.5 0 0 1-.493-.582l.333-2z"></path></svg> Change Password</button>
-                      <!-- End User Image Upload Buttons -->
-                    </div>
-    
-                    <div class="col-lg-8">
-                        <!-- User Position -->
-                        <h4 class="h6 g-font-weight-300 g-mb-10">
-                            <span class="u-label g-bg-pink g-rounded-20 g-px-15 g-mr-10"
-                                    data-bind="visible:me.external, enabled:editable">External</span>
-                        </h4>
-                      <!-- End User Position -->
-                      <!-- User Details -->
+      
+                      <div class="col-lg-8">
+                          <!-- User Position -->
+                          <h4 class="h6 g-font-weight-300 g-mb-10">
+                              <span class="u-label g-bg-pink g-rounded-20 g-px-15 g-mr-10"
+                                      data-bind="visible:me.external, enabled:editable">External</span>
+                          </h4>
+                        <!-- End User Position -->
+                        <!-- User Details -->
 
-                      <form class="needs-validation" novalidate>
-                        <div class="form-row">
-                          <div class="col-md-6 mb-3">
-                            <label for="validationTooltip01">Name</label>
-                            <input type="text" class="form-control form-control-lg" id="validationTooltip01" placeholder="Name" data-bind="value:me.name, enabled:editable"  required>
-                            <div class="valid-tooltip">
-                              Looks good!
-                            </div>
+                        <form class="needs-validation" novalidate>
+                          <div class="form-row">
+                            <div class="col-md-6 mb-3">
+                              <label for="validationTooltip01">Name</label>
+                              <input type="text" class="form-control form-control-lg" id="validationTooltip01" placeholder="Name" data-bind="value:me.name, enabled:editable"  required>
+                              <div class="valid-tooltip">
+                                Looks good!
+                              </div>
+                            </div> 
+                          </div>  
+                          <div class="form-row g-mb-25">
+                              <div class="col-md-6 mb-3">
+                                  <label for="validationTooltip01">Username</label>
+                                  <input type="text" class="form-control form-control-lg" id="validationTooltip01" readonly placeholder="Username" data-bind="value:me.username, enabled:editable" required>
+                              </div>    
                           </div> 
-                        </div>  
-                        <div class="form-row g-mb-25">
-                            <div class="col-md-6 mb-3">
-                                <label for="validationTooltip01">Username</label>
-                                <input type="text" class="form-control form-control-lg" id="validationTooltip01" readonly placeholder="Username" data-bind="value:me.username, enabled:editable" required>
-                            </div>    
-                        </div> 
-                        <div class="form-row">
-                            <div class="col-md-6 mb-3">
-                                <label for="validationTooltip01">Email</label>
-                                <input type="text" class="form-control form-control-lg" id="validationTooltip01" readonly placeholder="Email" data-bind="value:me.email, enabled:editable" required>
-                            </div>    
-                        </div>      
-                        <hr class="g-brd-gray-light-v4 g-my-20">
-                        <div class="form-row">
-                            <div class="col-md-6 mb-3">
-                              <label class="d-flex align-items-center justify-content-between g-mb-0" for="input-user-namevisible">
-                                <span class="g-pr-20 g-font-weight-500">Name Visible</span>
-                                <div class="u-check">
-                                  <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="input-user-namevisible"
-                                    name="input-user-namevisible" value="true"
-                                    data-bind="checked: me.nameVisible, enabled:editable" type="checkbox">
-                                  <div class="u-check-icon-radio-v8">
-                                    <i class="fa" data-check-icon=""></i>
-                                  </div>
-                                </div>
-                              </label>
-                              <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">We will disclose your name address.</small>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                              <div class="form-group g-mb-30">
-                                <div class="col-auto">
-                                  <label class="d-flex align-items-center justify-content-between g-mb-0"
-                                    for="input-user-emailvisible">
-                                    <span class="g-pr-20 g-font-weight-500">Email Visible</span>
-                                    <div class="u-check">
-                                      <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="input-user-emailvisible"
-                                        name="input-user-emailvisible" data-bind="checked: me.emailVisible, enabled:editable"
-                                        type="checkbox">
-                                      <div class="u-check-icon-radio-v8">
-                                        <i class="fa" data-check-icon=""></i>
-                                      </div>
+                          <div class="form-row">
+                              <div class="col-md-6 mb-3">
+                                  <label for="validationTooltip01">Email</label>
+                                  <input type="text" class="form-control form-control-lg" id="validationTooltip01" readonly placeholder="Email" data-bind="value:me.email, enabled:editable" required>
+                              </div>    
+                          </div>      
+                          <hr class="g-brd-gray-light-v4 g-my-20">
+                          <div class="form-row g-mb-20">
+                              <div class="col-md-6 mb-3">
+                                <label class="d-flex align-items-center justify-content-between g-mb-0" for="input-user-namevisible">
+                                  <span class="g-pr-20 g-font-weight-500">Name Visible</span>
+                                  <div class="u-check">
+                                    <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="input-user-namevisible"
+                                      name="input-user-namevisible" value="true"
+                                      data-bind="checked: me.nameVisible, enabled:editable" type="checkbox">
+                                    <div class="u-check-icon-radio-v8">
+                                      <i class="fa" data-check-icon=""></i>
                                     </div>
-                                  </label>
-                                  <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">We will disclose your email address.
-                                  </small>
-                                </div>
+                                  </div>
+                                </label>
+                                <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">We will disclose your name address.</small>
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                <label class="d-flex align-items-center justify-content-between g-mb-0" for="input-user-emailvisible">
+                                  <span class="g-font-weight-500">Email Visible</span>
+                                  <div class="u-check">
+                                    <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="input-user-emailvisible"
+                                      name="input-user-emailvisible" data-bind="checked: me.emailVisible, enabled:editable"
+                                      type="checkbox">
+                                    <div class="u-check-icon-radio-v8">
+                                      <i class="fa" data-check-icon=""></i>
+                                    </div>
+                                  </div>
+                                </label>
+                                <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">We will disclose your email address.
+                                </small>
                               </div>
                             </div>
-                          </div>
-                          <div class="form-row">
-                            <div class="col-md-12 text-right">
-                                <button class="btn btn-md u-btn-blue g-rounded-50 g-mr-10 g-mb-15"
-                                data-bind="click:saveOrUpdate">Save</button> 
+                            <div class="form-row">
+                              <div class="col-md-12 text-right">
+                                  <button class="btn btn-md u-btn-blue g-rounded-50 g-mr-10 g-mb-15"
+                                  data-bind="click:saveOrUpdate">Save</button> 
+                              </div>
                             </div>
+                        </form>                            
+                        <!-- End User Details -->  
+      
+                        <hr class="g-brd-gray-light-v4 g-my-20">
+      
+                        <!-- User Skills -->
+                        <div class="d-flex flex-wrap text-center">
+                          <!-- Counter Pie Chart -->
+                          <div class="g-mr-40 g-mb-20 g-mb-0--xl">
+                            <div class="js-pie g-color-purple g-mb-5" data-circles-value="54" data-circles-max-value="100" data-circles-bg-color="#d3b6c6" data-circles-fg-color="#9b6bcc" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-1"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#d3b6c6" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#9b6bcc" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 22.943363074828525 57.61256734362646 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">54%</div></div></div>
+                            <h4 class="h6 g-font-weight-300">Consulting</h4>
                           </div>
-                      </form>    
-
-                      
-                      <!-- End User Details -->  
-    
-                      <hr class="g-brd-gray-light-v4 g-my-20">
-    
-                      <!-- User Skills -->
-                      <div class="d-flex flex-wrap text-center">
-                        <!-- Counter Pie Chart -->
-                        <div class="g-mr-40 g-mb-20 g-mb-0--xl">
-                          <div class="js-pie g-color-purple g-mb-5" data-circles-value="54" data-circles-max-value="100" data-circles-bg-color="#d3b6c6" data-circles-fg-color="#9b6bcc" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-1"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#d3b6c6" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#9b6bcc" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 22.943363074828525 57.61256734362646 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">54%</div></div></div>
-                          <h4 class="h6 g-font-weight-300">Consulting</h4>
+                          <!-- End Counter Pie Chart -->
+      
+                          <!-- Counter Pie Chart -->
+                          <div class="g-mr-40 g-mb-20 g-mb-0--xl">
+                            <div class="js-pie g-color-blue g-mb-5" data-circles-value="72" data-circles-max-value="100" data-circles-bg-color="#bee3f7" data-circles-fg-color="#3498db" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-2"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#bee3f7" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#3498db" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 2.0106890878874566 35.37107760743576 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">72%</div></div></div>
+                            <h4 class="h6 g-font-weight-300">Branding</h4>
+                          </div>
+                          <!-- End Counter Pie Chart -->
+      
+                          <!-- Counter Pie Chart -->
+                          <div class="g-mr-40 g-mb-20 g-mb-0--xl">
+                            <div class="js-pie g-color-lightred g-mb-5" data-circles-value="81" data-circles-max-value="100" data-circles-bg-color="#ffc2bb" data-circles-fg-color="#e74c3c" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-3"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#ffc2bb" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#e74c3c" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 3.4952499945662545 19.523921194002977 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">81%</div></div></div>
+                            <h4 class="h6 g-font-weight-300">Copywriting</h4>
+                          </div>
+                          <!-- End Counter Pie Chart -->
+      
+                          <!-- Counter Pie Chart -->
+                          <div class="g-mr-40 g-mb-20 g-mb-0--xl">
+                            <div class="js-pie g-color-primary g-mb-5" data-circles-value="83" data-circles-max-value="100" data-circles-bg-color="#c9ff97" data-circles-fg-color="#72c02c" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-4"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#c9ff97" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#72c02c" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 5.008151206172407 16.301186406609574 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">83%</div></div></div>
+                            <h4 class="h6 g-font-weight-300">Marketing</h4>
+                          </div>
+                          <!-- End Counter Pie Chart -->
+      
+                          <!-- Counter Pie Chart -->
+                          <div class="g-mb-20 g-mb-0--lg">
+                            <div class="js-pie g-mb-5" data-circles-value="92" data-circles-max-value="100" data-circles-bg-color="#eeeeee" data-circles-fg-color="#111111" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-5"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#eeeeee" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#111111" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 16.251688639110682 5.035346292727354 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">92%</div></div></div>
+                            <h4 class="h6 g-font-weight-300">Management</h4>
+                          </div>
+                          <!-- End Counter Pie Chart -->
                         </div>
-                        <!-- End Counter Pie Chart -->
-    
-                        <!-- Counter Pie Chart -->
-                        <div class="g-mr-40 g-mb-20 g-mb-0--xl">
-                          <div class="js-pie g-color-blue g-mb-5" data-circles-value="72" data-circles-max-value="100" data-circles-bg-color="#bee3f7" data-circles-fg-color="#3498db" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-2"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#bee3f7" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#3498db" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 2.0106890878874566 35.37107760743576 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">72%</div></div></div>
-                          <h4 class="h6 g-font-weight-300">Branding</h4>
-                        </div>
-                        <!-- End Counter Pie Chart -->
-    
-                        <!-- Counter Pie Chart -->
-                        <div class="g-mr-40 g-mb-20 g-mb-0--xl">
-                          <div class="js-pie g-color-lightred g-mb-5" data-circles-value="81" data-circles-max-value="100" data-circles-bg-color="#ffc2bb" data-circles-fg-color="#e74c3c" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-3"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#ffc2bb" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#e74c3c" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 3.4952499945662545 19.523921194002977 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">81%</div></div></div>
-                          <h4 class="h6 g-font-weight-300">Copywriting</h4>
-                        </div>
-                        <!-- End Counter Pie Chart -->
-    
-                        <!-- Counter Pie Chart -->
-                        <div class="g-mr-40 g-mb-20 g-mb-0--xl">
-                          <div class="js-pie g-color-primary g-mb-5" data-circles-value="83" data-circles-max-value="100" data-circles-bg-color="#c9ff97" data-circles-fg-color="#72c02c" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-4"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#c9ff97" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#72c02c" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 5.008151206172407 16.301186406609574 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">83%</div></div></div>
-                          <h4 class="h6 g-font-weight-300">Marketing</h4>
-                        </div>
-                        <!-- End Counter Pie Chart -->
-    
-                        <!-- Counter Pie Chart -->
-                        <div class="g-mb-20 g-mb-0--lg">
-                          <div class="js-pie g-mb-5" data-circles-value="92" data-circles-max-value="100" data-circles-bg-color="#eeeeee" data-circles-fg-color="#111111" data-circles-radius="30" data-circles-stroke-width="3" data-circles-additional-text="%" data-circles-duration="2000" data-circles-scroll-animate="true" data-circles-font-size="14" id="hs-pie-5"><div class="circles-wrp" style="position: relative; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path fill="transparent" stroke="#eeeeee" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 29.96041407176496 1.5000274920433334 Z" class="circles-maxValueStroke"></path><path fill="transparent" stroke="#111111" stroke-width="3" d="M 29.994195313694686 1.5000005911295347 A 28.5 28.5 0 1 1 16.251688639110682 5.035346292727354 " class="circles-valueStroke"></path></svg><div class="circles-text" style="position: absolute; top: 0px; left: 0px; text-align: center; width: 100%; font-size: 14px; height: 60px; line-height: 60px;">92%</div></div></div>
-                          <h4 class="h6 g-font-weight-300">Management</h4>
-                        </div>
-                        <!-- End Counter Pie Chart -->
-                      </div>
-                      <!-- End User Skills -->
-                    </div>
-                  </div>
-                </div>
-                <!-- End User Block -->
-    
-                <!-- Experience Timeline -->
-                <div class="card border-0 rounded-0 g-mb-40">
-                  <!-- Panel Header -->
-                  <div class="card-header d-flex align-items-center justify-content-between g-bg-gray-light-v5 border-0 g-mb-15">
-                    <h3 class="h6 mb-0">
-                        <i class="icon-briefcase g-pos-rel g-top-1 g-mr-5"></i> Experience
-                      </h3>
-                    <div class="dropdown g-mb-10 g-mb-0--md">
-                      <span class="d-block g-color-primary--hover g-cursor-pointer g-mr-minus-5 g-pa-5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          <i class="icon-options-vertical g-pos-rel g-top-1"></i>
-                        </span>
-                      <div class="dropdown-menu dropdown-menu-right rounded-0 g-mt-10">
-                        <a class="dropdown-item g-px-10" href="#">
-                          <i class="icon-layers g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> Projects
-                        </a>
-                        <a class="dropdown-item g-px-10" href="#">
-                          <i class="icon-wallet g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> Wallets
-                        </a>
-                        <a class="dropdown-item g-px-10" href="#">
-                          <i class="icon-fire g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> Reports
-                        </a>
-                        <a class="dropdown-item g-px-10" href="#">
-                          <i class="icon-settings g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> Users Setting
-                        </a>
-    
-                        <div class="dropdown-divider"></div>
-    
-                        <a class="dropdown-item g-px-10" href="#">
-                          <i class="icon-plus g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> View More
-                        </a>
+                        <!-- End User Skills -->
                       </div>
                     </div>
                   </div>
-                  <!-- End Panel Header --> 
-                  <!-- Panel Body -->
-                  <div class="js-scrollbar card-block u-info-v1-1 g-bg-white-gradient-v1--after g-height-300 g-pa-0 mCustomScrollbar _mCS_2 mCS-autoHide" style="overflow: visible;"><div id="mCSB_2" class="mCustomScrollBox mCS-minimal-dark mCSB_vertical mCSB_outside" tabindex="0" style="max-height: none;"><div id="mCSB_2_container" class="mCSB_container" style="position:relative; top:0; left:0;" dir="ltr">
-                    <ul class="row u-timeline-v2-wrap list-unstyled">
-                      <li class="col-md-12 g-brd-bottom g-brd-0--md g-brd-gray-light-v4 g-pb-30 g-pb-0--md g-mb-30 g-mb-0--md">
-                        <div class="row">
-                          <!-- Timeline Date -->
-                          <div class="col-md-3 align-self-center text-md-right g-pr-40--md g-mb-20 g-mb-0--md">
-                            <h4 class="h5 g-font-weight-300">Project Manager</h4>
-                            <h5 class="h6 g-font-weight-300 mb-0">2016 - Current</h5>
-                          </div>
-                          <!-- End Timeline Date -->
-    
-                          <!-- Timeline Content -->
-                          <div class="col-md-9 align-self-center g-orientation-left g-pl-40--md">
-                            <!-- Timeline Dot -->
-                            <div class="g-hidden-sm-down u-timeline-v2__icon g-top-35">
-                              <i class="d-block g-width-18 g-height-18 g-bg-primary g-brd-around g-brd-4 g-brd-gray-light-v4 rounded-circle"></i>
-                            </div>
-                            <!-- End Timeline Dot -->
-    
-                            <article class="g-pa-10--md">
-                              <h3 class="h4 g-font-weight-300">Pixeel Ltd.</h3>
-                              <p class="mb-0">Winter purslane courgette pumpkin quandong komatsuna fennel green bean cucumber. Pea cress potato sprouts wattle seed rutabaga.</p>
-                            </article>
-                          </div>
-                          <!-- End Timeline Content -->
+                  <!-- End User Block -->
+      
+                  <!-- Experience Timeline -->
+                  <div class="card g-brd-around g-brd-gray-light-v4 g-mb-40">
+                    <!-- Panel Header -->
+                    <div class="card-header d-flex align-items-center justify-content-between g-bg-gray-light-v5 border-0 g-mb-15">
+                      <h3 class="h6 mb-0">
+                          <i class="icon-briefcase g-pos-rel g-top-1 g-mr-5"></i> Experience
+                        </h3>
+                      <div class="dropdown g-mb-10 g-mb-0--md">
+                        <span class="d-block g-color-primary--hover g-cursor-pointer g-mr-minus-5 g-pa-5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="icon-options-vertical g-pos-rel g-top-1"></i>
+                          </span>
+                        <div class="dropdown-menu dropdown-menu-right rounded-0 g-mt-10">
+                          <a class="dropdown-item g-px-10" href="#">
+                            <i class="icon-layers g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> Projects
+                          </a>
+                          <a class="dropdown-item g-px-10" href="#">
+                            <i class="icon-wallet g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> Wallets
+                          </a>
+                          <a class="dropdown-item g-px-10" href="#">
+                            <i class="icon-fire g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> Reports
+                          </a>
+                          <a class="dropdown-item g-px-10" href="#">
+                            <i class="icon-settings g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> Users Setting
+                          </a>
+      
+                          <div class="dropdown-divider"></div>
+      
+                          <a class="dropdown-item g-px-10" href="#">
+                            <i class="icon-plus g-font-size-12 g-color-gray-dark-v5 g-mr-5"></i> View More
+                          </a>
                         </div>
-                      </li>
-                      <li class="col-md-12 g-brd-bottom g-brd-0--md g-brd-gray-light-v4 g-pb-30 g-pb-0--md g-mb-30 g-mb-0--md">
-                        <div class="row">
-                          <!-- Timeline Date -->
-                          <div class="col-md-3 align-self-center text-md-right g-pr-40--md g-mb-20 g-mb-0--md">
-                            <h4 class="h5 g-font-weight-300">Full Stack Developer</h4>
-                            <h5 class="h6 g-font-weight-300 mb-0">2014 - 2016</h5>
-                          </div>
-                          <!-- End Timeline Date -->
-    
-                          <!-- Timeline Content -->
-                          <div class="col-md-9 align-self-center g-orientation-left g-pl-40--md">
-                            <!-- Timeline Dot -->
-                            <div class="g-hidden-sm-down u-timeline-v2__icon g-top-35">
-                              <i class="d-block g-width-18 g-height-18 g-bg-primary g-brd-around g-brd-4 g-brd-gray-light-v4 rounded-circle"></i>
+                      </div>
+                    </div>
+                    <!-- End Panel Header --> 
+                    <!-- Panel Body -->
+                    <div class="js-scrollbar card-block u-info-v1-1 g-bg-white-gradient-v1--after g-height-300 g-pa-0 mCustomScrollbar _mCS_2 mCS-autoHide" style="overflow: visible;"><div id="mCSB_2" class="mCustomScrollBox mCS-minimal-dark mCSB_vertical mCSB_outside" tabindex="0" style="max-height: none;"><div id="mCSB_2_container" class="mCSB_container" style="position:relative; top:0; left:0;" dir="ltr">
+                      <ul class="row u-timeline-v2-wrap list-unstyled">
+                        <li class="col-md-12 g-brd-bottom g-brd-0--md g-brd-gray-light-v4 g-pb-30 g-pb-0--md g-mb-30 g-mb-0--md">
+                          <div class="row">
+                            <!-- Timeline Date -->
+                            <div class="col-md-3 align-self-center text-md-right g-pr-40--md g-mb-20 g-mb-0--md">
+                              <h4 class="h5 g-font-weight-300">Project Manager</h4>
+                              <h5 class="h6 g-font-weight-300 mb-0">2016 - Current</h5>
                             </div>
-                            <!-- End Timeline Dot -->
-    
-                            <article class="g-pa-10--md">
-                              <h3 class="h4 g-font-weight-300">Htmlstream</h3>
-                              <p class="mb-0">Winter purslane courgette pumpkin quandong komatsuna fennel green bean cucumber. Pea cress potato sprouts wattle seed rutabaga.</p>
-                            </article>
-                          </div>
-                          <!-- End Timeline Content -->
-                        </div>
-                      </li>
-                      <li class="col-md-12 g-brd-bottom g-brd-0--md g-brd-gray-light-v4 g-pb-30 g-pb-0--md g-mb-30 g-mb-0--md">
-                        <div class="row">
-                          <!-- Timeline Date -->
-                          <div class="col-md-3 align-self-center text-md-right g-pr-40--md g-mb-20 g-mb-0--md">
-                            <h4 class="h5 g-font-weight-300">Frontend Developer</h4>
-                            <h5 class="h6 g-font-weight-300 mb-0">2012 - 2014</h5>
-                          </div>
-                          <!-- End Timeline Date -->
-    
-                          <!-- Timeline Content -->
-                          <div class="col-md-9 align-self-center g-orientation-left g-pl-40--md">
-                            <!-- Timeline Dot -->
-                            <div class="g-hidden-sm-down u-timeline-v2__icon g-top-35">
-                              <i class="d-block g-width-18 g-height-18 g-bg-primary g-brd-around g-brd-4 g-brd-gray-light-v4 rounded-circle"></i>
+                            <!-- End Timeline Date -->
+      
+                            <!-- Timeline Content -->
+                            <div class="col-md-9 align-self-center g-orientation-left g-pl-40--md">
+                              <!-- Timeline Dot -->
+                              <div class="g-hidden-sm-down u-timeline-v2__icon g-top-35">
+                                <i class="d-block g-width-18 g-height-18 g-bg-primary g-brd-around g-brd-4 g-brd-gray-light-v4 rounded-circle"></i>
+                              </div>
+                              <!-- End Timeline Dot -->
+      
+                              <article class="g-pa-10--md">
+                                <h3 class="h4 g-font-weight-300">Pixeel Ltd.</h3>
+                                <p class="mb-0">Winter purslane courgette pumpkin quandong komatsuna fennel green bean cucumber. Pea cress potato sprouts wattle seed rutabaga.</p>
+                              </article>
                             </div>
-                            <!-- End Timeline Dot -->
-    
-                            <article class="g-pa-10--md">
-                              <h3 class="h4 g-font-weight-300">Amazon Inc.</h3>
-                              <p class="mb-0">Winter purslane courgette pumpkin quandong komatsuna fennel green bean cucumber. Pea cress potato sprouts wattle seed rutabaga.</p>
-                            </article>
+                            <!-- End Timeline Content -->
                           </div>
-                          <!-- End Timeline Content -->
-                        </div>
-                      </li>
-                      <li class="col-md-12">
-                        <div class="row">
-                          <!-- Timeline Date -->
-                          <div class="col-md-3 align-self-center text-md-right g-pr-40--md g-mb-20 g-mb-0--md">
-                            <h4 class="h5 g-font-weight-300">UX/UI Designer</h4>
-                            <h5 class="h6 g-font-weight-300 mb-0">2010 - 2012</h5>
-                          </div>
-                          <!-- End Timeline Date -->
-    
-                          <!-- Timeline Content -->
-                          <div class="col-md-9 align-self-center g-orientation-left g-pl-40--md">
-                            <!-- Timeline Dot -->
-                            <div class="g-hidden-sm-down u-timeline-v2__icon g-top-35">
-                              <i class="d-block g-width-18 g-height-18 g-bg-primary g-brd-around g-brd-4 g-brd-gray-light-v4 rounded-circle"></i>
+                        </li>
+                        <li class="col-md-12 g-brd-bottom g-brd-0--md g-brd-gray-light-v4 g-pb-30 g-pb-0--md g-mb-30 g-mb-0--md">
+                          <div class="row">
+                            <!-- Timeline Date -->
+                            <div class="col-md-3 align-self-center text-md-right g-pr-40--md g-mb-20 g-mb-0--md">
+                              <h4 class="h5 g-font-weight-300">Full Stack Developer</h4>
+                              <h5 class="h6 g-font-weight-300 mb-0">2014 - 2016</h5>
                             </div>
-                            <!-- End Timeline Dot -->
-    
-                            <article class="g-pa-10--md">
-                              <h3 class="h4 g-font-weight-300">Apple Inc.</h3>
-                              <p class="mb-0">Winter purslane courgette pumpkin quandong komatsuna fennel green bean cucumber. Pea cress potato sprouts wattle seed rutabaga.</p>
-                            </article>
+                            <!-- End Timeline Date -->
+      
+                            <!-- Timeline Content -->
+                            <div class="col-md-9 align-self-center g-orientation-left g-pl-40--md">
+                              <!-- Timeline Dot -->
+                              <div class="g-hidden-sm-down u-timeline-v2__icon g-top-35">
+                                <i class="d-block g-width-18 g-height-18 g-bg-primary g-brd-around g-brd-4 g-brd-gray-light-v4 rounded-circle"></i>
+                              </div>
+                              <!-- End Timeline Dot -->
+      
+                              <article class="g-pa-10--md">
+                                <h3 class="h4 g-font-weight-300">Htmlstream</h3>
+                                <p class="mb-0">Winter purslane courgette pumpkin quandong komatsuna fennel green bean cucumber. Pea cress potato sprouts wattle seed rutabaga.</p>
+                              </article>
+                            </div>
+                            <!-- End Timeline Content -->
                           </div>
-                          <!-- End Timeline Content -->
-                        </div>
-                      </li>
-                    </ul>
-                  </div></div><div id="mCSB_2_sc rollbar_vertical" class="mCSB_scrollTools mCSB_2_scrollbar mCS-minimal-dark mCSB_scrollTools_vertical" style="display: block;"><div class="mCSB_draggerContainer"><div id="mCSB_2_dragger_vertical" class="mCSB_dragger" style="position: absolute; min-height: 50px; display: block; height: 200px; max-height: 266px; top: 0px;"><div class="mCSB_dragger_bar" style="line-height: 50px;"></div></div><div class="mCSB_draggerRail"></div></div></div></div>
-                  <!-- End Panel Body -->
-                </div>
-                <!-- End Experience Timeline --> 
-              </div> 
+                        </li>
+                        <li class="col-md-12 g-brd-bottom g-brd-0--md g-brd-gray-light-v4 g-pb-30 g-pb-0--md g-mb-30 g-mb-0--md">
+                          <div class="row">
+                            <!-- Timeline Date -->
+                            <div class="col-md-3 align-self-center text-md-right g-pr-40--md g-mb-20 g-mb-0--md">
+                              <h4 class="h5 g-font-weight-300">Frontend Developer</h4>
+                              <h5 class="h6 g-font-weight-300 mb-0">2012 - 2014</h5>
+                            </div>
+                            <!-- End Timeline Date -->
+      
+                            <!-- Timeline Content -->
+                            <div class="col-md-9 align-self-center g-orientation-left g-pl-40--md">
+                              <!-- Timeline Dot -->
+                              <div class="g-hidden-sm-down u-timeline-v2__icon g-top-35">
+                                <i class="d-block g-width-18 g-height-18 g-bg-primary g-brd-around g-brd-4 g-brd-gray-light-v4 rounded-circle"></i>
+                              </div>
+                              <!-- End Timeline Dot -->
+      
+                              <article class="g-pa-10--md">
+                                <h3 class="h4 g-font-weight-300">Amazon Inc.</h3>
+                                <p class="mb-0">Winter purslane courgette pumpkin quandong komatsuna fennel green bean cucumber. Pea cress potato sprouts wattle seed rutabaga.</p>
+                              </article>
+                            </div>
+                            <!-- End Timeline Content -->
+                          </div>
+                        </li>
+                        <li class="col-md-12">
+                          <div class="row">
+                            <!-- Timeline Date -->
+                            <div class="col-md-3 align-self-center text-md-right g-pr-40--md g-mb-20 g-mb-0--md">
+                              <h4 class="h5 g-font-weight-300">UX/UI Designer</h4>
+                              <h5 class="h6 g-font-weight-300 mb-0">2010 - 2012</h5>
+                            </div>
+                            <!-- End Timeline Date -->
+      
+                            <!-- Timeline Content -->
+                            <div class="col-md-9 align-self-center g-orientation-left g-pl-40--md">
+                              <!-- Timeline Dot -->
+                              <div class="g-hidden-sm-down u-timeline-v2__icon g-top-35">
+                                <i class="d-block g-width-18 g-height-18 g-bg-primary g-brd-around g-brd-4 g-brd-gray-light-v4 rounded-circle"></i>
+                              </div>
+                              <!-- End Timeline Dot -->
+      
+                              <article class="g-pa-10--md">
+                                <h3 class="h4 g-font-weight-300">Apple Inc.</h3>
+                                <p class="mb-0">Winter purslane courgette pumpkin quandong komatsuna fennel green bean cucumber. Pea cress potato sprouts wattle seed rutabaga.</p>
+                              </article>
+                            </div>
+                            <!-- End Timeline Content -->
+                          </div>
+                        </li>
+                      </ul>
+                    </div></div><div id="mCSB_2_sc rollbar_vertical" class="mCSB_scrollTools mCSB_2_scrollbar mCS-minimal-dark mCSB_scrollTools_vertical" style="display: block;"><div class="mCSB_draggerContainer"><div id="mCSB_2_dragger_vertical" class="mCSB_dragger" style="position: absolute; min-height: 50px; display: block; height: 200px; max-height: 266px; top: 0px;"><div class="mCSB_dragger_bar" style="line-height: 50px;"></div></div><div class="mCSB_draggerRail"></div></div></div></div>
+                    <!-- End Panel Body -->
+                  </div>
+                  <!-- End Experience Timeline --> 
+                </div> 
+              </div>
             </div> 
         </div>
       </main>

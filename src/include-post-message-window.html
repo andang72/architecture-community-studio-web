@@ -1,0 +1,366 @@
+<style>
+  .post-body {
+    font-size: 14px;
+    line-height: 1.7;
+    position: relative;
+    overflow: auto;
+    overflow-wrap: break-word;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+  }
+
+  .k-i-ace::before {
+    content: "\e918";
+  }
+
+  .post-message-window {
+    position: fixed !important;
+    bottom: 0;
+    top: unset !important;
+    background-color: transparent !important;
+  }
+
+  .post-message-window > .k-window-titlebar {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom: 1;
+    border-bottom-color: #f5f5ff;
+  }
+
+  .post-message-window > .k-window-content {
+    background-color: #fff;
+  }
+</style>
+<script>
+  /**
+   * Post Message Window.
+   * renderTo : 윈도우를 생성할 대상
+   * item : message json object
+   *
+   */
+  function getPostEditWindow(renderTo, item, callback ) {
+    renderTo = renderTo || $("#post-edit-window");
+    if (!renderTo.data("kendoWindow")) {
+      var MessageModel = kendo.data.Model.define(studio.data.model.Message);
+      var observable = kendo.observable({
+        message: new MessageModel(),
+        unlocked: true,
+        editable: false,
+        editor: {
+          warp: true,
+          editable: true,
+          visible: false,
+          mode: "ace/mode/html",
+          theme: "ace/theme/chrome",
+          edit: function () {
+            if (observable.message.body != null) {
+              ace_editor.setValue(kendo_editor.value());
+            } else {
+              ace_editor.setValue("");
+            }
+            observable.set("editor.kendoEditor", false);
+            observable.set("editor.visible", true);
+          },
+          cancle: function () {
+            kendo_editor.value(ace_editor.getValue());
+            observable.set("editor.kendoEditor", true);
+            observable.set("editor.visible", false);
+          },
+          kendo: function () {
+            observable.set("editor.kendoEditor", true);
+            observable.set("editor.visible", false);
+          },
+          kendoEditor: true,
+        },
+        setSource: function (data) {
+          var $this = this;
+          data = data || new MessageModel();
+          data.copy($this.message);
+          $this.set("editable", $this.message.messageId > 0 ? true : false);
+        },
+        saveOrUpdate: function () {
+          var $self = this;
+          if ($self.get("editor.kendoEditor")) {
+            $self.set("message.body", kendo_editor.value());
+          } else {
+            $self.set("message.body", ace_editor.getValue());
+          }
+          ;
+
+          var template = kendo.template(
+            "Update the #: message.subject #. This operation cannot be canceled."
+          );
+          var dialog = $("#dialog")
+            .kendoDialog({
+              width: "450px",
+              closable: true,
+              modal: true,
+              buttonLayout: "normal",
+              title: "Save Or Update",
+              content: template($self),
+              actions: [
+                {
+                  text: "Ok",
+                  action: function (e) {
+                    kendo.ui.progress($(".k-dialog"), true);
+                                         
+                    var _url = "/data/secure/mgmt/messages/" + $self.message.messageId ;
+                    var _method = "put";
+
+                    // 1.thread root message 
+                    // method : post
+                    // url : /data/secure/mgmt/streams/{streamId}/messages/0
+                    // 2. message update 
+                    // method : put
+                    // url : /data/secure/mgmt/messages/{messageId}                    
+                    // 3. reply message 
+                    // method : post
+                    // url : /data/secure/mgmt/messages/{messageId}/reply  
+
+                    if( $self.message.messageId == 0){
+                      _method = "post";
+                      if( $self.message.threadId > 0 ) {
+                        // reply
+                        _url = _url + "/reply"
+                      }else{
+                        // therad
+                        _url =  "/data/secure/mgmt/streams/"+ $self.message.objectId + "/messages/0";
+                      }
+                    }                    
+                    axios({
+                      url: studio.services.getApiUrl(_url),
+                      method:_method ,
+                      data: JSON.stringify($self.message),
+                      headers: studio.ui.headerWithAuth(),
+                    })
+                      .then((response) => {
+                        let data = response.data;
+                        studio.ui.notify(null, $self.get("message.subject") + " has been updated.",
+                          "success"
+                        );
+                        $self.setSource(new MessageModel(data));
+                        kendoWindow.close();
+                        if( studio.ui.isFunction(callback) ){ 
+                          callback($self.message);
+                        }
+                      })
+                      .catch(function (error) {
+                        studio.ui.handleAxiosError(error);
+                      })
+                      .then(function () {
+                        // always executed
+                        kendo.ui.progress($(".k-dialog"), false);
+                        dialog.close();
+                      });
+                    return false;
+                  },
+                  primary: true,
+                },
+                { text: "Cancle" },
+              ],
+            })
+            .data("kendoDialog");
+          dialog.open();
+        },
+      });
+      var ace_editor = createAceEditor(null, observable);
+      var kendo_editor = createKendoEditor(null, observable);
+      observable.bind("change", function (e) {
+        if (e.field === "editor.warp") {
+          ace_editor.getSession().setUseWrapMode(observable.get("editor.warp"));
+        }
+      });
+      kendo.bind(renderTo, observable);
+      renderTo.data("model", observable);
+      var kendoWindow = renderTo
+        .kendoWindow({
+          width: "950px",
+          height: "700px",
+          title: "Post Message",
+          visible: false,
+          resizable: false,
+          draggable: false,
+          scrollable: false,
+          modal: true,
+          actions: ["Maximize", "Close"], //
+          open: function () {
+            var _subject = observable.message.subject;            
+            this.title(_subject == null ? "New Post" : _subject);
+            observable.editor.kendo();
+          },
+          close: function () {},
+        })
+        .data("kendoWindow");
+      kendoWindow.wrapper.addClass("post-message-window");
+    }
+    renderTo.data("model").setSource(item);
+    renderTo.data("kendoWindow").center().open();
+  }
+
+  function createAceEditor(renderTo, observable) {
+    renderTo = renderTo || $("#ace-editor");
+    if (renderTo.contents().length == 0) {
+      var editor = ace.edit(renderTo.attr("id"));
+      editor.getSession().setMode(observable.get("editor.mode"));
+      editor.setTheme(observable.get("editor.theme"));
+      editor.getSession().setUseWrapMode(observable.get("editor.warp"));
+      editor.setReadOnly(!observable.get("editor.editable"));
+    }
+    return ace.edit(renderTo.attr("id"));
+  }
+
+  function createKendoEditor(renderTo, observable) {
+    renderTo = renderTo || $("#kendo-editor");
+    if (!renderTo.data("kendoEditor")) {
+      var editor = renderTo.kendoEditor({
+        tools: [
+          {
+            name: "ace",
+            tooltip: "code edit mode",
+            exec: function (e) {
+              observable.editor.edit();
+            },
+          },
+          "bold",
+          "italic",
+          "underline",
+          "justifyLeft",
+          "justifyCenter",
+          "justifyRight",
+          "insertUnorderedList",
+          "createLink",
+          "unlink",
+          "insertImage",
+          "tableWizard",
+          "createTable",
+          "addRowAbove",
+          "addRowBelow",
+          "addColumnLeft",
+          "addColumnRight",
+          "deleteRow",
+          "deleteColumn",
+          "mergeCellsHorizontally",
+          "mergeCellsVertically",
+          "splitCellHorizontally",
+          "splitCellVertically",
+          "formatting",
+          {
+            name: "fontName",
+            items: [
+              { text: "Andale Mono", value: "Andale Mono" },
+              { text: "Arial", value: "Arial" },
+              { text: "Arial Black", value: "Arial Black" },
+              { text: "Book Antiqua", value: "Book Antiqua" },
+              { text: "Comic Sans MS", value: "Comic Sans MS" },
+              { text: "Courier New", value: "Courier New" },
+              { text: "Georgia", value: "Georgia" },
+              { text: "Helvetica", value: "Helvetica" },
+              { text: "Impact", value: "Impact" },
+              { text: "Symbol", value: "Symbol" },
+              { text: "Tahoma", value: "Tahoma" },
+              { text: "Terminal", value: "Terminal" },
+              { text: "Times New Roman", value: "Times New Roman" },
+              { text: "Trebuchet MS", value: "Trebuchet MS" },
+              { text: "Verdana", value: "Verdana" },
+            ],
+          },
+          "fontSize",
+          "foreColor",
+          "backColor",
+        ],
+      });
+    }
+    return renderTo.data("kendoEditor");
+  }
+</script>
+<div
+  id="post-edit-window"
+  class="g-pa-0 g-height-700 post-window"
+  style="display: none;"
+>
+  <div class="g-pa-15 g-pa-15--sm container">
+    <form id="streams-form" onsubmit="return false">
+      <div class="form-row g-mb-5">
+        <div class="col">
+          <div class="u-input-group-v2">
+            <input id="input-post-subject" class="form-control rounded-0 u-form-control" name="input-post-subject" type="text" placeholder="Type a subject"
+            data-bind="value:message.subject"
+            equired
+            validationMessage="Please enter the subjecgt.">
+            <label for="nput-post-subject">Subject</label>
+          </div>
+          <span
+            class="k-widget k-tooltip k-tooltip-validation k-invalid-msg"
+            data-for="input-post-subject"
+            role="alert"
+            style="display: none;"
+          ></span>
+        </div>
+      </div>
+      <div class="form-row g-mb-25">
+        <div class="col">
+          <div data-bind="visible:editor.visible" class="g-brd-1 g-brd-style-solid" style="border-color:#d1cccc;" >
+            <div class="layer w-100" style="background-color: #f6f6f6;">
+              <div class="peers ai-c jc-sb p-10 fxw-nw">
+                <div class="peer">
+                  <button
+                    data-role="button"
+                    data-icon="edit"
+                    data-bind="events:{click: editor.cancle }"
+                  ></button>
+                </div>
+                <div class="peer">
+                  <ul class="u-list-inline">
+                    <li class="list-inline-item">
+                      <label
+                        class="d-flex align-items-center justify-content-between g-mb-0"
+                      >
+                        <span class="g-pr-20 g-font-size-12 g-font-weight-300"
+                          >Word Warp</span
+                        >
+                        <div class="u-check">
+                          <input
+                            class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0"
+                            name="useWarp"
+                            value="true"
+                            data-bind="checked:editor.warp"
+                            type="checkbox"
+                          />
+                          <div class="u-check-icon-radio-v8">
+                            <i class="fa" data-check-icon=""></i>
+                          </div>
+                        </div>
+                      </label>
+                    </li>
+                    <li class="list-inline-item"></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div id="ace-editor" style="height: 495px; width: 100%;"></div>
+          </div>
+          <textarea
+            id="kendo-editor"
+            rows="10"
+            cols="30"
+            style="min-height: 500px; height: 500px;"
+            aria-label="kendo-editor"
+            data-bind="visible:editor.kendoEditor, value:message.body"
+          ></textarea>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 text-right">
+          <button
+            type="button"
+            class="btn btn-md u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
+            data-bind="click:saveOrUpdate"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

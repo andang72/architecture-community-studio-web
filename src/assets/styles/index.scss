@@ -7,3 +7,6 @@
 //@import "~@progress/kendo-ui/css/web/kendo.common.min.css";
 //@import "~@progress/kendo-ui/css/web/kendo.default.min.css";
 @import "~@progress/kendo-theme-default/dist/all";
+
+@import '~codemirror/lib/codemirror.css'; // Editor's Dependency Style
+@import '~@toast-ui/editor/dist/toastui-editor.css'; // Editor's Style

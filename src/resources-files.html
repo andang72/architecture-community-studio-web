@@ -149,169 +149,7 @@
   <!-- =================================================== -->
   <div>
     <!-- #Left Sidebar ==================== -->
-    <div class="sidebar">
-      <div class="sidebar-inner">
-        <!-- ### $Sidebar Header ### -->
-        <div class="sidebar-logo">
-          <div class="peers ai-c fxw-nw">
-            <div class="peer peer-greed">
-              <a class="sidebar-link td-n" href="index.html">
-                <div class="peers ai-c fxw-nw">
-                  <div class="peer">
-                    <div class="logo">
-                      <img src="assets/static/images/logo.png" alt="">
-                    </div>
-                  </div>
-                  <div class="peer peer-greed">
-                    <h5 class="lh-1 mB-0 logo-text">Adminator</h5>
-                  </div>
-                </div>
-              </a>
-            </div>
-            <div class="peer">
-              <div class="mobile-toggle sidebar-toggle">
-                <a href="" class="td-n">
-                  <i class="ti-arrow-circle-left"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ### $Sidebar Menu ### -->
-        <ul class="sidebar-menu scrollable pos-r">
-          <li class="nav-item  mT-30">
-            <a class="sidebar-link" href="index.html">
-              <span class="icon-holder">
-                <i class="c-blue-500 ti-home"></i>
-              </span>
-              <span class="title">Dashboard</span>
-            </a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-orange-500 ti-folder"></i>
-              </span>
-              <span class="title">Settings</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link ' href="settings-properties.html">Properties</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="settings-locale.html">Locale</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="settings-datasource.html">DataSource</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-deep-orange-500 ti-folder"></i>
-              </span>
-              <span class="title">Security</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="security-users.html">Users</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="security-audit.html">Audit</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-green-500 ti-folder"></i>
-              </span>
-              <span class="title">Services</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="services-email.html">Email</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-menu.html">Menu</a>
-              </li> 
-            </ul>
-          </li>
-          <li class="nav-item dropdown open">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-purple-500 ti-folder"></i>
-              </span>
-              <span class="title">Resources</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="resources-pages.html">Pages</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-apis.html">Apis</a>
-              </li>
-
-              <li class="nav-item dropdown">
-                <a href="javascript:void(0);">
-                  <span>Sources</span>
-                  <span class="arrow">
-                    <i class="ti-angle-right"></i>
-                  </span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a href="resources-decorators.html">Decorators</a>
-                  </li>
-                  <li>
-                    <a href="resources-templates.html">Templates</a>
-                  </li>
-                  <li>
-                    <a href="resources-groovys.html">Gloovy</a>
-                  </li>
-                  <li>
-                    <a href="resources-sqls.html">Sql</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a class='sidebar-link actived' href="resources-files.html">Files</a>
-              </li>
-              <li>
-                <a class='sidebar-link ' href="resources-images.html">Images</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-albums.html">Albums</a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-
+    <%= require('html-loader!./include-sidebar.html') %>
     <!-- #Main ============================ -->
     <div class="page-container">
       <!-- ### $Topbar ### -->
@@ -320,11 +158,14 @@
       <!-- ### $App Screen Content ### -->
       <script>
         function setup() {
+          $('a.sidebar-link[href="resources-files.html"]').addClass('actived');
+          $('a.sidebar-link[href="resources-files.html"]').closest('li.nav-item.dropdown').addClass('open'); 
+
           $(document).ajaxSend(function (event, jqXHR, options) {
             jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
           });
           var $window = $(window).on('resize', function () {
-            var height = $(document).height() - ($('.header-container').height() + 61)
+            var height = $(document).height() - ($('.header-container').height())
             $('#grid').height(height);
           }).trigger('resize'); //on page load     
           const headers = {
@@ -735,6 +576,14 @@
                   objectId: observable.get("attachment.objectId"),
                   imageId: observable.get("attachment.attachmentId")
                 };
+                var xhr = e.XMLHttpRequest;
+                if (xhr) {
+                  xhr.addEventListener("readystatechange", function onUploadReady(e) {
+                    if (xhr.readyState == 1 /* OPENED */) {
+                      xhr.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
+                    }
+                  });
+                }
               },
               success: function (e) {
                 const data = e.response;
@@ -1113,13 +962,6 @@
                 <path fill-rule="evenodd" d="M2.5 4.5a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm2-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
               </svg>
               Tags</button>
-            <button type="button" class="btn cur-p btn-outline-primary">
-              <svg class="bi bi-images" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M12.002 4h-10a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-10-1a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-10z"/>
-                <path d="M10.648 8.646a.5.5 0 0 1 .577-.093l1.777 1.947V14h-12v-1l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71z"/>
-                <path fill-rule="evenodd" d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM4 2h10a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1v1a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2h1a1 1 0 0 1 1-1z"/>
-              </svg>
-              Slide</button>
             <button type="button" class="btn cur-p u-btn-pink" data-bind="enabled:selected, click:delete">
               <svg class="bi bi-trash" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
@@ -1137,9 +979,7 @@
         </div>
         <div class="media-body align-self-center text-left">#if ( !user.anonymous  && user.name != null ) {# #: user.name # #}#</div>
       </div>	
-      </script>
-      <!-- ### $App Screen Footer ### -->
-      <%= require('html-loader!./include-footer.html') %>
+      </script> 
     </div>
   </div>
 </body>

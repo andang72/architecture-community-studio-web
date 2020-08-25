@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title><%= title %></title>
+  <style>
+    #loader {
+      transition: all 0.3s ease-in-out;
+      opacity: 1;
+      visibility: visible;
+      position: fixed;
+      height: 100vh;
+      width: 100%;
+      background: #fff;
+      z-index: 90000;
+    }
+
+    #loader.fadeOut {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: calc(50% - 20px);
+      left: calc(50% - 20px);
+      background-color: #333;
+      border-radius: 100%;
+      -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+      animation: sk-scaleout 1.0s infinite ease-in-out;
+    }
+
+    @-webkit-keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0)
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+
+    @keyframes sk-scaleout {
+      0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+      }
+
+      100% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+        opacity: 0;
+      }
+    }
+
+    .k-grid .u-link-underline>h5,
+    .k-grid .u-link-underline>h4,
+    .k-grid .u-link-underline>.u-title {
+      border-bottom: 1px solid transparent;
+      padding-bottom: 1.5px;
+    }
+
+    .is-loading {
+      background-color: #fff;
+      background-image: url('assets/static/images/loading-image.gif');
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .is-loading img,
+    .is-broken img {
+      opacity: 0;
+    }
+
+    .tab-pane-grid .k-grid-toolbar {
+      background: #fff;
+    }
+
+    .k-grid tbody tr {
+      cursor: move;
+    }
+
+    .placeholder {
+      outline-style: dashed;
+      outline-width: 1px;
+      outline-color: red;
+    }
+
+    .masonry {
+      display: block;
+    }
+
+    .masonry:after {
+      content: '';
+      display: block;
+      clear: both;
+    }
+
+    .masonry .card>a {
+      width: 250px;
+      overflow: hidden;
+    }
+
+    .masonry-item {
+      float: left;
+      border-radius: 5px;
+    }
+
+    .masonry-sizer,
+    .masonry-item {
+      width: 250px;
+      overflow: hidden;
+    }
+
+    .masonry-item img.k-card-image {
+      width: 250px;
+      overflow: hidden;
+    }
+
+    .masonry-item .k-card-body {
+      overflow-wrap: anywhere;
+    }
+
+    @media only screen and (max-width: 300px) {
+      .masonry-item img.k-card-image {
+        width: 100%; 
+      }
+    }
+
+  </style>
+</head>
+
+<body class="app" authenticate-required="true">
+  <!-- @TOC -->
+
+  <div id='loader'>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    window.addEventListener('load', function load() {
+      const loader = document.getElementById('loader');
+      setTimeout(function () {
+        loader.classList.add('fadeOut');
+      }, 300);
+    });
+  </script>
+
+  <!-- @App Content -->
+  <!-- =================================================== -->
+  <script>
+    function setup() {
+      $(document).ajaxSend(function (event, jqXHR, options) {
+        jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
+      });
+
+      var renderTo = $("#mainContent");
+      var AlbumModel = kendo.data.Model.define(studio.data.model.Album);
+      const NO_AVATA_IMAGE = 'assets/static/images/no-avatar.png';
+      var observable = kendo.observable({
+        masonry : false,
+        album: new AlbumModel(),
+        authorImgUrl: NO_AVATA_IMAGE,
+        lastModifiedDate: "",
+        setSource: function (data) {
+          var $this = this;
+          data = data || new AlbumModel();
+          data.copy($this.album);
+          $this.set('authorImgUrl', studio.services.accounts.getUserAvatarUrl($this.album.user.username));
+          $this.set('lastModifiedDate', studio.ui.format.date($this.album.modifiedDate, "yyyy.MM.dd HH:mm"));
+          createAlbumMasonry($this);
+        },
+        load: function (albumId) {
+          var $this = this;
+          kendo.ui.progress(renderTo, false);
+          axios({
+            url: studio.services.getApiUrl('/data/secure/mgmt/albums/' + albumId),
+            method: "get",
+            headers: studio.ui.headerWithAuth()
+          })
+            .then(response => {
+              const data = response.data;
+              $this.setSource(new AlbumModel(data));
+            })
+            .catch(function (error) {
+              studio.ui.handleAxiosError(error);
+            })
+            .then(function () {
+              // always executed
+              kendo.ui.progress(renderTo, false);
+            });
+        },
+        close: function () {
+          //window.close();
+          window.history.back();
+        }
+      });
+
+      var objectId = window.location.search.substring(1);
+      if( studio.ui.defined(objectId) )
+        observable.load(objectId);    
+      kendo.bind(renderTo, observable);
+    }
+
+
+    function createAlbumMasonry(observable) {
+      var renderTo = $(".masonry");
+      var template = kendo.template($("#album-image-template").html());
+      var dataSource = new kendo.data.DataSource({
+        transport: {
+          read: {
+            url: studio.services.getApiUrl('/data/secure/mgmt/albums/') + observable.album.albumId + '/images',
+            type: 'post', dataType: 'json', contentType: "application/json; charset=utf-8"
+          },
+          parameterMap: function (options, operation) {
+            if (operation !== "read" && options.models) {
+              return JSON.stringify(options.models);
+            } else {
+            }
+            return JSON.stringify(options);
+          }
+        },
+        //pageSize: 54,
+        serverPaging: false,
+        serverFiltering: false,
+        serverSorting: false,
+        error: studio.ui.handleAjaxError,
+        schema: {
+          data: "items",
+          total: "totalCount",
+          model: studio.data.model.Image
+        },
+        change: function () {
+          $elems = kendo.render(template, this.view());
+          renderTo.html($elems);
+
+          if( observable.get('masonry')){
+            renderTo.masonry('destroy');
+          } 
+          renderTo.masonry({ horizontalOrder: true, columnWidth: 250, percentPosition: false, gutter: 10 });
+          observable.set('masonry', true);
+
+          var delay = 600;
+          renderTo.find("img[is-secure]").each(function () {
+            var $this = $(this);
+            $this.parent().addClass('is-loading');
+            delay = delay + 200;
+            studio.ui.setSecureImage($this, delay, function () {
+              renderTo.masonry('layout');
+            });
+          });
+          $(".masonry img").hover(function () {
+            kendo.fx(this).zoom("in").startValue(1).endValue(1.2).play();
+          }, function () {
+            kendo.fx(this).zoom("out").endValue(1).startValue(1.2).play();
+          });
+        }
+      });
+      dataSource.read();
+    }
+
+  </script>
+  <div id="mainContent">
+    <!-- Article -->
+    <article class="g-bg-gray-dark-v2 g-pa-15">
+      <a class="btn btn-link u-link-v5 g-mr-10 g-font-size-15 g-color-secondary--hover g-pos-abs" style="right:15px;"
+        data-bind="click:close">
+        <img src="assets/static/images/cross.png" />
+      </a>
+      <div class="media g-mb-25">
+        <img class="d-flex g-width-40 g-height-40 rounded-circle mr-2" src="assets/static/images/no-image_2.jpg" data-bind="attr:{src: authorImgUrl }" alt="Image Description">
+        <div class="media-body">
+          <h4 class="h6 g-color-primary mb-0"><a href="#" data-bind="text:album.user.name"></a></h4>
+          <span class="d-block g-color-gray-dark-v4 g-font-size-12" data-bind="text:lastModifiedDate"></span>
+        </div>
+      </div>
+      <div class="g-mb-0">
+        <h2 class="h4 g-color-black g-font-weight-600 mb-3"><a class="u-link-v5 g-color-black g-color-primary--hover" href="#"><span data-bind="text:album.name"></a></h2>
+        <p class="g-color-gray-dark-v4 g-line-height-1_8" data-bind="text:album.description"></p>
+      </div>
+    </article>
+    <!-- End Article -->
+    <div class="container-fluid">
+      <div id="masonry-listview" class="masonry"></div>
+    </div>
+  </div>
+  <script type="text/x-kendo-template" id="album-image-template">
+    <div class="k-card g-pa-0 g-ma-5 masonry-item" >     
+      <!-- Figure Image -->
+        <a class="fancybox" is-secure="true" data-fancybox="gallery" href="#= studio.ui.getImageUrl(data) #"
+          data-caption="#if (tags !=null && tags.length>0 ) {#<span class='u-label g-rounded-3 g-bg-pink g-mr-10 g-mb-15'><i class='fa fa-tags g-mr-3'></i>#: tags #</span>#}#
+          <br/> 
+          #: name #  #= studio.ui.format.byte( size ) # #= studio.ui.format.date( modifiedDate , 'yyyy.MM.dd HH:MM') #">
+          <figure class="g-pos-rel u-bg-overlay g-bg-black-opacity-0_1--after g-overflow-hidden">
+            <img
+              class="k-card-image g-brd-2 g-brd-transparent g-brd-lightblue-v3--parent-opened"
+              #if (imageLink==null) { # data-retry="0" is-secure="true" data-max-rery="5"
+              secure-image="#= studio.ui.getImageUrl(data, { width:300, height:300, thumbnail:true } ) #"
+              src="#= studio.ui.getImageUrl(data, {thumbnail:true}) #"  #}else{# 
+            src="#= studio.ui.getImageUrl(data, {thumbnail:true}) #"   
+          #}# alt="#= name #">
+          </figure>
+        </a>
+      <!-- Figure Image -->
+    </div>
+  </script>
+
+</body>
+
+</html>

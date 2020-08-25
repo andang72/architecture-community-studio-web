@@ -104,169 +104,7 @@
   <!-- =================================================== -->
   <div>
     <!-- #Left Sidebar ==================== -->
-    <div class="sidebar">
-      <div class="sidebar-inner">
-        <!-- ### $Sidebar Header ### -->
-        <div class="sidebar-logo">
-          <div class="peers ai-c fxw-nw">
-            <div class="peer peer-greed">
-              <a class="sidebar-link td-n" href="index.html">
-                <div class="peers ai-c fxw-nw">
-                  <div class="peer">
-                    <div class="logo">
-                      <img src="assets/static/images/logo.png" alt="">
-                    </div>
-                  </div>
-                  <div class="peer peer-greed">
-                    <h5 class="lh-1 mB-0 logo-text">Adminator</h5>
-                  </div>
-                </div>
-              </a>
-            </div>
-            <div class="peer">
-              <div class="mobile-toggle sidebar-toggle">
-                <a href="" class="td-n">
-                  <i class="ti-arrow-circle-left"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ### $Sidebar Menu ### -->
-        <ul class="sidebar-menu scrollable pos-r">
-          <li class="nav-item  mT-30">
-            <a class="sidebar-link" href="index.html">
-              <span class="icon-holder">
-                <i class="c-blue-500 ti-home"></i>
-              </span>
-              <span class="title">Dashboard</span>
-            </a>
-          </li>
-          <li class="nav-item dropdown ">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-orange-500 ti-folder"></i>
-              </span>
-              <span class="title">Settings</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link ' href="settings-properties.html">Properties</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="settings-locale.html">Locale</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="settings-datasource.html">DataSource</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown open">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-deep-orange-500 ti-folder"></i>
-              </span>
-              <span class="title">Security</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
-              </li>
-              <li>
-                <a class='sidebar-link actived' href="security-users.html">Users</a>
-              </li>
-              <li>
-                <a class='sidebar-link ' href="security-audit.html">Audit</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-green-500 ti-folder"></i>
-              </span>
-              <span class="title">Services</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="services-email.html">Email</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-menu.html">Menu</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-purple-500 ti-folder"></i>
-              </span>
-              <span class="title">Resources</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="resources-pages.html">Pages</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-apis.html">Apis</a>
-              </li>
-
-              <li class="nav-item dropdown">
-                <a href="javascript:void(0);">
-                  <span>Sources</span>
-                  <span class="arrow">
-                    <i class="ti-angle-right"></i>
-                  </span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a href="resources-decorators.html">Decorators</a>
-                  </li>
-                  <li>
-                    <a href="resources-templates.html">Templates</a>
-                  </li>
-                  <li>
-                    <a href="resources-groovys.html">Gloovy</a>
-                  </li>
-                  <li>
-                    <a href="resources-sqls.html">Sql</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-files.html">Files</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-images.html">Images</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-albums.html">Albums</a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-
+    <%= require('html-loader!./include-sidebar.html') %>
     <!-- #Main ============================ -->
     <div class="page-container">
       <!-- ### $Topbar ### -->
@@ -275,12 +113,21 @@
       <!-- ### $App Screen Content ### -->
       <script>
         function setup() {
+
+          const sidebar_nav_item = $('.sidebar .nav-item a[href="security-users.html"]');
+          if( sidebar_nav_item.hasClass('sidebar-link')){
+            sidebar_nav_item.addClass('actived');
+          }else{
+            sidebar_nav_item.parent().addClass('actived');
+          }
+          sidebar_nav_item.parents('li.nav-item.dropdown').addClass('open'); 
+
           $(document).ajaxSend(function (event, jqXHR, options) {
             jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
           });
 
           var $window = $(window).on('resize', function () {
-            var height = $(document).height() - ($('.header-container').height() + 61)
+            var height = $(document).height() - ($('.header-container').height())
             $('#grid').height(height);
           }).trigger('resize'); //on page load  
 
@@ -291,15 +138,19 @@
           Object.assign(headers, studio.services.accounts.authHeader());
 
           var renderTo = $("#mainContent");
+
           var observable = new kendo.observable({
             selected: false,
+            createUser: function (e) {
+              getUserEditorWindow();
+            },
             deleteUsers: function (e) {
               var $this = this;
               var grid = $('#grid').data('kendoGrid');
               if (grid.selectedKeyNames().length > 0) {
-                var template = kendo.template('선택한 사용자를 영구적으로 제거합니다.<br/> 이동작은 최소할 수 없습니다.');
+                var template = kendo.template('Permanently remove the selected users.<br/> Moves cannot be undo.');
                 var dialog = $("#dialog").kendoDialog({
-                  title: '선택한 사용자을 삭제하시겠습니까?',
+                  title: 'Are you sure you want to delete the selected users?',
                   content: template($this),
                   closable: true,
                   modal: true,
@@ -335,6 +186,32 @@
                 dialog.open();
               }
             },
+            userStateWindow: {
+              state: null,
+              enabled: true
+            },
+            userState: function () {
+              var $this = this;
+              var grid = $('#grid').data('kendoGrid');
+              if (grid.selectedKeyNames().length > 0) {
+                getUserStateWindow(this);
+              }
+            },
+            selectedState: null,
+            getSelectedState: function () {
+              var $this = this;
+              var state = $this.get('selectedState');
+              if (state != null) {
+                return state.value;
+              }
+              return null;
+            },
+            stateChanged: function () {
+              var $this = this;
+              var grid = $('#grid').data('kendoGrid');
+              grid.dataSource.read();
+            },
+            stateDataSource: studio.services.accounts.userState,
             selectedRole: null,
             getSelectedRole: function () {
               var $this = this;
@@ -371,6 +248,27 @@
           kendo.bind(renderTo, observable);
         }
 
+        function getUserStateWindow(observable) {
+          var renderTo = $('#user-state-window');
+          if (!renderTo.data('kendoWindow')) {
+            var window = renderTo.kendoWindow({
+              width: "500px",
+              title: "User State",
+              visible: false,
+              modal: true,
+              actions: ["Close"], // 
+              open: function () {
+                observable.set('userStateWindow.state', null);
+                observable.set('userStateWindow.enabled', true);
+              },
+              close: function () {
+              }
+            });
+            kendo.bind(renderTo, observable);
+          }
+          renderTo.data('kendoWindow').center().open();
+        }
+
         function createLocalUserGrid(observable) {
           var renderTo = $('#grid');
           if (!renderTo.data("kendoWindow")) {
@@ -382,6 +280,14 @@
                     requiredRole = observable.getSelectedRole();
                     if (requiredRole != null)
                       options['REQUIRED_ROLE'] = requiredRole;
+                    requiredState = observable.getSelectedState();
+                    if (requiredState != null) {
+                      if (studio.ui.defined(options.filter)) {
+                        options.filter.filters.push({ field: 'STATUS', operator: 'eq', value: requiredState });
+                      } else {
+                        options.filter = { logic: "and", filters: [{ field: 'STATUS', operator: 'eq', value: requiredState }] };
+                      }
+                    }
                     return JSON.stringify(options);
                   }
                 },
@@ -420,9 +326,9 @@
                 { field: "NAME", title: "Name", template: '#: name #', width: 300, validation: { required: true } },
                 { field: "EMAIL", title: "Email", template: '#: email #', width: 300, validation: { required: true } },
                 { field: "USER_EXTERNAL", title: "External", template: '#: external#', width: 100, validation: { required: true } },
-                { field: "STATUS", title: "Status", template: '#:status#', width: 100, validation: { required: true } },
-                { field: "creationDate", title: "Creation Date", type: "date", format: "{0:yyyy.MM.dd}", width: 100, validation: { required: true }, filterable: { ui: "datetimepicker" } },
-                { field: "modifiedDate", title: "Modified Date", format: "{0:yyyy.MM.dd}", width: 100, validation: { required: true }, filterable: { ui: "datetimepicker" } }
+                { field: "STATUS", title: "State", template: '#:status#', filterable: false, width: 120, validation: { required: true } },
+                { field: "CREATION_DATE", title: "Creation", type: "date", filterable: false, template: "#= studio.ui.format.date( creationDate, 'yyyy.MM.dd') #", width: 100 },
+                { field: "MODIFIED_DATE", title: "Modified", type: "date", filterable: false, template: "#= studio.ui.format.date( modifiedDate, 'yyyy.MM.dd') #", width: 100 }
               ]
             }).data('kendoGrid');
 
@@ -453,6 +359,7 @@
               unlocked: true,
               editable: false,
               prifileImgUrl: NO_AVATA_IMAGE,
+              assignedRoles: [],
               passwd: function () {
                 var $this = this;
                 var passwdRenderTo = $('#passwd-window');
@@ -512,7 +419,6 @@
                     {
                       text: 'Ok',
                       action: function (e) {
-
                         kendo.ui.progress(renderTo, true);
                         axios({
                           url: studio.services.getApiUrl('/data/secure/mgmt/security/users/save-or-update.json'),
@@ -525,7 +431,44 @@
                         }).then(function () {
                           kendo.ui.progress(renderTo, false);
                         });
-
+                        return false;
+                      },
+                      primary: true
+                    },
+                    { text: 'Cancle' }
+                  ]
+                }).data("kendoDialog");
+                dialog.open();
+              },
+              saveOrUpdateRoles() {
+                var $this = this;
+                var template = kendo.template('Will you change assigned roles ?');
+                console.log(JSON.stringify($this.assignedRoles));
+                var dialog = $("#dialog").kendoDialog({
+                  width: "300px",
+                  closable: true,
+                  modal: true,
+                  buttonLayout: "normal",
+                  title: 'Confirm',
+                  content: template($this),
+                  actions: [
+                    {
+                      text: 'Ok',
+                      action: function (e) {
+                        kendo.ui.progress($('.k-dialog'), true);
+                        axios({
+                          url: studio.services.getApiUrl('/data/secure/mgmt/security/users/' + $this.user.userId + '/roles'),
+                          method: 'post',
+                          headers: headers,
+                          data: JSON.stringify($this.assignedRoles)
+                        }).then(response => {
+                          studio.ui.notify(null, "role updated.", "success");
+                        }).catch(function (error) {
+                          studio.ui.handleAxiosError(error);
+                        }).then(function () {
+                          kendo.ui.progress($('.k-dialog'), false);
+                          dialog.close();
+                        });
                         return false;
                       },
                       primary: true
@@ -543,9 +486,20 @@
                 $this.set('editable', $this.user.userId > 0 ? true : false);
                 if ($this.get('editable')) {
                   $this.set('prifileImgUrl', studio.services.accounts.getUserAvatarUrl(data.username));
-                  $("#dropZone").data("kendoUpload").options.async.saveUrl =
-                    studio.services.getApiUrl('/data/secure/mgmt/security/users/') + data.userId + '/avatar/upload.json';
+                  $("#dropZone").data("kendoUpload").options.async.saveUrl = studio.services.getApiUrl('/data/secure/mgmt/security/users/') + data.userId + '/avatar/upload.json';
                   studio.ui.propertyGrid(null, "users", data.userId);
+                  var select = createRoleSelect(null);
+                  Promise.resolve(studio.services.accounts.getUserRoles(data.userId)).then(function (value) {
+                    // "Success" 
+                    var assigned = [];
+                    $.each(value, function (index, item) {
+                      assigned.push(item.roleId);
+                    });
+                    select.value(assigned);
+                  }, function (value) {
+                    // not called 
+                    select.value([]);
+                  });
                 } else {
                   $this.set('prifileImgUrl', NO_AVATA_IMAGE);
                 }
@@ -580,14 +534,13 @@
               },
               dropZone: ".dropZoneElement"
             });
-
             kendo.bind(renderTo, observable);
             renderTo.data('model', observable);
             var window = renderTo.kendoWindow({
               width: "950px",
               title: "User",
               visible: false,
-              scrollable: false,
+              scrollable: true,
               modal: true,
               actions: ["Close"], // 
               open: function () {
@@ -604,6 +557,40 @@
           renderTo.data('model').setSource(item);
           renderTo.data("kendoWindow").center().open();
         }
+
+        function createRoleSelect(renderTo) {
+          renderTo = renderTo || $("#role-select");
+          if (!renderTo.data('kendoMultiSelect')) {
+            renderTo.kendoMultiSelect({
+              placeholder: "Select roles ...",
+              dataTextField: "name",
+              dataValueField: "roleId",
+              valuePrimitive: false,
+              autoBind: false,
+              dataSource: {
+                transport: {
+                  read: {
+                    url: studio.services.getApiUrl('/data/secure/mgmt/security/roles/list.json'),
+                    type: 'post', contentType: "application/json; charset=utf-8"
+                  },
+                  parameterMap: function (options, operation) {
+                    return kendo.stringify(options);
+                  }
+                },
+                error: studio.ui.handleAjaxError,
+                schema: {
+                  total: "totalCount",
+                  data: "items",
+                  model: studio.data.Role
+                }
+              }
+            });
+          }
+          //console.log(assignedRoles);
+          //renderTo.data('kendoMultiSelect').value(assignedRoles);
+          return renderTo.data('kendoMultiSelect');
+        }
+
       </script>
       <main class='main-content bgc-grey-100'>
         <div id='mainContent'>
@@ -613,13 +600,80 @@
         </div>
       </main>
       <span id="dialog"></span>
+
+
+      <div class="row g-mb-15">
+        <div class="col-md-6"><label class="g-mb-10 g-font-weight-600" for="input-user-status"
+            id="input-user-status_label">상태</label>
+          <div class="form-group g-mb-30"><span title="" class="k-widget k-dropdown" unselectable="on" role="listbox" aria-haspopup="true" aria-expanded="false" aria-owns="input-user-status_listbox"
+              aria-labelledby="input-user-status_label" aria-live="polite" aria-disabled="false" aria-busy="false"
+              style="width: 100%;" aria-activedescendant="b9464ee5-5d21-41d5-93da-d263a08d8992" tabindex="0"><span
+                unselectable="on" class="k-dropdown-wrap k-state-default"><span unselectable="on"
+                  class="k-input">REGISTERED</span><span unselectable="on" class="k-select" aria-label="select"><span
+                    class="k-icon k-i-arrow-60-down"></span></span></span><select data-role="dropdownlist"
+                data-bind="value: user.status, enabled:editable" id="input-user-status"
+                style="width: 100%; display: none;">
+                <option value="NONE" selected="selected">NONE</option>
+                <option value="APPROVED">APPROVED</option>
+                <option value="REJECTED">REJECTED</option>
+                <option value="VALIDATED">VALIDATED</option>
+                <option value="REGISTERED">REGISTERED</option>
+              </select></span></div>
+        </div>
+      </div>
+
+      <div id="user-state-window" class="g-pa-15 g-height-500 container-fluid" style="display:none;">
+        <div class="row g-mb-25">
+          <div class="col">
+            <label class="d-flex align-items-center justify-content-between g-mb-0"
+              for="input-state-window-user-state">
+              <span class="g-pr-20 g-font-weight-500">User State</span> 
+            <input id="input-state-window-user-state" data-role="dropdownlist" data-option-label="Select state ..." data-auto-bind="false" 
+              data-text-field="text" data-value-field="value"
+              data-bind="value:userStateWindow.state, source: stateDataSource" style="width: 300px;" />
+            </label>
+            <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
+              
+            </small>
+          </div>
+        </div>
+        <div class="row g-mb-25">
+          <div class="col text-right"><button class="btn btn-md u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
+              data-bind="click:saveOrUpdateState">Change User State</button></div>
+        </div>
+        <hr />
+        <div class="row g-mb-25">
+          <div class="col">
+            <label class="d-flex align-items-center justify-content-between g-mb-0"
+              for="input-state-window-user-enabled">
+              <span class="g-pr-20 g-font-weight-500">User Enable</span>
+              <div class="u-check">
+                <input class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0" id="input-state-window-user-enabled"
+                  name="input-state-window-user-enabled" value="true" data-bind="checked:userStateWindow.enabled"
+                  type="checkbox">
+                <div class="u-check-icon-radio-v8">
+                  <i class="fa" data-check-icon=""></i>
+                </div>
+              </div>
+            </label>
+            <small class="g-font-weight-300 g-font-size-12 g-color-gray-dark-v6 g-pt-5 g-hidden-md-down">
+              Once disabled, the user can no longer use the system.
+            </small>
+          </div>
+        </div>
+        <div class="row g-mb-25">
+          <div class="col text-right"><button class="btn btn-md u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
+              data-bind="click:saveOrUpdateEnable">Change User Enable or Disable</button></div>
+        </div>
+      </div>
+
       <div id="user-window" class="g-pa-0 g-height-600 container-fluid" style="display:none;">
         <div class="g-pa-15 g-pa-30--sm">
-          <div class="row g-mb-25 align-items-end">
+          <div class="row g-mb-25 align-items-center">
             <div class="col-sm-4">
-              <div class="d-inline-block g-pos-rel g-mb-30">
+              <div class="d-inline-block g-pos-rel g-mb-30" data-bind="visible:editable">
                 <a class="u-badge-v2--lg u-badge--bottom-right g-width-32 g-height-32 g-bg-lightblue-v3 g-bg-primary--hover g-mb-20 g-mr-20"
-                  href="#!" data-bind="click:select,enabled:editable">
+                  href="#!" data-bind="click:select,enabled:editable, visible:editable">
                   <svg class="bi bi-cloud-upload g-absolute-centered g-font-size-16 g-color-white" width="1em"
                     height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -630,8 +684,7 @@
                   </svg>
                 </a>
                 <figure class="g-max-width-200 dropZoneElement">
-                  <img
-                    class="img-fluid rounded-circle g-brd-2 g-brd-transparent g-brd-lightblue-v3--parent-opened g-mr-20--sm"
+                  <img class="img-fluid rounded g-brd-2 g-brd-transparent g-brd-lightblue-v3--parent-opened g-mr-20--sm"
                     src="assets/static/images/no-avatar.png" data-bind="attr:{src: prifileImgUrl }">
                 </figure>
               </div>
@@ -760,25 +813,24 @@
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col text-right">
-              <button class="btn btn-md u-btn-outline-red g-rounded-50 g-mr-10 g-mb-15"
-                data-bind="visible:editable, click:passwd">
-                <svg class="bi bi-shield-lock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd"
-                    d="M5.443 1.991a60.17 60.17 0 0 0-2.725.802.454.454 0 0 0-.315.366C1.87 7.056 3.1 9.9 4.567 11.773c.736.94 1.533 1.636 2.197 2.093.333.228.626.394.857.5.116.053.21.089.282.11A.73.73 0 0 0 8 14.5c.007-.001.038-.005.097-.023.072-.022.166-.058.282-.111.23-.106.525-.272.857-.5a10.197 10.197 0 0 0 2.197-2.093C12.9 9.9 14.13 7.056 13.597 3.159a.454.454 0 0 0-.315-.366c-.626-.2-1.682-.526-2.725-.802C9.491 1.71 8.51 1.5 8 1.5c-.51 0-1.49.21-2.557.491zm-.256-.966C6.23.749 7.337.5 8 .5c.662 0 1.77.249 2.813.525a61.09 61.09 0 0 1 2.772.815c.528.168.926.623 1.003 1.184.573 4.197-.756 7.307-2.367 9.365a11.191 11.191 0 0 1-2.418 2.3 6.942 6.942 0 0 1-1.007.586c-.27.124-.558.225-.796.225s-.526-.101-.796-.225a6.908 6.908 0 0 1-1.007-.586 11.192 11.192 0 0 1-2.417-2.3C2.167 10.331.839 7.221 1.412 3.024A1.454 1.454 0 0 1 2.415 1.84a61.11 61.11 0 0 1 2.772-.815z" />
-                  <path d="M9.5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
-                  <path
-                    d="M7.411 8.034a.5.5 0 0 1 .493-.417h.156a.5.5 0 0 1 .492.414l.347 2a.5.5 0 0 1-.493.585h-.835a.5.5 0 0 1-.493-.582l.333-2z" />
-                </svg>
-                Change Password
-              </button>
-
-              <button class="btn btn-md u-btn-blue g-rounded-50 g-mr-10 g-mb-15"
-                data-bind="click:saveOrUpdate">Save</button>
+              <div class="row">
+                <div class="col text-right">
+                  <button class="btn btn-md u-btn-outline-red g-rounded-50 g-mr-10 g-mb-15"
+                    data-bind="visible:editable, click:passwd">
+                    <svg class="bi bi-shield-lock" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd"
+                        d="M5.443 1.991a60.17 60.17 0 0 0-2.725.802.454.454 0 0 0-.315.366C1.87 7.056 3.1 9.9 4.567 11.773c.736.94 1.533 1.636 2.197 2.093.333.228.626.394.857.5.116.053.21.089.282.11A.73.73 0 0 0 8 14.5c.007-.001.038-.005.097-.023.072-.022.166-.058.282-.111.23-.106.525-.272.857-.5a10.197 10.197 0 0 0 2.197-2.093C12.9 9.9 14.13 7.056 13.597 3.159a.454.454 0 0 0-.315-.366c-.626-.2-1.682-.526-2.725-.802C9.491 1.71 8.51 1.5 8 1.5c-.51 0-1.49.21-2.557.491zm-.256-.966C6.23.749 7.337.5 8 .5c.662 0 1.77.249 2.813.525a61.09 61.09 0 0 1 2.772.815c.528.168.926.623 1.003 1.184.573 4.197-.756 7.307-2.367 9.365a11.191 11.191 0 0 1-2.418 2.3 6.942 6.942 0 0 1-1.007.586c-.27.124-.558.225-.796.225s-.526-.101-.796-.225a6.908 6.908 0 0 1-1.007-.586 11.192 11.192 0 0 1-2.417-2.3C2.167 10.331.839 7.221 1.412 3.024A1.454 1.454 0 0 1 2.415 1.84a61.11 61.11 0 0 1 2.772-.815z" />
+                      <path d="M9.5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
+                      <path
+                        d="M7.411 8.034a.5.5 0 0 1 .493-.417h.156a.5.5 0 0 1 .492.414l.347 2a.5.5 0 0 1-.493.585h-.835a.5.5 0 0 1-.493-.582l.333-2z" />
+                    </svg>
+                    Change Password
+                  </button>
+                  <button class="btn btn-md u-btn-blue g-rounded-50 g-mr-10 g-mb-15"
+                    data-bind="click:saveOrUpdate">Save</button>
+                </div>
+              </div>
             </div>
           </div>
           <form id="pageForm" onsubmit="return false">
@@ -792,13 +844,24 @@
               aria-controls="nav-perms" aria-selected="false">Permissions</a>
           </div>
         </nav>
-        <div class="tab-content" id="nav-tabContent">
+        <div class="tab-content" id="nav-tabContent" data-bind="visible:editable">
           <div class="tab-pane fade show active" id="nav-property" role="tabpanel" aria-labelledby="nav-property-tab">
             <div id="property-grid" class="g-brd-0 tab-pane-grid"></div>
           </div>
-          <div class="tab-pane fade" id="nav-perms" role="tabpanel" aria-labelledby="nav-perms-tab">...</div>
+          <div class="tab-pane fade g-pa-15" id="nav-perms" role="tabpanel" aria-labelledby="nav-perms-tab">
+            <div class="form-group">
+              <label class="g-mb-10" for="role-select">Assign roles</label>
+              <select id="role-select" class="g-brd-0 g-ma-5 g-pa-5" data-bind="value:assignedRoles"></select>
+              <small class="form-text text-muted g-font-size-default g-mt-10">The granted role is may applied after
+                login.</small>
+              <button class="g-pos-abs g-right-20 btn u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
+                data-bind="visible:editable, click:saveOrUpdateRoles">Update</button>
+            </div>
+            <!-- End Role Input -->
+          </div>
         </div>
       </div>
+
       <div id="passwd-window" class="g-pa-15 g-height-300 container" style="display:none;">
         <form>
           <div class="form-group">
@@ -826,7 +889,14 @@
             <div class="peers ai-c jc-sb fxw-nw">
               <div class="peer">
                 <input data-role="dropdownlist"
-                data-option-label="롤을 선택하세요."
+                data-option-label="Select state ..."
+                data-auto-bind="false"
+                data-text-field="text"
+                data-value-field="value"
+                data-bind="value: selectedState, source: stateDataSource, events:{ change : stateChanged }"
+                style="width: 300px;" />  
+                <input data-role="dropdownlist"
+                data-option-label="Select role ..."
                 data-auto-bind="false"
                 data-text-field="name"
                 data-value-field="name"
@@ -834,12 +904,22 @@
                 style="width: 300px;" />                  
               </div>
               <div class="peer">
-                <button type="button" class="btn cur-p btn-danger">
+                <button type="button" class="btn cur-p btn-danger" data-bind="click:createUser">
                   <svg class="bi bi-person-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm4.5 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
                     <path fill-rule="evenodd" d="M13 7.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0v-2z"/>
                   </svg>
                   New User</button>
+
+                  <button type="button" class="btn cur-p u-btn-outline-blue" data-bind="enabled:selected, click:userState"> 
+                  <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggles2" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2 4a2 2 0 0 1 2-2h8a2 2 0 1 1 0 4H4a2 2 0 0 1-2-2zm2-1a1 1 0 0 0 0 2h8a1 1 0 1 0 0-2H4z"/>
+                    <path d="M14 4a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
+                    <path fill-rule="evenodd" d="M9.465 10H12a2 2 0 1 1 0 4H9.465c.34-.588.535-1.271.535-2 0-.729-.195-1.412-.535-2z"/>
+                    <path fill-rule="evenodd" d="M6 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+                  </svg>
+                  Change State</button>
+
                 <button type="button" class="btn cur-p btn-danger" data-bind="enabled:selected, click:deleteUsers" >
                   <svg class="bi bi-person-dash" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm2 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
@@ -862,8 +942,6 @@
         </div>
       </div>	
       </script>
-      <!-- ### $App Screen Footer ### -->
-      <%= require('html-loader!./include-footer.html') %>
     </div>
   </div>
 </body>

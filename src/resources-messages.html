@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title><%= title %></title>
+    <style>
+      #loader {
+        transition: all 0.3s ease-in-out;
+        opacity: 1;
+        visibility: visible;
+        position: fixed;
+        height: 100vh;
+        width: 100%;
+        background: #fff;
+        z-index: 90000;
+      }
+
+      #loader.fadeOut {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        position: absolute;
+        top: calc(50% - 20px);
+        left: calc(50% - 20px);
+        background-color: #333;
+        border-radius: 100%;
+        -webkit-animation: sk-scaleout 1s infinite ease-in-out;
+        animation: sk-scaleout 1s infinite ease-in-out;
+      }
+
+      @-webkit-keyframes sk-scaleout {
+        0% {
+          -webkit-transform: scale(0);
+        }
+
+        100% {
+          -webkit-transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      @keyframes sk-scaleout {
+        0% {
+          -webkit-transform: scale(0);
+          transform: scale(0);
+        }
+
+        100% {
+          -webkit-transform: scale(1);
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      .k-grid .u-link-underline > h5,
+      .k-grid .u-link-underline > h4,
+      .k-grid .u-link-underline > .u-title {
+        border-bottom: 1px solid transparent;
+        padding-bottom: 1.5px;
+      }
+
+      .is-loading {
+        background-color: #fff;
+        background-image: url("assets/static/images/loading-image.gif");
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      .is-loading img,
+      .is-broken img {
+        opacity: 0;
+      }
+
+      .tab-pane-grid .k-grid-toolbar {
+        background: #fff;
+      }
+
+      .dropZoneElement {
+        position: relative;
+        display: inline-block;
+        background-color: #f8f8f8;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        width: 100%;
+        height: 110px;
+        text-align: center;
+      }
+
+      .textWrapper {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 100%;
+        font-size: 24px;
+        line-height: 1.2em;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+      }
+
+      .dropImageHereText {
+        color: #c7c7c7;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+
+      #attachment-thumbnail-image {
+        min-height: 150px;
+        min-width: 150px;
+      }
+    </style>
+  </head>
+
+  <body class="app" authenticate-required="true">
+    <!-- @TOC -->
+    <!-- =================================================== -->
+    <!--
+      + @Page Loader
+      + @App Content
+          - #Left Sidebar
+              > $Sidebar Header
+              > $Sidebar Menu
+
+          - #Main
+              > $Topbar
+              > $App Screen Content
+    -->
+
+    <!-- @Page Loader -->
+    <!-- =================================================== -->
+    <div id="loader">
+      <div class="spinner"></div>
+    </div>
+
+    <script>
+      window.addEventListener("load", function load() {
+        const loader = document.getElementById("loader");
+        setTimeout(function () {
+          loader.classList.add("fadeOut");
+        }, 300);
+      });
+    </script>
+
+    <!-- @App Content -->
+    <!-- =================================================== -->
+    <div>
+      <!-- #Left Sidebar ==================== -->
+      <%= require('html-loader!./include-sidebar.html') %>
+      <!-- #Main ============================ -->
+      <div class="page-container">
+        <!-- ### $Topbar ### -->
+        <%= require('html-loader!./include-topbar.html') %>
+
+        <!-- ### $App Screen Content ### -->
+        <script>
+          function setup() {
+            $('a.sidebar-link[href="resources-streams.html"]').addClass(
+              "actived"
+            );
+            $('a.sidebar-link[href="resources-streams.html"]')
+              .closest("li.nav-item.dropdown")
+              .addClass("open");
+
+            $(document).ajaxSend(function (event, jqXHR, options) {
+              jqXHR.setRequestHeader(
+                "Authorization",
+                studio.services.accounts.authHeader()["Authorization"]
+              );
+            });
+
+            let promise = studio.ui.loadAceEditor();
+            promise.then((script) => {});
+
+            var $window = $(window)
+              .on("resize", function () {
+                var height =
+                  $(document).height() - $(".header-container").height();
+                $("#grid").height(height);
+              })
+              .trigger("resize"); //on page load
+
+            const headers = {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            };
+            Object.assign(headers, studio.services.accounts.authHeader());
+            var renderTo = $("#mainContent");
+            const NO_AVATA_IMAGE = "assets/static/images/no-avatar.png";
+            var ThreadModel = kendo.data.Model.define(studio.data.model.Thread);
+            var MessageModel = kendo.data.Model.define(
+              studio.data.model.Message
+            );
+            var observable = kendo.observable({
+              owner: false,
+              editable: false,
+              thread: new ThreadModel(),
+              prifileImgUrl: NO_AVATA_IMAGE,
+              refresh: function () {
+                var $this = this;
+                if ($this.get("thread.threadId")) {
+                  observable.load(this.get("thread.threadId"));
+                }
+              },
+              back: function () {
+                console.log("go bakcl....");
+                window.history.back();
+              },
+              setSource: function (data) {
+                var $this = this;
+                data = data || new ThreadModel();
+                data.copy($this.thread);
+                $this.set("editable", $this.thread.threadId > 0 ? true : false);
+                if ($this.get("editable")) {
+                  $this.set(
+                    "prifileImgUrl",
+                    studio.services.accounts.getUserAvatarUrl(
+                      $this.thread.rootMessage.user.username
+                    )
+                  );
+                  $this.set(
+                    "owner",
+                    $this.thread.rootMessage.user.userId ==
+                      studio.services.accounts.getCurrentUser().userId
+                      ? true
+                      : false
+                  );
+                } else {
+                  $this.set("prifileImgUrl", NO_AVATA_IMAGE);
+                  $this.set("editable", false);
+                  $this.set("owner", false);
+                }
+              },
+              load: function (objectId) {
+                var self = this;
+                kendo.ui.progress(renderTo, true);
+                axios({
+                  url: studio.services.getApiUrl(
+                    "/data/secure/mgmt/threads/" + objectId
+                  ),
+                  method: "get",
+                  headers: headers,
+                })
+                  .then((response) => {
+                    const data = response.data;
+                    self.setSource(new ThreadModel(data));
+                  })
+                  .catch(function (error) {
+                    studio.ui.handleAxiosError(error);
+                  })
+                  .then(function () {
+                    kendo.ui.progress(renderTo, false);
+                  });
+              },
+              edit: function () {
+                getPostEditWindow(null, new MessageModel(this.thread.rootMessage), function(){
+                    observable.refresh();
+                });
+              },
+            });
+
+            var objectId = window.location.search.substring(1);
+            if (studio.ui.defined(objectId) && objectId != null && objectId > 0) {
+              observable.load(objectId);
+            }
+            kendo.bind(renderTo, observable);          
+          }          
+        </script>
+        <main class="main-content bgc-grey-100">
+          <div id="mainContent">
+            <div class="container">
+              <header>
+                <div
+                  class="thread-page-toolbar"
+                  style="
+                    padding: 8px 8px;
+                    border-width: 0 0 1px;
+                    border-style: solid;
+                    border-color: #eded;
+                    -o-text-overflow: clip;
+                    text-overflow: clip;
+                    cursor: default;
+                    display: block;
+                  "
+                >
+                  <div class="layer w-100">
+                    <div class="peers ai-c jc-sb fxw-nw">
+                      <div class="peer">
+                        <button
+                          class="btn btn-link u-link-v5 g-mr-10 g-font-size-15 g-color-secondary--hover"
+                          data-bind="click:back"
+                        >
+                          <svg
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 16 16"
+                            class="bi bi-chevron-left"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"
+                            ></path>
+                          </svg>
+                        </button>
+                      </div>
+                      <div class="peer" style="flex: unset;">
+                        <h4 data-bind="text:thread.rootMessage.subject"></h4>
+                      </div>
+                      <div class="peer">
+                        <button
+                          class="btn btn-link u-link-v5 g-mr-10 g-font-size-15 g-color-secondary--hover refresh"
+                          data-bind="click:refresh"
+                        >
+                          <svg
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 16 16"
+                            class="bi bi-arrow-counterclockwise"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M12.83 6.706a5 5 0 0 0-7.103-3.16.5.5 0 1 1-.454-.892A6 6 0 1 1 2.545 5.5a.5.5 0 1 1 .91.417 5 5 0 1 0 9.375.789z"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M7.854.146a.5.5 0 0 0-.708 0l-2.5 2.5a.5.5 0 0 0 0 .708l2.5 2.5a.5.5 0 1 0 .708-.708L5.707 3 7.854.854a.5.5 0 0 0 0-.708z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </header>
+
+              <div class="container">
+                <div
+                  class="forum-page-nav g-pa-15"
+                  style="width: 150px; display: block; float: right;"
+                >
+                  <button
+                    type="button"
+                    class="btn cur-p u-btn-red"
+                    data-bind="click:reply"
+                  >
+                    <svg
+                      width="1em"
+                      height="1em"
+                      viewBox="0 0 16 16"
+                      class="bi bi-reply-fill"
+                      fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M9.079 11.9l4.568-3.281a.719.719 0 0 0 0-1.238L9.079 4.1A.716.716 0 0 0 8 4.719V6c-1.5 0-6 0-7 8 2.5-4.5 7-4 7-4v1.281c0 .56.606.898 1.079.62z"
+                      />
+                    </svg>
+                    Reply
+                  </button>
+                </div>
+                <div class="forum-page-stream" style="margin-right: 150px;">
+                  <div
+                    class="post-stream-item"
+                    style="margin-top: 10px; font-size: 13px; line-height: 1.3;"
+                  >
+                    <article
+                      class="post ck-content"
+                      style="
+                        min-height: 104px;
+                        padding: 20px;
+                        padding-left: 105px;
+                        margin: -1px -20px;
+                        transition: 0.2s box-shadow, top 0.2s, opacity 0.2s;
+                        position: relative;
+                        top: 0;
+                        border-radius: 4px;
+                      "
+                    >
+                      <div>
+                        <header
+                          class="post-header"
+                          style="
+                            margin-bottom: 15px;
+                            color: #667d99;
+                            display: block;
+                          "
+                        >
+                          <div class="peers ai-c jc-sb pX-20 pY-10">
+                            <div class="peers peer-greed">
+                              <div class="peer mR-20">
+                                <img
+                                  class="bdrs-50p w-3r h-3r"
+                                  alt=""
+                                  src="assets/static/images/no-avatar.png"
+                                  data-bind="attr:{src: prifileImgUrl }"
+                                />
+                              </div>
+                              <div class="peer">
+                                <small>Nov, 02 2017</small>
+                                <h5
+                                  class="c-grey-900 mB-5"
+                                  data-bind="text:thread.rootMessage.user.name"
+                                ></h5>
+                                <span
+                                  data-bind="text:thread.rootMessage.user.email"
+                                ></span>
+                              </div>
+                            </div>
+                            <div class="peer">
+                              <button
+                                type="button"
+                                class="btn cur-p u-btn-blue"
+                                data-bind="click:edit, visible:owner"
+                              >
+                                <svg
+                                  width="1em"
+                                  height="1em"
+                                  viewBox="0 0 16 16"
+                                  class="bi bi-pencil"
+                                  fill="currentColor"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fill-rule="evenodd"
+                                    d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"
+                                  />
+                                  <path
+                                    fill-rule="evenodd"
+                                    d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"
+                                  />
+                                </svg>
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                class="btn cur-p u-btn-red"
+                                data-bind="click:delete, visible:owner"
+                              >
+                                <svg
+                                  width="1em"
+                                  height="1em"
+                                  viewBox="0 0 16 16"
+                                  class="bi bi-trash"
+                                  fill="currentColor"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"
+                                  />
+                                  <path
+                                    fill-rule="evenodd"
+                                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
+                                  />
+                                </svg>
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </header>
+                        <div
+                          class="post-body"
+                          data-bind="html:thread.rootMessage.body"
+                        ></div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        
+        <span id="delete-dialog"></span>
+        <span id="dialog"></span>
+        <!-- START POST MESSAGE WINDOW -->
+        <%= require('html-loader!./include-post-message-window-with-ck.html') %>
+        <!-- END POST MESSAGE WINDOW -->
+        <script type="text/x-kendo-template" id="grid-toolbar-template">
+          <div class="layer w-100">
+            <div class="peers ai-c jc-sb fxw-nw">
+              <div class="peer">
+                <button type="button" class="btn cur-p btn-danger k-grid-add" data-bind="click:upload">
+                  <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-folder-plus" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M9.828 4H2.19a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91H9v1H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181L15.546 8H14.54l.265-2.91A1 1 0 0 0 13.81 4H9.828zm-2.95-1.707L7.587 3H2.19c-.24 0-.47.042-.684.12L1.5 2.98a1 1 0 0 1 1-.98h3.672a1 1 0 0 1 .707.293z"/>
+                    <path fill-rule="evenodd" d="M13.5 10a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1H13v-1.5a.5.5 0 0 1 .5-.5z"/>
+                    <path fill-rule="evenodd" d="M13 12.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0v-2z"/>
+                  </svg>
+                  New Streams</button>
+              </div>
+              <div class="peer">
+              </div>
+            </div>
+          </div>
+        </script>
+        <script type="text/x-kendo-template" id="name-column-template">
+          <a class="d-flex align-items-center u-link-v5 u-link-underline g-color-black g-color-lightblue-v3--hover g-color-lightblue-v3--opened" href="\#!" data-action="edit" data-object-id ="#=streamId#" ##>
+            <h5 class="g-font-weight-300 g-font-size-default g-mb-0">#= name #</h5>
+          </a>
+        </script>
+        <script type="text/x-kendo-template" id="display-name-column-template">
+          <div class="d-flex align-items-center justify-content-sm-between g-mb-5">
+          <a class="d-flex align-items-center u-link-v5 u-link-underline g-color-black g-color-lightblue-v3--hover g-color-lightblue-v3--opened" href="\#!" data-action="edit" data-object-id ="#=streamId#" ##>
+            <h5 class="g-font-weight-300 g-font-size-default g-mb-0">#= displayName #</h5>
+          </a>
+          <button class="btn btn-xs u-btn-outline-blue g-rounded-50" data-bind="visible:editable, click:passwd" style="">Threads</button>
+          </div>
+
+          <small class="form-text text-muted">#: description #</small>
+        </script>
+        <script type="text/x-kendo-template" id="user-column-template">
+          <div class="media">
+            <div class="d-flex align-self-center">
+              <img class="g-width-36 g-height-36 g-rounded-50 g-mr-15" src="#= studio.services.accounts.getUserAvatarUrl( user.username ) #" >
+            </div>
+            <div class="media-body align-self-center text-left">#if ( !user.anonymous  && user.name != null ) {# #: user.name # #}#</div>
+          </div>
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

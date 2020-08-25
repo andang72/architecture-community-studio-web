@@ -92,29 +92,48 @@
     }
 
     .masonry {
-      display:block;
+      display: block;
+      min-height: 600px;
     }
 
     .masonry:after {
       content: '';
-      display:block;
-      clear:both;
+      display: block;
+      clear: both;
+    }
+
+    .masonry .card>a {
+      width: 300px;
+      overflow: hidden;
     }
 
     .masonry-item {
-      float: left; border-radius: 5px;
+      float: left;
+      border-radius: 5px;
     }
 
     .masonry-sizer,
     .masonry-item {
-      width: 300px; 
+      width: 300px;
+      overflow: hidden;
     }
 
-    .masonry-item img.k-card-image{
-      max-height: 300px; overflow: hidden;
+    .masonry-item img.k-card-image {
+      width: 300px;
+      max-height: 300px;
+      overflow: hidden;
     }
-    .masonry-item .k-card-body{overflow-wrap: anywhere;}
 
+    .masonry-item .k-card-body {
+      overflow-wrap: anywhere;
+    }
+
+/*
+    #masonry-pager {
+      position: absolute;
+      bottom: 1px;
+    }
+    */
   </style>
 </head>
 
@@ -152,169 +171,7 @@
   <!-- =================================================== -->
   <div>
     <!-- #Left Sidebar ==================== -->
-    <div class="sidebar">
-      <div class="sidebar-inner">
-        <!-- ### $Sidebar Header ### -->
-        <div class="sidebar-logo">
-          <div class="peers ai-c fxw-nw">
-            <div class="peer peer-greed">
-              <a class="sidebar-link td-n" href="index.html">
-                <div class="peers ai-c fxw-nw">
-                  <div class="peer">
-                    <div class="logo">
-                      <img src="assets/static/images/logo.png" alt="">
-                    </div>
-                  </div>
-                  <div class="peer peer-greed">
-                    <h5 class="lh-1 mB-0 logo-text">Adminator</h5>
-                  </div>
-                </div>
-              </a>
-            </div>
-            <div class="peer">
-              <div class="mobile-toggle sidebar-toggle">
-                <a href="" class="td-n">
-                  <i class="ti-arrow-circle-left"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ### $Sidebar Menu ### -->
-        <ul class="sidebar-menu scrollable pos-r">
-          <li class="nav-item  mT-30">
-            <a class="sidebar-link" href="index.html">
-              <span class="icon-holder">
-                <i class="c-blue-500 ti-home"></i>
-              </span>
-              <span class="title">Dashboard</span>
-            </a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-orange-500 ti-folder"></i>
-              </span>
-              <span class="title">Settings</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link ' href="settings-properties.html">Properties</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="settings-locale.html">Locale</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="settings-datasource.html">DataSource</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-deep-orange-500 ti-folder"></i>
-              </span>
-              <span class="title">Security</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="security-perms.html">Roles & Permissions</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="security-users.html">Users</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="security-audit.html">Audit</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-green-500 ti-folder"></i>
-              </span>
-              <span class="title">Services</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="services-email.html">Email</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-sequencer.html">Sequencer</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-viewcount.html">View Count</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="services-menu.html">Menu</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown open">
-            <a class="dropdown-toggle" href="javascript:void(0);">
-              <span class="icon-holder">
-                <i class="c-purple-500 ti-folder"></i>
-              </span>
-              <span class="title">Resources</span>
-              <span class="arrow">
-                <i class="ti-angle-right"></i>
-              </span>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class='sidebar-link' href="resources-pages.html">Pages</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-apis.html">Apis</a>
-              </li>
-
-              <li class="nav-item dropdown">
-                <a href="javascript:void(0);">
-                  <span>Sources</span>
-                  <span class="arrow">
-                    <i class="ti-angle-right"></i>
-                  </span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a href="resources-decorators.html">Decorators</a>
-                  </li>
-                  <li>
-                    <a href="resources-templates.html">Templates</a>
-                  </li>
-                  <li>
-                    <a href="resources-groovys.html">Gloovy</a>
-                  </li>
-                  <li>
-                    <a href="resources-sqls.html">Sql</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-files.html">Files</a>
-              </li>
-              <li>
-                <a class='sidebar-link' href="resources-images.html">Images</a>
-              </li>
-              <li>
-                <a class='sidebar-link actived' href="resources-albums.html">Albums</a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-
+    <%= require('html-loader!./include-sidebar.html') %>
     <!-- #Main ============================ -->
     <div class="page-container">
       <!-- ### $Topbar ### -->
@@ -322,14 +179,16 @@
       <!-- ### $App Screen Content ### -->
       <script>
         function setup() {
+          $('a.sidebar-link[href="resources-albums.html"]').addClass('actived');
+          $('a.sidebar-link[href="resources-albums.html"]').closest('li.nav-item.dropdown').addClass('open'); 
 
           $(document).ajaxSend(function (event, jqXHR, options) {
             jqXHR.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
           });
 
           var $window = $(window).on('resize', function () {
-            var height = $(document).height() - ($('.header-container').height() + 61 + $('#masonry-pager').height())
-            //$('#masonry-listview').height(height);
+            var height = $(document).height() - ($('.header-container').height() + $('#masonry-pager').height())
+            $('masonry-listview').css('min-height', height );
           }).trigger('resize'); //on page load     
 
           var renderTo = $("#mainContent");
@@ -341,7 +200,8 @@
             upload: function () {
               var $this = this;
               getUploadWindow($this);
-            }
+            },
+            masonry:false
           });
           kendo.bind(renderTo, observable);
           //createAlbumListView(observable);
@@ -351,7 +211,6 @@
         function createAlbumMasonry(observable) {
           var renderTo = $(".masonry");
           var template = kendo.template($("#listview-album-template").html());
-          //studio.ui.masonry(renderTo, {horizontalOrder: true, columnWidth:250, percentPosition:false});
           var AlbumModel = kendo.data.Model.define(studio.data.model.Album);
           var dataSource = new kendo.data.DataSource({
             transport: {
@@ -377,18 +236,36 @@
             },
             change: function () {
               $elems = kendo.render(template, this.view());
-              renderTo.html($elems); 
-              renderTo.masonry({ horizontalOrder: true, columnWidth:300, percentPosition:false, gutter: 10 });
-              var delay = 600;
+              renderTo.html($elems);
+              
+              if(observable.get('masonry'))
+                renderTo.masonry('destroy');
+              
+              renderTo.masonry({ horizontalOrder: true, columnWidth: 300, percentPosition: false, gutter: 10 });
+              observable.set('masonry', true);
+
+              
+              var delay = 500;
               renderTo.find("img[is-secure]").each(function () {
                 var $this = $(this);
                 $this.parent().addClass('is-loading');
-                delay = delay + 60;
-                studio.ui.setSecureImage($this, delay, function(){
+                delay = delay + 1000;
+                studio.ui.setSecureImage($this, delay, function () {
                   renderTo.masonry('layout');
-                }); 
+                });
               });
-              renderTo.height( '100%' );
+
+              $("#" + renderTo.attr("id") + " figure img").one("load", function () {
+                  var $this = $(this);
+                  $this.parent().removeClass('is-loading');
+                }).each(function () { });
+
+              $(".masonry img.k-card-image").hover(function () {
+                kendo.fx(this).zoom("in").startValue(1).endValue(1.2).play();
+              }, function () {
+                kendo.fx(this).zoom("out").endValue(1).startValue(1.2).play();
+              });
+              //renderTo.height('100%');
             }
           });
 
@@ -408,7 +285,7 @@
             }
           });
         }
-
+ß
         function getUploadWindow(observable) {
           var renderTo = $('#upload-window');
           if (!renderTo.data("kendoWindow")) {
@@ -423,18 +300,13 @@
               previewsContainer: '#image-file-dropzone .dropzone-previews',
               previewTemplate: '<div class="dz-preview dz-file-preview"><div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div></div>'
             });
-
-            myDropzone.on("sending", function (file, xhr, formData) {
-
-            });
-
+            myDropzone.on("sending", function (file, xhr, formData) {});
             myDropzone.on("success", function (file, response) {
               file.previewElement.innerHTML = "";
               $.each(response, function (index, item) {
                 studio.ui.notify(null, item.name + " is uploaded.", "success");
               });
             });
-
             myDropzone.on("maxfilesexceeded", function () {
               console.log("maxfilesexceeded");
             });
@@ -445,7 +317,6 @@
             myDropzone.on("complete", function () {
               kendo.ui.progress(renderTo, false);
             });
-
             var window = renderTo.kendoWindow({
               width: "500px",
               title: "Upload",
@@ -571,10 +442,42 @@
                   createAlbumImageGridIfNotExist(null, $this.album.albumId);
                 }
               }
+            });            
+            
+            var myDropzone = studio.ui.dropzone(
+              "#album-image-file-dropzone", {
+              url: studio.services.getApiUrl('/data/secure/mgmt/images/upload.json'),
+              paramName: 'file',
+              parallelUploads: 1,
+              maxFilesize: 20,
+              uploadMultiple: true,
+              headers: studio.services.accounts.authHeader(),
+              previewsContainer: '#album-image-file-dropzone .dropzone-previews',
+              previewTemplate: '<div class="dz-preview dz-file-preview"><div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div></div>'
             });
+            myDropzone.on("sending", function (file, xhr, formData) {});
+            myDropzone.on("success", function (file, response) {
+              file.previewElement.innerHTML = "";
+              $.each(response, function (index, item) {
+                studio.ui.notify(null, item.name + " is uploaded.", "success");
+              });
+            });
+            myDropzone.on("maxfilesexceeded", function () {
+              console.log("maxfilesexceeded");
+            });
+            myDropzone.on("addedfile", function (file) {
+              kendo.ui.progress(renderTo, false);
+              console.log("file added");
+            });
+            myDropzone.on("complete", function () {
+              kendo.ui.progress(renderTo, false);
+            });
+
             createAlbumImageGridIfNotExist(null, 0);
+            
             kendo.bind(renderTo, observable);
             renderTo.data('model', observable);
+
             var window = renderTo.kendoWindow({
               width: "900px",
               title: "Album",
@@ -605,6 +508,7 @@
           if (!renderTo.data("kendoWindow")) {
             var observable = kendo.observable({
               selected: false,
+              selectedTags: [],
               select: function () {
                 var $this = this;
                 var selectedImages = [];
@@ -648,8 +552,8 @@
                     if (operation !== "read" && options.models) {
                       return JSON.stringify(options.models);
                     } else {
-                      //var tags = createTagSelect($("#tags"));
-                      //options.tags = tags.value();
+                      var tags = createTagSelect($("#tags"));
+                      options.tags = tags.value();
                     }
                     return JSON.stringify(options);
                   }
@@ -682,16 +586,18 @@
                 }
               },
               dataBound: function () {
-                $("#" + renderTo.attr("id") + " figure img:not([is-secure])").one("load", function () {
+
+                $("#" + renderTo.attr("id") + " figure img").one("load", function () {
                   var $this = $(this);
                   $this.parent().removeClass('is-loading');
-                }).each(function () {
-                });
+                }).each(function () { });
+ 
                 $("#" + renderTo.attr("id") + " figure img[is-secure]").each(function () {
                   var $this = $(this);
                   $this.parent().addClass('is-loading');
-                  studio.ui.setSecureImage($this, 600);
-                });
+                  studio.ui.setSecureImage($this, 1000);
+                }); 
+
               },
               noRecords: {
                 template: "<p class='g-pa-20' >데이터가 로드되지 않았습니다. 잠시 후에 다시 데이터 새로고침 버튼을 클릭하여 주세요.</p>"
@@ -708,11 +614,48 @@
                 //{ field: "MODIFIED_DATE", title: "Modified Date", filterable: false, sortable: true, width: 100, template: '#: studio.ui.format.date( modifiedDate ,"yyyy.MM.dd")#', attributes: { class: "text-center" } }
               ]
             }).data('kendoGrid');
+
+            var select = createTagSelect($('#select-tags'));
+
             kendo.bind(renderTo, observable);
           }
           renderTo.data("kendoWindow").center().open();
         }
 
+        function createTagSelect(renderTo) {
+          if (!renderTo.data('kendoMultiSelect')) {
+            var select = renderTo.kendoMultiSelect({
+              filter: "startswith",
+              valuePrimitive: true,
+              placeholder: 'Select tags...',
+              dataTextField: "name",
+              dataValueField: "tagId",
+              dataSource: {
+                transport: {
+                  read: { url: studio.services.getApiUrl('/data/secure/mgmt/services/tags/list.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  create: { url: studio.services.getApiUrl('/data/secure/mgmt/services/tags/0/create.json'), type: 'post', contentType: "application/json; charset=utf-8" },
+                  parameterMap: function (options, operation) {
+                    return kendo.stringify(options);
+                  }
+                },
+                error: studio.ui.handleAjaxError,
+                schema: {
+                  total: "totalCount",
+                  data: "items",
+                  model: {
+                    id: "tagId",
+                    fields: {
+                      tagId: { type: "number", defaultValue: 0 },
+                      name: { type: "string", defaultValue: null }
+                    }
+                  }
+                }
+              },
+              noDataTemplate: $('#no-tag-data-template').html()
+            }).data('kendoMultiSelect');
+          }
+          return renderTo.data('kendoMultiSelect');
+        }
 
         function createAlbumImageGridIfNotExist(renderTo, objectId) {
           renderTo = renderTo || $('#album-image-grid');
@@ -745,13 +688,13 @@
                     // $(this).trigger('load'); // For jQuery >= 3.0 
                   }
                 });
+                var delay = 600;
                 $("#" + renderTo.attr("id") + " figure img[is-secure]").each(function () {
                   var $this = $(this);
                   $this.parent().addClass('is-loading');
-                  studio.ui.setSecureImage($this, 600);
+                  studio.ui.setSecureImage($this, delay);
+                  delay = delay + 100;
                 });
-
-
               }
             }).data("kendoGrid");
             grid.table.kendoSortable({
@@ -857,7 +800,7 @@
               var delay = 500;
               renderTo.find("img[is-secure]").each(function () {
                 var $this = $(this);
-                delay = delay + 50;
+                delay = delay + 100;
                 $this.parent().addClass('is-loading');
                 studio.ui.setSecureImage($this, delay);
               });
@@ -881,9 +824,9 @@
           dataSource.read();
         }
       </script>
-      <main class='main-content bgc-grey-100'>
+      <main class='main-content'>
         <div id='mainContent'>
-          <div class="full-container">
+          <div class="full-container bgc-grey-100">
             <!-- Top -->
             <div class="layer w-100 g-pa-15">
               <div class="peers ai-c jc-sb fxw-nw">
@@ -954,15 +897,14 @@
           <div class="dropzone-previews"></div>
         </form>
         <!-- End Dropdown -->
-
       </div>
       <div id="album-window" class="g-pa-0 g-height-600 container-fluid bgc-grey-100" style="display:none;">
         <div class="row no-gutters">
           <div class="col-md-8 bgc-grey-100">
             <div id="album-image-grid" class="g-brd-0 tab-pane-grid g-height-600" data-bind="visible:editable"></div>
           </div>
-          <div class="col-md-4">
-            <form class="g-pa-15 g-height-600">
+          <div class="col-md-4" style="border-left: solid 1px #ddd;">
+            <form class="g-pa-15 g-height-300">
               <div class="form-group">
                 <input type="text" class="form-control form-control-md g-rounded-4 g-px-14 g-py-10"
                   data-bind="value:album.name" placeholder="Add Title">
@@ -975,9 +917,27 @@
                 <a href="#" class="btn u-btn-darkgray g-mr-10 g-mb-15" data-bind="click:saveOrUpdate">Save</a>
               </div>
             </form>
+
+            <!-- Dropdown -->
+            <form action="" method="post" enctype="multipart/form-data" id="album-image-file-dropzone"
+            class="u-dropzone u-file-attach-v3 dz-clickable g-rounded-50 g-pa-20 g-ma-20">
+            <div class="dz-default dz-message">
+              <p>
+                <img
+                  src="data:image/png;base64,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">
+              </p>
+              <h3 class="g-font-size-14 g-font-weight-400 g-color-gray-dark-v2 mb-0">Drag the image files to upload here
+                <span class="g-color-primary">Drag &amp; Drop</span>. <br /> Or click to select a file.</h3>
+              <p class="g-font-size-12 g-color-gray-light-v2 mb-0">The maximum file size is 10MB.</p>
+            </div>
+            <div class="dropzone-previews"></div>
+          </form>
+          <!-- End Dropdown --> 
+
           </div>
         </div>
       </div>
+
       <div id="image-broswer-window" class="g-height-600 g-pa-0 g-bg-gray-light-v5" style="display:none;">
         <div class="container">
           <div class="row">
@@ -988,7 +948,12 @@
       <script type="text/x-kendo-template" id="imagebroswer-toolbar-template">
         <div class="layer w-100">
           <div class="peers ai-c jc-sb fxw-nw">
-            <div class="peer">            
+            <div class="peer">     
+              <svg class="bi bi-tag" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M.5 2A1.5 1.5 0 0 1 2 .5h4.586a1.5 1.5 0 0 1 1.06.44l7 7a1.5 1.5 0 0 1 0 2.12l-4.585 4.586a1.5 1.5 0 0 1-2.122 0l-7-7A1.5 1.5 0 0 1 .5 6.586V2zM2 1.5a.5.5 0 0 0-.5.5v4.586a.5.5 0 0 0 .146.353l7 7a.5.5 0 0 0 .708 0l4.585-4.585a.5.5 0 0 0 0-.708l-7-7a.5.5 0 0 0-.353-.146H2z"/>
+                <path fill-rule="evenodd" d="M2.5 4.5a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm2-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+              </svg>
+              <select id="tags" style="width:300px;"></select>        
             </div>
             <div class="peer">
               <button type="button" class="btn cur-p u-btn-pink" data-bind="enabled:selected, click:select" >
@@ -1018,7 +983,7 @@
         <figure class="g-pos-rel u-bg-overlay g-bg-black-opacity-0_1--after g-overflow-hidden">
           <img
             class="g-width-100 g-width-100--md g-width-100 g-height-100--md g-brd-2 g-brd-transparent g-brd-lightblue-v3--parent-opened g-mr-20--sm"
-            #if (imageLink==null) { # data-retry="0" is-secure="true"
+            #if (imageLink==null) { # data-retry="0" is-secure="true" data-max-retry="3"
             secure-image="#= studio.ui.getImageUrl(data, {thumbnail:true}) #" src="assets/static/images/no-image_2.jpg" #}else{# 
             src="#= studio.ui.getImageUrl(data, {thumbnail:true}) #"   
           #}# alt="#= name #">
@@ -1032,11 +997,14 @@
           <div class="k-card-header k-display-flex k-align-items-center bgc-grey-100">
             <h5 class="k-card-title g-font-size-14">#:name#</h5> 
           </div>
+          <a style="overflow:hidden;" href="albums.html?#=albumId#" target="_self" >
           <img class="k-card-image"
           # if (coverImage!=null) { #
-            data-retry="0" is-secure="true"
+            data-retry="0" is-secure="true" data-max-retry="5"
             secure-image="#= studio.ui.getImageUrl(coverImage, { width:300, height:300, thumbnail:true }) #"
-          # } # src = "assets/static/images/no-image_2.jpg"  /> 
+            src="#= studio.ui.getImageUrl(coverImage, { width:300, height:300, thumbnail:true }) #"
+          # }else{ # src = "assets/static/images/no-image_2.jpg" #}# /> 
+          </a>
           <div class="k-card-body">
             <h6 class="k-card-subtitle">#= studio.ui.format.date( modifiedDate ,"yyyy.MM.dd HH:mm")  #  
             </h6>
@@ -1152,7 +1120,7 @@
         </button>
       </script>
       <!-- ### $App Screen Footer ### -->
-      </div>
+    </div>
   </div>
 </body>
 

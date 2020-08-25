@@ -9,7 +9,6 @@
     function getResourceSelectorWindow(renderTo, type, callback ) {
         renderTo = renderTo || $('#resource-select-window');
         if (!renderTo.data("kendoWindow")) {
-
             const headers = {
                 Accept: "application/json",
                 "Content-Type": "application/json"
@@ -141,7 +140,7 @@
 </script>
 <div id="resource-select-window" class="g-height-600 g-pa-0 g-bg-gray-light-v5" style="display:none;">
     <div class="h-100 layers">
-        <div class="layer w-100">
+        <div class="layer w-100" data-bind="invisible:folder">
             <div class="bgc-grey-100 peers ai-c jc-sb p-15 fxw-nw">
                 <div class="peer">
                     <span class="g-ml-15 g-font-weight-500" data-bind="text:filename"></span>
@@ -170,7 +169,7 @@
                 { collapsible: false }
              ]" data-bind="events: { resize: onResize }">
             <div class="pane-content">
-                <div style="height:100%; width: 100%;"></div>
+                <div style="height:100%; width: 100%; padding-top:10px;"></div>
             </div>
             <div class="pane-content text-center">
                 <img alt="svgImg" data-bind="visible:folder" class="g-mt-100"
@@ -197,4 +196,4 @@
 	# if (!item.items) { #
 		<a class='delete-link' href='\#'></a> 
     # } #
-    </script>
+</script>

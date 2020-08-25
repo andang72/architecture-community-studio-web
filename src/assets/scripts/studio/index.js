@@ -48,9 +48,8 @@ const RoleModel = {
     creationDate: { type: "date", editable: false },
     modifiedDate: { type: "date", editable: false },
   },
-};
-
-const UserModel = {
+},
+UserModel = {
   id: "userId",
   fields: {
     userId: { type: "number", defaultValue: 0 },
@@ -101,9 +100,8 @@ const UserModel = {
     if (typeof this.get("properties") === "object")
       target.set("properties", this.get("properties"));
   },
-};
-
-const ImageLinkModel = {
+},
+ImageLinkModel = {
   id: "imageId",
   fields: {
     imageId: { type: "number", defaultValue: 0 },
@@ -111,8 +109,8 @@ const ImageLinkModel = {
     publicShared: { type: "boolean", defaultValue: false },
     filename: { type: "string", defaultValue: null },
   },
-};
-const SharedLinkModel = {
+},
+SharedLinkModel = {
   id: "linkId",
   fields: {
     objectType: { type: "number", defaultValue: 0 },
@@ -120,8 +118,8 @@ const SharedLinkModel = {
     linkId: { type: "string", defaultValue: null },
     publicShared: { type: "boolean", defaultValue: false },
   },
-};
-const AttachmentModel = {
+},
+AttachmentModel = {
   id: "attachmentId",
   fields: {
     attachmentId: { type: "number", defaultValue: 0 },
@@ -163,9 +161,8 @@ const AttachmentModel = {
   formattedModifiedDate: function () {
     return kendo.toString(this.get("modifiedDate"), "g");
   },
-};
-
-const ImageModel = {
+},
+ImageModel = {
   id: "imageId",
   fields: {
     imageId: { type: "number", defaultValue: 0 },
@@ -214,9 +211,8 @@ const ImageModel = {
   formattedModifiedDate: function () {
     return kendo.toString(this.get("modifiedDate"), "g");
   },
-};
-
-const AlbumModel = {
+},
+AlbumModel = {
   id: "albumId", // the identifier of the model
   fields: {
     albumId: { type: "number", editable: false, defaultValue: 0 },
@@ -242,9 +238,8 @@ const AlbumModel = {
     target.set("creationDate", this.get("creationDate"));
     target.set("modifiedDate", this.get("modifiedDate"));
   },
-};
-
-const PageModel = {
+},
+PageModel = {
   id: "pageId",
   fields: {
     objectType: { type: "number", defaultValue: -1 },
@@ -303,9 +298,8 @@ const PageModel = {
     if (typeof this.get("bodyContent") === "object")
       target.set("bodyContent", this.get("bodyContent"));
   },
-};
-
-const BodyContentModel = {
+},
+BodyContentModel = {
   id: "bodyId",
   fields: {
     bodyId: { type: "number", defaultValue: -1 },
@@ -313,9 +307,8 @@ const BodyContentModel = {
     bodyType: { type: "string", defaultValue: "FREEMARKER" },
     pageId: { type: "number", defaultValue: 0 },
   },
-};
-
-const ApiModel = {
+},
+ApiModel = {
   id: "apiId",
   fields: {
     apiId: { type: "number", defaultValue: -1 },
@@ -355,7 +348,112 @@ const ApiModel = {
     if (typeof this.get("properties") === "object")
       target.set("properties", this.get("properties"));
   },
-};
+},
+StreamsModel = {
+  id: "streamId",
+  fields: {
+    streamId: { type: "number", defaultValue:0 },
+    objectType: { type: "number", defaultValue:0 },
+    objectId: { type: "number", defaultValue: 0},
+    categoryId: { type: "number", defaultValue: 0},
+    name: { type: "string", defaultValue: null },
+    displayName: { type: "string", defaultValue: null },
+    description: { type: "string", defaultValue: null },
+    creationDate: { type: "date" },
+    modifiedDate: { type: "date" },
+    properties: { type: "object", defaultValue: {} },
+  },
+  copy: function (target) {
+    target.streamId = this.get("streamId");
+    target.set("objectType", this.get("objectType"));
+    target.set("objectId", this.get("objectId")); 
+    target.set("categoryId", this.get("categoryId"));
+    target.set("name", this.get("name"));
+    target.set("displayName", this.get("displayName"));
+    target.set("description", this.get("description"));
+    target.set("enabled", this.get("enabled"));
+    target.set("modifiedDate", this.get("modifiedDate"));
+    target.set("creationDate", this.get("creationDate"));
+    if (typeof this.get("properties") === "object")
+      target.set("properties", this.get("properties"));
+  },
+},
+MessageModel = {
+  id: "messageId",
+  fields: { 	
+    user: { type: "object" , defaultValue : {} },
+    objectType: { type: "number", defaultValue: 0 },			
+    objectId: { type: "number", defaultValue: 0 },			
+    threadId: { type: "number", defaultValue: 0 },			
+    messageId: { type: "number", defaultValue: 0 },			
+    parentMessageId: { type: "number", defaultValue: 0 },			
+    keywords:{ type: "string", defaultValue: "" },		
+    subject:{ type: "string", defaultValue: "" },			
+    body:{type: "string", defaultValue: "" },			
+    replyCount:{ type: "number", defaultValue: 0 },	
+    attachmentsCount:{ type: "number", defaultValue: 0 },	
+    properties: { type: "object", defaultValue : {} },
+    creationDate:{ type: "date" },			
+    modifiedDate:{ type: "date" }
+  },
+  copy: function (target) {
+    target.messageId = this.get("messageId");
+    target.set("objectType", this.get("objectType"));
+    target.set("objectId", this.get("objectId"));      
+    target.set("threadId", this.get("threadId"));
+    target.set("parentMessageId", this.get("parentMessageId"));
+    target.set("keywords", this.get("keywords"));
+    target.set("subject", this.get("subject"));
+    target.set("body", this.get("body"));
+    target.set("replyCount", this.get("replyCount"));
+    target.set("attachmentsCount", this.get("attachmentsCount"));
+    target.set("modifiedDate", this.get("modifiedDate"));
+    target.set("creationDate", this.get("creationDate"));
+    if (typeof this.get("properties") === "object")
+      target.set("properties", this.get("properties"));    
+    if (typeof this.get("user") === "object")
+      target.set("user", this.get("user")); 
+  }
+},
+ThreadModel = {
+  id : "threadId",
+  fields: { 	
+    threadId: { type: "number", defaultValue: 0 },		
+    objectType: { type: "number", defaultValue: 0 },		
+    objectId: { type: "number", defaultValue: 0 },		
+    latestMessage :{ type: "object", defaultValue:{} },	
+    rootMessage	: { type: "object", defaultValue: {} },	
+    messageCount: { type: "number", defaultValue: 0 },	
+    viewCount: { type: "number", defaultValue: 0 },	
+    properties: { type: "object", defaultValue : {} },
+    creationDate: { type: "date" },			
+    modifiedDate: { type: "date" }
+  },
+  copy: function (target) {
+    target.threadId = this.get("threadId");
+    target.set("objectType", this.get("objectType"));
+    target.set("objectId", this.get("objectId"));  
+    target.set("messageCount", this.get("messageCount"));  
+    target.set("viewCount", this.get("viewCount"));  
+    target.set("modifiedDate", this.get("modifiedDate"));
+    target.set("creationDate", this.get("creationDate"));
+    if (typeof this.get("properties") === "object")
+      target.set("properties", this.get("properties"));    
+    if (typeof this.get("rootMessage") === "object")
+      target.set("rootMessage", this.get("rootMessage"));
+    if (typeof this.get("latestMessage") === "object")
+      target.set("latestMessage", this.get("latestMessage"));
+   }
+}
+;  
+
+const userState = [
+  {text: "NONE", value:"0"},
+  {text: "APPROVED", value:"1"},
+  {text: "REJECTED", value:"2"},
+  {text: "VALIDATED", value:"3"},
+  {text: "REGISTERED", value:"4"}
+];
 
 export const studio = {
   VERSION,
@@ -364,12 +462,14 @@ export const studio = {
       return `${API_ROOT_URL}` + url;
     },
     accounts: {
+      userState,
       state: initialState,
       logout,
       loginSuccess,
       authHeader,
       getCurrentUser,
       getUserAvatarUrl,
+      getUserRoles,
       verify: verifyToken,
     },
   },
@@ -384,6 +484,9 @@ export const studio = {
       BodyContent: BodyContentModel,
       Page: PageModel,
       Api: ApiModel,
+      Streams:StreamsModel,
+      Thread : ThreadModel,
+      Message : MessageModel
     },
   },
   ui: {
@@ -391,19 +494,23 @@ export const studio = {
     isFunction,
     sleep,
     notify,
+    send,
     handleAjaxError,
     handleAxiosError,
     headerWithAuth,
+    isUserLoggedIn,
     getImageUrl,
     getAttachmentUrl,
     setSecureImage,
     setImageAsBase64,
     getImageAsBase64,
     loadAceEditor,
-    propertyGrid: createPropertyGrid,
+    createToastUiEditor,
+    propertyGrid: createPropertyKendoGrid,
     aceEditor: createAceEditor,
     dropzone: createDropzone,
     masonry: createMasonry,
+    ckeditor: createCKEditor,
     format: {
       date: getFormattedDate,
       number: getFormattedNumber,
@@ -411,6 +518,7 @@ export const studio = {
     },
   },
 };
+
 
 function getFormattedByteSize(bytes) {
   var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -424,6 +532,52 @@ function getFormattedNumber(num, format) {
   format = format || "###,##";
   if (typeof num == "string") return kendo.toString(new Number(num), format);
   return kendo.toString(num, format);
+}
+
+function isSpeechSynthesis(){
+  if ('speechSynthesis' in window) {
+    return true;
+   }else{
+     console.log("Sorry, your browser doesn't support text to speech!");
+     return false;
+   }
+}
+
+const DEFAULT_SPEECH_SYNTHESIS_OPTIONS = {
+  voice: 10,
+  volume:1,
+  rate:1,
+  pitch:2,
+  lnag: 'en',
+  text: 'hello'
+};
+
+function getSpeechSynthesisUtterance( options ){
+  options = options || {};
+  var settings = $.extend(true, {}, DEFAULT_SPEECH_SYNTHESIS_OPTIONS, options);
+  var utter = new SpeechSynthesisUtterance();
+  var voices = window.speechSynthesis.getVoices();
+  utter.voice = voices[settings.voice]; 
+  utter.volume = settings.volum; // From 0 to 1
+  utter.rate = settings.rate; // From 0.1 to 10
+  utter.pitch = settings.pitch ; // From 0 to 2
+  utter.text = settings.text;
+  utter.lang = settings.lang;
+  return utter ;
+}
+
+function getUserRoles(userId){
+  const headers = {};
+  Object.assign(headers, studio.services.accounts.authHeader()); 
+  return axios
+  .get(`${API_ROOT_URL}/data/secure/mgmt/security/users/${userId}/roles`, { headers: headers })
+  .then((response) => {
+    const data = response.data;
+    return data.items;
+  })
+  .catch(function (error) {
+    return [];
+  });
 }
 
 function getFormattedDate(date, format) {
@@ -456,7 +610,7 @@ function headerWithAuth(headers) {
 function isUserLoggedIn() {
   let _user = JSON.parse(localStorage.getItem("user"));
   if (_user) {
-    console.log("is_user_logged_in" + !_user.anonymous);
+    //console.log("is_user_logged_in" + !_user.anonymous);
     return !_user.anonymous;
   }
   return false;
@@ -464,7 +618,7 @@ function isUserLoggedIn() {
 
 function getUserAvatarUrl(username) {
   const _user = getCurrentUser();
-  if (_user == null) return "@/assets/images/no-avatar.png";
+  if (_user == null) return "/assets/static/images/no-avatar.png";
   else username = username || _user.username;
   return `${API_ROOT_URL}/download/avatar/${username}`;
 }
@@ -475,10 +629,11 @@ function getCurrentUser() {
 }
 
 const DEFAULT_DOWNLOAD_OPTIONS = {
-  deafultImage: "/images/no-image.jpg",
+  deafultImage: "/images/no-image2.jpg",
   thumbnail: false,
   width: 150,
   height: 150,
+  jwt:false
 };
 
 function getImageUrlAsBase64(image, options) {
@@ -514,8 +669,7 @@ function setSecureImage(elemment, delay, callback) {
       if (isFunction(callback)) callback();
     },
     function () {
-      let maxRetry = 3,
-        retry = 0;
+      let maxRetry = 3, retry = 0;
       if (defined(elemment.data("max-retry"))) {
         maxRetry = elemment.data("max-retry");
       }
@@ -524,9 +678,11 @@ function setSecureImage(elemment, delay, callback) {
       }
       if (retry < maxRetry) {
         elemment.data("retry", retry + 1);
-        sleep(delay);
-        console.log("retry " + retry + " for " + url);
-        setSecureImage(elemment);
+        setTimeout(
+          function() {
+            setSecureImage(elemment);
+          }, 
+          delay);         
       } else {
         elemment.parent().removeClass("is-loading");
       }
@@ -536,8 +692,8 @@ function setSecureImage(elemment, delay, callback) {
 
 async function setImageAsBase64(url, successHandler, errorHandler) {
   const headers = {};
-  Object.assign(headers, studio.services.accounts.authHeader());
-  axios
+  Object.assign(headers, studio.services.accounts.authHeader()); 
+  await axios
     .get(url, { headers: headers, responseType: "arraybuffer" })
     .then((response) => {
       var mineType = response.headers["content-type"].toLowerCase();
@@ -546,9 +702,14 @@ async function setImageAsBase64(url, successHandler, errorHandler) {
       if (isFunction(successHandler)) successHandler(prefix + b64encoded);
     })
     .then((error) => {
-      if (isFunction(errorHandler)) errorHandler();
+      if (isFunction(errorHandler)) {
+        errorHandler();
+      }else{
+        handleAxiosError(error);
+      }
     });
 }
+
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -569,22 +730,20 @@ async function getImageAsBase64(url) {
 
 function getImageUrl(image, options) {
   options = options || {};
-  var settings = $.extend(true, {}, DEFAULT_DOWNLOAD_OPTIONS, options);
-  if (image.imageId > 0) {
-    var _imageUrl =
-      `${API_ROOT_URL}/download/images/` + image.imageId + "/" + image.name;
+  var settings = $.extend( true, {}, DEFAULT_DOWNLOAD_OPTIONS, options);
+  if (image.imageId > 0) {  
+    var _imageUrl =`${API_ROOT_URL}/download/images/` + image.imageId + "/" + image.name;
+    if( defined( image.imageLink ) &&  image.imageLink != null ) {
+      _imageUrl =`${API_ROOT_URL}/download/images/` + image.imageLink.linkId ;
+    }  
     if (settings.thumbnail) {
-      _imageUrl =
-        _imageUrl +
-        "?thumbnail=true&height=" +
-        settings.height +
-        "&width=" +
-        settings.width +
-        "&time=" +
-        kendo.guid();
-    } else {
-      _imageUrl = _imageUrl + "?time=" + kendo.guid();
+      _imageUrl = _imageUrl + "?thumbnail=true&height=" + settings.height + "&width=" + settings.width + "&time=" + kendo.guid(); 
+    }else{
+      _imageUrl = _imageUrl +  "?time=" + kendo.guid(); 
     }
+    if( settings.jwt && isUserLoggedIn() ){
+      _imageUrl = _imageUrl + "&jwt=" + authHeader().Authorization 
+    } 
     return encodeURI(_imageUrl);
   }
   return settings.deafultImage;
@@ -646,7 +805,6 @@ function verifyToken(options) {
     .get(options.url, { headers: headers })
     .then((response) => {
       const data = response.data;
-      console.log(data);
     })
     .catch(function (error) {
       if (error.response) {
@@ -660,13 +818,13 @@ function verifyToken(options) {
       } else if (error.request) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
+        // http.ClientRequest in node.js 
+        notify(null, error.message, "error");
       } else {
         // Something happened in setting up the request that triggered an Error
         console.log("Error", error.message);
       }
-      console.log(error.config);
+      //console.log(error.config);
     });
 }
 
@@ -715,13 +873,16 @@ function defined(x) {
 }
 
 function handleAxiosError(error) {
-  var message = "";
+  let message = "";
+  //console.log( '--------------------1' );
+  //console.log( JSON.stringify( error ) );
   if (error.response) {
     // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
-    console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
+    //console.log(error.response.data);
+    //console.log(error.response.status);
+    //console.log(error.response.headers); 
     if (
+
       error.response.status == 0 ||
       error.response.status == 404 ||
       error.response.status == 503 ||
@@ -748,8 +909,9 @@ function handleAxiosError(error) {
   } else if (error.request) {
     // 요청이 이루어 졌으나 응답을 받지 못했습니다.
     // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
-    // Node.js의 http.ClientRequest 인스턴스입니다.
-    console.log(error.request);
+    // Node.js의 http.ClientRequest 인스턴스입니다. 
+    message = error.message;
+    //console.log(error.request);
   } else {
     // 오류를 발생시킨 요청을 설정하는 중에 문제가 발생했습니다.
     console.log("Error", error.message);
@@ -874,7 +1036,7 @@ function createAceEditor(renderTo, options) {
   return ace.edit(renderTo.attr("id"));
 }
 
-function createPropertyGrid(renderTo, type, objectId) {
+function createPropertyKendoGrid(renderTo, type, objectId) {
   renderTo = renderTo || $("#property-grid");
   if (!renderTo.data("kendoGrid")) {
     var grid = renderTo
@@ -974,7 +1136,7 @@ function createPropertyGrid(renderTo, type, objectId) {
           },
           destroy: {
             url: `${API_ROOT_URL}/data/secure/mgmt/${type}/${objectId}/properties/delete.json`,
-            type: "post",
+            type: "delete",
             contentType: "application/json",
           },
           parameterMap: function (options, operation) {
@@ -999,6 +1161,52 @@ function createPropertyGrid(renderTo, type, objectId) {
   }
 }
 
+const GET = "get",
+POST = "post"
+function send(url, values, method, target) {
+  method = method || GET;
+  method = method && method.toUpperCase() == GET ? GET : POST;
+  target = target || "_self";
+  if (!values) {
+    var obj = parseUrl(url);
+    url = obj.url;
+    values = obj.params;
+  }
+  var form = $("<form>").attr({
+    method: method,
+    action: url,
+    target: target,
+  });
+  for (var i in values) {
+    $("<input>")
+      .attr({
+        type: "hidden",
+        name: i,
+        value: values[i],
+      })
+      .appendTo(form);
+  }
+  $("body").append(form);
+  form.submit();
+}
+
+function parseUrl ( url ){
+  if (url.indexOf('?') == -1)
+    return { url: url, params: {} }			
+  var parts = url.split('?'),
+    url = parts[0],
+    query_string = parts[1],
+    elems = query_string.split('&'),
+    obj = {};
+  
+  for(var i in elems)
+  {
+    var pair = elems[i].split('=');
+    obj[pair[0]] = pair[1];
+  }
+  return {url: url, params: obj};	
+}
+
 function loadAceEditor() {
   return import(
     /* webpackChunkName: "ace" */ "ace-builds/src-noconflict/ace"
@@ -1009,6 +1217,170 @@ function loadAceEditor() {
   });
 }
 
+// Using ES6 imports: Toast UI
+import Editor from '@toast-ui/editor';
+function createToastUiEditor( options ){    
+  return new Editor(options);
+}
+
+// Using ES6 imports: CKEditor 5
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
+class StudioUploadAdapter {
+
+  constructor( loader ) {
+      // CKEditor 5's FileLoader instance.
+      this.loader = loader;
+      // URL where to send files.
+      this.url =  `${API_ROOT_URL}/data/images/0/upload` ;
+  }
+  // Starts the upload process.
+  upload() {
+      console.log( this.loader.file );
+      return new Promise( ( resolve, reject ) => {         
+        console.log('init...');
+          this._initRequest();
+          console.log('listner...');
+          this._initListeners( resolve, reject );
+          console.log('sending...');
+          this._sendRequest();
+          console.log('sended');
+      } );
+  }
+  // Aborts the upload process.
+  abort() {
+      if ( this.xhr ) {
+          this.xhr.abort();
+      }
+  }
+  // Example implementation using XMLHttpRequest.
+  _initRequest() {
+      const xhr = this.xhr = new XMLHttpRequest();
+      xhr.open( 'POST', this.url, true );
+      xhr.responseType = 'json';
+  }
+  // Initializes XMLHttpRequest listeners.
+  _initListeners( resolve, reject ) {
+      const xhr = this.xhr;
+      const loader = this.loader;
+      const genericErrorText = 'Couldn\'t upload file:' + ` ${ loader.file.name }.`;
+      xhr.addEventListener( 'error', () => reject( genericErrorText ) );
+      xhr.addEventListener( 'abort', () => reject() );
+      xhr.addEventListener( 'load', () => {
+          const response = xhr.response;
+          console.log( response );
+          if ( !response || response.error ) {
+              return reject( response && response.error ? response.error.message : genericErrorText );
+          }
+          // If the upload is successful, resolve the upload promise with an object containing
+          // at least the "default" URL, pointing to the image on the server.
+          resolve( {
+              default: getDownloadUrl(response[0])
+          } );
+      } );
+      if ( xhr.upload ) {
+          xhr.upload.addEventListener( 'progress', evt => {
+              if ( evt.lengthComputable ) {
+                  loader.uploadTotal = evt.total;
+                  loader.uploaded = evt.loaded;
+              }
+          } );
+      }
+  }
+  // Prepares the data and sends the request.
+  _sendRequest() {
+      const data = new FormData();
+      let that = this;
+      let file = that.loader.file;
+      that.xhr.setRequestHeader( 'Authorization', authHeader().Authorization );    
+      file.then(function(result){
+         //wait for the promise to finish then continue
+         data.append("upload", result);
+         that.xhr.send( data );
+      });      
+      //data.append( 'upload', this.loader.file );
+      //console.log( that.loader.file );      
+      
+  }
+}
+
+function getDownloadUrl(item){
+  return encodeURI(`${API_ROOT_URL}/download/images/${item.linkId}`);
+}
+
+
+function StudioUploadAdapterPlugin( editor ) {
+  editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
+      return new StudioUploadAdapter( loader );
+  };
+}
+
+
+function createCKEditor( renderTo , options ){
+  renderTo = renderTo || $("#ckeditor");
+  var $headers = headerWithAuth({});
+ return ClassicEditor.create(renderTo.get(0), {   
+   extraPlugins: [StudioUploadAdapterPlugin],
+   mediaEmbed : { previewsInData : true },
+   image: {
+     // Configure the available styles.
+     styles: ["alignLeft", "alignCenter", "alignRight"],
+
+     // Configure the available image resize options.
+     resizeOptions: [
+       {
+         name: "imageResize:original",
+         label: "Original",
+         value: null,
+       },
+       {
+         name: "imageResize:50",
+         label: "50%",
+         value: "50",
+       },
+       {
+         name: "imageResize:75",
+         label: "75%",
+         value: "75",
+       },
+     ],
+
+     // You need to configure the image toolbar, too, so it shows the new style
+     // buttons as well as the resize buttons.
+     toolbar: [
+       "imageStyle:alignLeft",
+       "imageStyle:alignCenter",
+       "imageStyle:alignRight",
+       "|",
+       "imageResize",
+       "|",
+       "imageTextAlternative",
+     ],
+   },
+ })
+   .then((editor) => {
+     window.ckeditor = editor;
+   })
+   .catch((error) => {
+     console.error("There was a problem initializing the editor.", error);
+   });
+}
+
+
+
+//window.CKEDITOR_BASEPATH = '/node_modules/ckeditor4/';
+//import 'ckeditor4';
+/*
+require('ckeditor4');
+
+function createCKEditor(renderTo, options){
+  renderTo = renderTo || $("#ckeditor");
+  CKEDITOR.replace(  renderTo.attr('id')  );
+  return CKEDITOR.instances[ renderTo.attr('id') ];
+}
+*/
+
+
 import Dropzone from "dropzone";
 
 function createDropzone(renderTo, options) {
@@ -1016,25 +1388,21 @@ function createDropzone(renderTo, options) {
   return myDropzone;
 }
 
-
-import Masonry from "masonry-layout"; 
-import jQueryBridget from "jquery-bridget";  
+import Masonry from "masonry-layout";
+import jQueryBridget from "jquery-bridget";
 
 // make Masonry a jQuery plugin
-jQueryBridget( 'masonry', Masonry, $ );
-
+jQueryBridget("masonry", Masonry, $);
 
 const DEFAULT_MASONRY_OPTIONS = {
-  itemSelector: '.masonry-item',
-  columnWidth: '.masonry-sizer',
- 
+  itemSelector: ".masonry-item",
+  columnWidth: ".masonry-sizer",
   // columnWidth: '.masonry-sizer',
-  percentPosition: true
+  percentPosition: true,
 };
 
 function createMasonry(renderTo, options) {
   options = options || {};
   var settings = $.extend(true, {}, DEFAULT_MASONRY_OPTIONS, options);
   renderTo.masonry(settings);
-  //return new Masonry(renderTo, settings);
 }
