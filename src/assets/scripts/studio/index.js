@@ -510,7 +510,7 @@ export const studio = {
     aceEditor: createAceEditor,
     dropzone: createDropzone,
     masonry: createMasonry,
-    ckeditor: createCKEditor,
+    ckeditor: createCKEditor5,
     format: {
       date: getFormattedDate,
       number: getFormattedNumber,
@@ -518,7 +518,6 @@ export const studio = {
     },
   },
 };
-
 
 function getFormattedByteSize(bytes) {
   var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -1227,7 +1226,6 @@ function createToastUiEditor( options ){
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 class StudioUploadAdapter {
-
   constructor( loader ) {
       // CKEditor 5's FileLoader instance.
       this.loader = loader;
@@ -1308,7 +1306,6 @@ function getDownloadUrl(item){
   return encodeURI(`${API_ROOT_URL}/download/images/${item.linkId}`);
 }
 
-
 function StudioUploadAdapterPlugin( editor ) {
   editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
       return new StudioUploadAdapter( loader );
@@ -1316,7 +1313,7 @@ function StudioUploadAdapterPlugin( editor ) {
 }
 
 
-function createCKEditor( renderTo , options ){
+function createCKEditor5( renderTo , options , callback ){
   renderTo = renderTo || $("#ckeditor");
   var $headers = headerWithAuth({});
  return ClassicEditor.create(renderTo.get(0), {   
@@ -1325,7 +1322,6 @@ function createCKEditor( renderTo , options ){
    image: {
      // Configure the available styles.
      styles: ["alignLeft", "alignCenter", "alignRight"],
-
      // Configure the available image resize options.
      resizeOptions: [
        {
@@ -1344,7 +1340,6 @@ function createCKEditor( renderTo , options ){
          value: "75",
        },
      ],
-
      // You need to configure the image toolbar, too, so it shows the new style
      // buttons as well as the resize buttons.
      toolbar: [
@@ -1360,26 +1355,14 @@ function createCKEditor( renderTo , options ){
  })
    .then((editor) => {
      window.ckeditor = editor;
+     if (isFunction(callback)) {
+      callback(editor);
+     }
    })
    .catch((error) => {
      console.error("There was a problem initializing the editor.", error);
    });
 }
-
-
-
-//window.CKEDITOR_BASEPATH = '/node_modules/ckeditor4/';
-//import 'ckeditor4';
-/*
-require('ckeditor4');
-
-function createCKEditor(renderTo, options){
-  renderTo = renderTo || $("#ckeditor");
-  CKEDITOR.replace(  renderTo.attr('id')  );
-  return CKEDITOR.instances[ renderTo.attr('id') ];
-}
-*/
-
 
 import Dropzone from "dropzone";
 
@@ -1395,8 +1378,8 @@ import jQueryBridget from "jquery-bridget";
 jQueryBridget("masonry", Masonry, $);
 
 const DEFAULT_MASONRY_OPTIONS = {
-  itemSelector: ".masonry-item",
-  columnWidth: ".masonry-sizer",
+  itemSelector: ".masonry-grid-item",
+  columnWidth: ".masonry-grid-sizer",
   // columnWidth: '.masonry-sizer',
   percentPosition: true,
 };

@@ -107,24 +107,23 @@
       overflow: hidden;
     }
 
-    .masonry-item {
+    .masonry-grid-item {
       float: left;
       border-radius: 5px;
     }
 
-    .masonry-sizer,
-    .masonry-item {
+    .masonry-grid-sizer,
+    .masonry-grid-item {
       width: 300px;
       overflow: hidden;
     }
 
-    .masonry-item img.k-card-image {
+    .masonry-grid-item img.album-cover-img {
       width: 300px;
-      max-height: 300px;
       overflow: hidden;
     }
 
-    .masonry-item .k-card-body {
+    .masonry-grid-item .k-card-body {
       overflow-wrap: anywhere;
     }
 
@@ -244,7 +243,6 @@
               renderTo.masonry({ horizontalOrder: true, columnWidth: 300, percentPosition: false, gutter: 10 });
               observable.set('masonry', true);
 
-              
               var delay = 500;
               renderTo.find("img[is-secure]").each(function () {
                 var $this = $(this);
@@ -260,12 +258,11 @@
                   $this.parent().removeClass('is-loading');
                 }).each(function () { });
 
-              $(".masonry img.k-card-image").hover(function () {
+              $(".masonry img.album-cover-img").hover(function () {
                 kendo.fx(this).zoom("in").startValue(1).endValue(1.2).play();
               }, function () {
                 kendo.fx(this).zoom("out").endValue(1).startValue(1.2).play();
               });
-              //renderTo.height('100%');
             }
           });
 
@@ -483,7 +480,9 @@
               title: "Album",
               visible: false,
               scrollable: true,
-              modal: true,
+              modal: {
+                preventScroll: true
+              },
               actions: ["Close"], // 
               resize: function () {
                 // the user has finished resizing the Window 
@@ -991,9 +990,69 @@
       </div>
       <!-- Figure Image -->
       </script>
-
       <script type="text/x-kendo-template" id="listview-album-template">
-        <div class="k-card g-pa-0 g-ma-5 masonry-item" >
+        <div class="masonry-grid-item g-pa-0 g-ma-5">
+          <!-- Albumn Grid Blocks -->
+          <article class="u-shadow-v21 u-shadow-v21--hover g-transition-0_3">
+            <a style="overflow:hidden;" href="albums.html?#=albumId#" target="_self" >
+            <img class="img-fluid w-100 g-rounded-top-5 album-cover-img"             
+            # if (coverImage!=null) { #
+              data-retry="0" is-secure="true" data-max-retry="5"
+              secure-image="#= studio.ui.getImageUrl(coverImage, { width:300, height:300, thumbnail:true }) #"
+              src="#= studio.ui.getImageUrl(coverImage, { width:300, height:300, thumbnail:true }) #"
+            # }else{ # src = "assets/static/images/no-image_2.jpg" #}# alt="Image Description">
+            </a>
+            <div class="g-bg-white g-pa-15 g-rounded-bottom-5">
+              <ul class="list-inline g-color-gray-dark-v4 g-font-weight-300 g-font-size-12 g-mb-10">
+                <li class="list-inline-item mr-0">
+                  <span class="d-inline-block g-color-gray-dark-v4">
+                    <img class="g-width-20 g-height-20 rounded-circle mr-2" src="#= studio.services.accounts.getUserAvatarUrl( user.username ) #" alt="Image Description">
+                    #if ( !user.anonymous && user.name != null ) {# #: user.name # #}#
+                  </span>
+                </li>
+                <li class="list-inline-item mx-2">·</li>
+                <li class="list-inline-item">#= studio.ui.format.date( modifiedDate ,"yyyy.MM.dd HH:mm")  #</li>
+              </ul>
+              <h2 class="h5 g-color-black g-font-weight-600 mb-4">
+                <a class="u-link-v5 g-color-black g-color-primary--hover g-cursor-pointer" href="\#">#:name#</a>
+              </h2>
+              <p class="g-color-gray-dark-v4 g-line-height-1_8">#: description #</p>
+              <!--
+              <ul class="list-inline g-font-size-12 mb-0">
+                <li class="list-inline-item g-mb-10">
+                  <a class="u-tags-v1 g-color-teal g-bg-teal-opacity-0_1 g-bg-teal--hover g-color-white--hover g-rounded-50 g-py-4 g-px-15" href="\#">Art</a>
+                </li>
+                <li class="list-inline-item g-mb-10">
+                  <a class="u-tags-v1 g-color-yellow g-bg-yellow-opacity-0_1 g-bg-yellow--hover g-color-white--hover g-rounded-50 g-py-4 g-px-15" href="\#">Design</a>
+                </li>
+              </ul>
+            -->
+              <ul class="list-inline d-flex justify-content-between mb-0">
+                <li class="list-inline-item g-color-gray-dark-v4">
+                  <a class="d-inline-block g-color-gray-dark-v4 g-font-size-13 g-cursor-pointer g-text-underline--none--hover" href="\#">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chat-left" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v11.586l2-2A2 2 0 0 1 4.414 11H14a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                    </svg> 
+                    0 Comments
+                  </a>
+                </li>
+                <li class="list-inline-item g-color-gray-dark-v4">
+                  <a class="btn btn-link u-link-v5 g-font-size-13 g-color-secondary--hover g-text-right" data-action="edit" data-object-id="#=albumId#">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
+                      <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
+                    </svg> 
+                    Edit
+                  </a> 
+                </li>
+              </ul>
+            </div>
+          </article>
+          <!-- End Albumn Grid Blocks -->
+        </div>
+      </script>  
+      <script type="text/x-kendo-template" id="listview-album-template2">
+        <div class="k-card g-pa-0 g-ma-5 masonry-grid-item" >
           <div class="k-card-header k-display-flex k-align-items-center bgc-grey-100">
             <h5 class="k-card-title g-font-size-14">#:name#</h5> 
           </div>

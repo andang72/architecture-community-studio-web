@@ -18,7 +18,7 @@ This project based on **Adminator**.
 
 
 ## Getting Started
-In order to run **dashboard** on your local machine all what you need to do is to have the prerequisites stated below installed on your machine and follow the installation steps down below.
+In order to run **studio** on your local machine all what you need to do is to have the prerequisites stated below installed on your machine and follow the installation steps down below.
 
 #### Prerequisites
   - node.js & npm
@@ -26,7 +26,7 @@ In order to run **dashboard** on your local machine all what you need to do is t
   - Tools (Visual Studio Code .. )
 
 #### Installing & Local Development
-Start by typing the following commands in your terminal in order to get **dashboard** full package on your machine and starting a local development server with live reload feature.
+Start by typing the following commands in your terminal in order to get **studio** full package on your machine and starting a local development server with live reload feature.
 
 ```
 > git clone https://github.com/andang72/architecture-community-studio-web.git studio-web
@@ -35,7 +35,6 @@ Start by typing the following commands in your terminal in order to get **dashbo
 > npm run preview
 ```
 Note that you must have a studio server and enter the server address in the webpack/manifest.js file.
-
 
 ## Files/Folders Structure
 Here is a brief explanation of the template folder structure and some of its main files usage:
@@ -135,8 +134,7 @@ Initial Release
 
 ## Authors
  
-## More info
- 
+## More info 
 
 ## License
 

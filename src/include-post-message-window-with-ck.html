@@ -116,13 +116,6 @@
         },
         saveOrUpdate: function () {
           var $self = this;
-          //$self.set("message.body", toast_editor.getData());
-          // if ($self.get("editor.kendoEditor")) {
-          //$self.set("message.body", kendo_editor.value());
-          //} else {
-          // $self.set("message.body", ace_editor.getValue());
-          //
-          // }
           if($self.editor.ace.visible){
             $self.set("message.body", ace_editor.getValue());
           }else{
@@ -182,6 +175,7 @@
                           "success"
                         );
                         $self.setSource(new MessageModel(data));
+                        dialog.close();
                         kendoWindow.close();
                         if (studio.ui.isFunction(callback)) {
                           callback($self.message);
@@ -218,14 +212,18 @@
       renderTo.data("model", observable);
       var kendoWindow = renderTo
         .kendoWindow({
-          width: "900px",
+          width:'900px',
+          //minWidth: "900px",
           height: "700px",
+          //size: "wide",
           title: "Post Message",
           visible: false,
           resizable: false,
           draggable: false,
-          scrollable: false,
-          modal: true,
+          //scrollable: false,
+          modal: {
+            preventScroll: true
+          },
           actions: ["Maximize", "Close"], //
           open: function () {
             var _subject = observable.message.subject;

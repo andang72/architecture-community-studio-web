@@ -245,11 +245,11 @@
           renderTo.masonry({ horizontalOrder: true, columnWidth: 250, percentPosition: false, gutter: 10 });
           observable.set('masonry', true);
 
-          var delay = 600;
+          var delay = 500;
           renderTo.find("img[is-secure]").each(function () {
             var $this = $(this);
             $this.parent().addClass('is-loading');
-            delay = delay + 200;
+            delay = delay + 500;
             studio.ui.setSecureImage($this, delay, function () {
               renderTo.masonry('layout');
             });
