@@ -91,6 +91,10 @@
       outline-color: red;
     }
 
+    .bg-gray{
+      background-image: linear-gradient(to bottom, #fafafa, #fff);
+    }
+
     .masonry {
       display: block;
     }
@@ -130,6 +134,12 @@
       .masonry-item img.k-card-image {
         width: 100%; 
       }
+    }
+
+    img.close {
+      width : 50px;
+      opacity:.4;
+      filter: alpha(opacity=40); /* For IE8 and earlier */
     }
 
   </style>
@@ -207,7 +217,6 @@
       kendo.bind(renderTo, observable);
     }
 
-
     function createAlbumMasonry(observable) {
       var renderTo = $(".masonry");
       var template = kendo.template($("#album-image-template").html());
@@ -224,8 +233,7 @@
             }
             return JSON.stringify(options);
           }
-        },
-        //pageSize: 54,
+        }, 
         serverPaging: false,
         serverFiltering: false,
         serverSorting: false,
@@ -236,12 +244,13 @@
           model: studio.data.model.Image
         },
         change: function () {
+          
           $elems = kendo.render(template, this.view());
           renderTo.html($elems);
-
           if( observable.get('masonry')){
             renderTo.masonry('destroy');
           } 
+          
           renderTo.masonry({ horizontalOrder: true, columnWidth: 250, percentPosition: false, gutter: 10 });
           observable.set('masonry', true);
 
@@ -254,38 +263,42 @@
               renderTo.masonry('layout');
             });
           });
+          
           $(".masonry img").hover(function () {
             kendo.fx(this).zoom("in").startValue(1).endValue(1.2).play();
           }, function () {
             kendo.fx(this).zoom("out").endValue(1).startValue(1.2).play();
           });
+          
         }
       });
       dataSource.read();
     }
 
   </script>
-  <div id="mainContent">
-    <!-- Article -->
-    <article class="g-bg-gray-dark-v2 g-pa-15">
-      <a class="btn btn-link u-link-v5 g-mr-10 g-font-size-15 g-color-secondary--hover g-pos-abs" style="right:15px;"
+  <div id="mainContent" class="bg-gray">    
+    <div class="g-pa-50 g-pt-0 g-px-100--lg g-pb-100--lg">
+      
+      <a class="btn btn-link u-link-v5 g-mr-10 g-font-size-15 g-color-secondary--hover g-pos-abs" style="right:15px; top:15px;"
         data-bind="click:close">
-        <img src="assets/static/images/cross.png" />
+        <img src="assets/static/images/close.svg" class="close" />
       </a>
-      <div class="media g-mb-25">
-        <img class="d-flex g-width-40 g-height-40 rounded-circle mr-2" src="assets/static/images/no-image_2.jpg" data-bind="attr:{src: authorImgUrl }" alt="Image Description">
+
+      <div class="g-max-width-400--md g-pos-rel g-z-index-1 g-pt-25 g-pl-50 g-pl-0--md g-ml-minus-50--lg mb-4">
+        <h1 class="h2 g-color-black g-font-weight-600" data-bind="text:album.name" ></h1>
+      </div>
+      <div class="mb-2">
+        <p class="g-color-black g-font-weight-400 g-font-size-16" data-bind="text:album.description"></p>
+      </div>
+      <!-- Author -->
+      <div class="media align-items-center g-brd-bottom g-brd-gray-light-v4 pb-5 mb-5">
+        <img class="d-flex img-fluid g-width-40 g-height-40 rounded-circle mr-3" src="assets/static/images/no-image_2.jpg" data-bind="attr:{src: authorImgUrl }" alt="Image Description">
         <div class="media-body">
-          <h4 class="h6 g-color-primary mb-0"><a href="#" data-bind="text:album.user.name"></a></h4>
-          <span class="d-block g-color-gray-dark-v4 g-font-size-12" data-bind="text:lastModifiedDate"></span>
+          <h4 class="h6 g-color-black g-font-weight-400 mb-0" data-bind="text:album.user.name" ></h4>
+          <span class="d-block g-color-gray-dark-v5 g-font-size-12" data-bind="text:lastModifiedDate"></span>
         </div>
       </div>
-      <div class="g-mb-0">
-        <h2 class="h4 g-color-black g-font-weight-600 mb-3"><a class="u-link-v5 g-color-black g-color-primary--hover" href="#"><span data-bind="text:album.name"></a></h2>
-        <p class="g-color-gray-dark-v4 g-line-height-1_8" data-bind="text:album.description"></p>
-      </div>
-    </article>
-    <!-- End Article -->
-    <div class="container-fluid">
+      <!-- End Author --> 
       <div id="masonry-listview" class="masonry"></div>
     </div>
   </div>

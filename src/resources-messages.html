@@ -114,6 +114,20 @@
         min-height: 150px;
         min-width: 150px;
       }
+      
+      .post-body {
+        border-color: rgba(0, 0, 0, .08);
+        border-style:solid;
+        border-width:1px;
+      }
+
+      .g-brd-bottom-1 {
+        border-bottom-width : 1px!important;
+      }
+
+      .g-brd-style-dashed {
+        border-style : dashed;
+      }
     </style>
   </head>
 
@@ -235,6 +249,7 @@
                   $this.set("editable", false);
                   $this.set("owner", false);
                 }
+                getAttachmentListView( $('#message-attachement-listview'), $this.thread.rootMessage );
               },
               load: function (objectId) {
                 var self = this;
@@ -270,6 +285,16 @@
             }
             kendo.bind(renderTo, observable);          
           }          
+
+          function getAttachmentListView( renderTo, item ){
+            if (!renderTo.data("kendoListView")) {
+              var listview = renderTo.kendoListView({
+                dataSource : studio.ui.attachmentDataSource( 22, item.messageId),
+                template: kendo.template($("#message-attachment-template").html()),
+              }).data('kendoListView');
+            }
+          }
+
         </script>
         <main class="main-content bgc-grey-100">
           <div id="mainContent">
@@ -373,7 +398,7 @@
                     style="margin-top: 10px; font-size: 13px; line-height: 1.3;"
                   >
                     <article
-                      class="post ck-content"
+                      class="post"
                       style="
                         min-height: 104px;
                         padding: 20px;
@@ -467,9 +492,19 @@
                           </div>
                         </header>
                         <div
-                          class="post-body"
-                          data-bind="html:thread.rootMessage.body"
+                          class="post-body ck-content"
+                          data-bind="html:thread.rootMessage.body" 
+                          style="border-radius:5px;"
                         ></div>
+                        <div class="card-header d-flex align-items-center justify-content-between g-bg-gray-light-v5 border-0 g-mb-0">
+                          <h3 class="h6 mb-0">
+                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-paperclip" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                              <path fill-rule="evenodd" d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0V3z"/>
+                            </svg>
+                            Attachments <small></small>
+                          </h3>
+                        </div>
+                        <div id = "message-attachement-listview" class="g-mt-0"></div>
                       </div>
                     </article>
                   </div>
@@ -477,13 +512,38 @@
               </div>
             </div>
           </div>
-        </main>
-        
+        </main>        
         <span id="delete-dialog"></span>
         <span id="dialog"></span>
         <!-- START POST MESSAGE WINDOW -->
         <%= require('html-loader!./include-post-message-window-with-ck.html') %>
         <!-- END POST MESSAGE WINDOW -->
+        
+        <script type="text/x-kendo-template" id="message-attachment-template">
+          <article>
+          <div class="media g-brd-1 g-brd-style-dashed g-brd-gray-light-v4 g-pa-15 g-mb-0">
+            <img class="d-flex g-width-50 g-height-50 g-mt-3 g-mr-20" src="#= studio.ui.getAttachmentThumbnailUrl( data ) #" alt="Image Description">
+            <div class="media-body">
+              <div class="d-sm-flex justify-content-sm-between align-items-sm-center g-mb-15 g-mb-10--sm">
+                <h5 class="h5 g-font-weight-300 g-mr-10 g-mb-5 g-mb-0--sm">#:name#</h5>
+                <div class="text-nowrap g-font-size-12">
+                  <span>#= studio.ui.format.byte(size) #</span> /  <a class="btn btn-link u-link-v5 g-mr-10 g-font-size-15 g-color-secondary--hover" herf="#=studio.ui.getAttachmentUrl(data)#" ><spin class="g-ml-5 g-font-size-12 g-font-weight-300"> Download </spin></a>
+                </div>
+              </div>
+              #if ( extrnalLink != 'null' || extrnalLink != null ) {#
+              <p>
+                #if( contentType === 'video/mp4'){#
+                  <video class="video-js" controls preload="auto" data-setup='{}'>
+                  <source src="#=studio.ui.getAttachmentUrl(data)#" type="video/mp4"></source>
+                  </video>
+                #}#                
+              </p>    
+              #}#        
+            </div>
+          </div>
+        </article>
+        </script>
+        
         <script type="text/x-kendo-template" id="grid-toolbar-template">
           <div class="layer w-100">
             <div class="peers ai-c jc-sb fxw-nw">
@@ -513,7 +573,6 @@
           </a>
           <button class="btn btn-xs u-btn-outline-blue g-rounded-50" data-bind="visible:editable, click:passwd" style="">Threads</button>
           </div>
-
           <small class="form-text text-muted">#: description #</small>
         </script>
         <script type="text/x-kendo-template" id="user-column-template">

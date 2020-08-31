@@ -9,17 +9,15 @@ const VERSION = "1.0.0",
   },
   STRING = "string",
   STATUS_ERROR_MESSAGES = {
-    "0": "오프라인 상태입니다.",
-    "404": "요청하신 웹 페이지를 찾을 수 없습니다.",
-    "405": "웹 사이트에서 페이지를 표시할 수 없습니다.",
-    "406": "이 웹 페이지 형식을 읽을 수 없습니다.",
-    "408":
-      "서버에서 웹 페이지를 표시하는 데 시간이 너무 오래 걸리거나 같은 페이지를 요청하는 사용자가 너무 많습니다. 나중에 다시 시도하여 주십시오.",
-    "409":
-      "서버에서 웹 페이지를 표시하는 데 시간이 너무 오래 걸리거나 같은 페이지를 요청하는 사용자가 너무 많습니다. 나중에 다시 시도하여 주십시오.",
-    "500": "오류가 발생하였습니다.",
-    "503": "서비스 이용이 지연되고 있습니다. 잠시 후 다시 시도하여 주십시오.",
-    "403": "접근 권한이 없습니다. 권한이 필요한 경우 관리자에게 문의하십시오.",
+    0: "오프라인 상태입니다.",
+    404: "요청하신 웹 페이지를 찾을 수 없습니다.",
+    405: "웹 사이트에서 페이지를 표시할 수 없습니다.",
+    406: "이 웹 페이지 형식을 읽을 수 없습니다.",
+    408: "서버에서 웹 페이지를 표시하는 데 시간이 너무 오래 걸리거나 같은 페이지를 요청하는 사용자가 너무 많습니다. 나중에 다시 시도하여 주십시오.",
+    409: "서버에서 웹 페이지를 표시하는 데 시간이 너무 오래 걸리거나 같은 페이지를 요청하는 사용자가 너무 많습니다. 나중에 다시 시도하여 주십시오.",
+    500: "오류가 발생하였습니다.",
+    503: "서비스 이용이 지연되고 있습니다. 잠시 후 다시 시도하여 주십시오.",
+    403: "접근 권한이 없습니다. 권한이 필요한 경우 관리자에게 문의하십시오.",
   };
 
 //const $ = require("jquery");
@@ -35,424 +33,422 @@ const initialState = user
   : { status: { loggedIn: false }, user: null };
 
 const RoleModel = {
-  id: "roleId",
-  fields: {
-    roleId: {
-      type: "number",
-      defaultValue: 0,
-      editable: false,
-      validation: { min: 0, required: true },
-    },
-    name: { type: "string", defaultValue: null },
-    description: { type: "string", defaultValue: null },
-    creationDate: { type: "date", editable: false },
-    modifiedDate: { type: "date", editable: false },
-  },
-},
-UserModel = {
-  id: "userId",
-  fields: {
-    userId: { type: "number", defaultValue: 0 },
-    username: { type: "string", defaultValue: "" },
-    name: { type: "string", defaultValue: "" },
-    nameVisible: { type: "boolean", defaultValue: false },
-    firstName: { type: "string", defaultValue: "" },
-    lastName: { type: "string", defaultValue: "" },
-    email: { type: "string", defaultValue: "" },
-    emailVisible: { type: "boolean", defaultValue: false },
-    anonymous: { type: "boolean", defaultValue: true },
-    enabled: { type: "boolean", defaultValue: false },
-    external: { type: "boolean", defaultValue: false },
-    creationDate: { type: "date" },
-    modifiedDate: { type: "date" },
-    status: { type: "string", defaultValue: "NONE" },
-    properties: { type: "object", defaultValue: {} },
-    roles: { type: "object", defaultValue: [] },
-  },
-  formattedCreationDate: function () {
-    return kendo.toString(this.get("creationDate"), "g");
-  },
-  formattedModifiedDate: function () {
-    return kendo.toString(this.get("modifiedDate"), "g");
-  },
-  hasRole: function (role) {
-    if (typeof this.roles != "undefined" && $.inArray(role, this.roles) >= 0)
-      return true;
-    else return false;
-  },
-  copy: function (target) {
-    target.userId = this.get("userId");
-    target.set("username", this.get("username"));
-    target.set("name", this.get("name"));
-    target.set("email", this.get("email"));
-    target.set("status", this.get("status"));
-    if (this.get("creationDate") != null)
-      target.set("creationDate", this.get("creationDate"));
-    if (this.get("modifiedDate") != null)
-      target.set("modifiedDate", this.get("modifiedDate"));
-    target.set("enabled", this.get("enabled"));
-    target.set("external", this.get("external"));
-    target.set("nameVisible", this.get("nameVisible"));
-    target.set("emailVisible", this.get("emailVisible"));
-    target.set("anonymous", this.get("anonymous"));
-    if (typeof this.get("roles") === "object")
-      target.set("roles", this.get("roles"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));
-  },
-},
-ImageLinkModel = {
-  id: "imageId",
-  fields: {
-    imageId: { type: "number", defaultValue: 0 },
-    linkId: { type: "string", defaultValue: null },
-    publicShared: { type: "boolean", defaultValue: false },
-    filename: { type: "string", defaultValue: null },
-  },
-},
-SharedLinkModel = {
-  id: "linkId",
-  fields: {
-    objectType: { type: "number", defaultValue: 0 },
-    objectId: { type: "number", defaultValue: 0 },
-    linkId: { type: "string", defaultValue: null },
-    publicShared: { type: "boolean", defaultValue: false },
-  },
-},
-AttachmentModel = {
-  id: "attachmentId",
-  fields: {
-    attachmentId: { type: "number", defaultValue: 0 },
-    objectType: { type: "number", defaultValue: 0 },
-    objectId: { type: "number", defaultValue: 0 },
-    name: { type: "string", defaultValue: "" },
-    contentType: { type: "string", defaultValue: "" },
-    downloadCount: { type: "number", defaultValue: 0 },
-    size: { type: "number", defaultValue: 0 },
-    user: { type: "object", defaultValue: { userId: 0 } },
-    properties: { type: "object", defaultValue: {} },
-    sharedLink: { type: "object", defaultValue: {} },
-    creationDate: { type: "date" },
-    modifiedDate: { type: "date" },
-  },
-  copy: function (target) {
-    target.attachmentId = this.get("attachmentId");
-    target.set("objectType", this.get("objectType"));
-    target.set("objectId", this.get("objectId"));
-    target.set("name", this.get("name"));
-    target.set("contentType", this.get("contentType"));
-    target.set("size", this.get("size"));
-    target.set("downloadCount", this.get("downloadCount"));
-    target.set("modifiedDate", this.get("modifiedDate"));
-    target.set("creationDate", this.get("creationDate"));
-    if (typeof this.get("user") === "object")
-      target.set("user", this.get("user"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));
-    if (typeof this.get("sharedLink") === "object")
-      target.set("sharedLink", this.get("sharedLink"));
-  },
-  formattedSize: function () {
-    return kendo.toString(this.get("size"), "##,###");
-  },
-  formattedCreationDate: function () {
-    return kendo.toString(this.get("creationDate"), "g");
-  },
-  formattedModifiedDate: function () {
-    return kendo.toString(this.get("modifiedDate"), "g");
-  },
-},
-ImageModel = {
-  id: "imageId",
-  fields: {
-    imageId: { type: "number", defaultValue: 0 },
-    objectType: { type: "number", defaultValue: 0 },
-    objectId: { type: "number", defaultValue: 0 },
-    name: { type: "string", defaultValue: "" },
-    contentType: { type: "string", defaultValue: "" },
-    size: { type: "number", defaultValue: 0 },
-    thumbnailContentType: { type: "string", defaultValue: "" },
-    thumbnailSize: { type: "number", defaultValue: 0 },
-    user: { type: "object", defaultValue: { userId: 0 } },
-    imageLink: {
-      type: "object",
-      defaultValue: {},
-    },
-    tags: { type: "string", defaultValue: "" },
-    properties: { type: "object", defaultValue: {} },
-    creationDate: { type: "date" },
-    modifiedDate: { type: "date" },
-  },
-  copy: function (target) {
-    target.imageId = this.get("imageId");
-    target.set("objectType", this.get("objectType"));
-    target.set("objectId", this.get("objectId"));
-    target.set("name", this.get("name"));
-    target.set("contentType", this.get("contentType"));
-    target.set("size", this.get("size"));
-    target.set("thumbnailContentType", this.get("thumbnailContentType"));
-    target.set("thumbnailSize", this.get("thumbnailSize"));
-    target.set("modifiedDate", this.get("modifiedDate"));
-    target.set("creationDate", this.get("creationDate"));
-    target.set("tags", this.get("tags"));
-    if (typeof this.get("user") === "object")
-      target.set("user", this.get("user"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));
-    if (typeof this.get("imageLink") === "object")
-      target.set("imageLink", this.get("imageLink"));
-  },
-  formattedSize: function () {
-    return kendo.toString(this.get("size"), "##,###");
-  },
-  formattedCreationDate: function () {
-    return kendo.toString(this.get("creationDate"), "g");
-  },
-  formattedModifiedDate: function () {
-    return kendo.toString(this.get("modifiedDate"), "g");
-  },
-},
-AlbumModel = {
-  id: "albumId", // the identifier of the model
-  fields: {
-    albumId: { type: "number", editable: false, defaultValue: 0 },
-    name: { type: "string", editable: true },
-    description: { type: "string", editable: true, defaultValue: "" },
-    collaborate: { type: "boolean", editable: true, defaultValue: "" },
-    shared: { type: "boolean", editable: true, defaultValue: false },
-    properties: { type: "object", defaultValue: {} },
-    user: { type: "object", defaultValue: { userId: 0 } },
-    modifiedDate: { type: "date" },
-    creationDate: { type: "date" },
-  },
-  copy: function (target) {
-    target.albumId = this.get("albumId");
-    target.set("name", this.get("name"));
-    target.set("description", this.get("description"));
-    target.set("collaborate", this.get("collaborate"));
-    target.set("shared", this.get("shared"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));
-    if (typeof this.get("user") === "object")
-      target.set("user", this.get("user"));
-    target.set("creationDate", this.get("creationDate"));
-    target.set("modifiedDate", this.get("modifiedDate"));
-  },
-},
-PageModel = {
-  id: "pageId",
-  fields: {
-    objectType: { type: "number", defaultValue: -1 },
-    objectId: { type: "number", defaultValue: -1 },
-    pageId: { type: "number", defaultValue: 0 },
-    name: { type: "string", defaultValue: "" },
-    versionId: { type: "number", defaultValue: 0 },
-    pageState: { type: "string", defaultValue: "INCOMPLETE" },
-    commentCount: { type: "number", defaultValue: 0 },
-    viewCount: { type: "number", defaultValue: 0 },
-    summary: { type: "string", defaultValue: "" },
-    tagsString: { type: "string", defaultValue: "" },
-    title: { type: "string", defaultValue: "" },
-    template: { type: "string", defaultValue: "" },
-    pattern: { type: "string", defaultValue: "" },
-    script: { type: "string", defaultValue: "" },
-    secured: { type: "boolean", defaultValue: false },
-    properties: { type: "object", defaultValue: {} },
-    bodyText: { type: "string", defaultValue: "" },
-    bodyContent: {
-      type: "object",
-      defaultValue: {
-        bodyId: 0,
-        bodyText: "",
-        bodyType: "FREEMARKER",
-        pageId: 0,
+    id: "roleId",
+    fields: {
+      roleId: {
+        type: "number",
+        defaultValue: 0,
+        editable: false,
+        validation: { min: 0, required: true },
       },
+      name: { type: "string", defaultValue: null },
+      description: { type: "string", defaultValue: null },
+      creationDate: { type: "date", editable: false },
+      modifiedDate: { type: "date", editable: false },
     },
-    user: { type: "object", defaultValue: { userId: 0 } },
-    creationDate: { type: "date" },
-    modifiedDate: { type: "date" },
   },
-  copy: function (target) {
-    target.pageId = this.get("pageId");
-    target.set("objectType", this.get("objectType"));
-    target.set("objectId", this.get("objectId"));
-    target.set("name", this.get("name"));
-    target.set("versionId", this.get("versionId"));
-    target.set("pageState", this.get("pageState"));
-    target.set("commentCount", this.get("commentCount"));
-    target.set("viewCount", this.get("viewCount"));
-    target.set("summary", this.get("summary"));
-    target.set("tagsString", this.get("tagsString"));
-    target.set("title", this.get("title"));
-    target.set("template", this.get("template"));
-    target.set("pattern", this.get("pattern"));
-    target.set("script", this.get("script"));
-    target.set("secured", this.get("secured"));
-    target.set("bodyText", this.get("bodyText"));
-    target.set("modifiedDate", this.get("modifiedDate"));
-    target.set("creationDate", this.get("creationDate"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));
-    if (typeof this.get("user") === "object")
-      target.set("user", this.get("user"));
-    if (typeof this.get("bodyContent") === "object")
-      target.set("bodyContent", this.get("bodyContent"));
+  UserModel = {
+    id: "userId",
+    fields: {
+      userId: { type: "number", defaultValue: 0 },
+      username: { type: "string", defaultValue: "" },
+      name: { type: "string", defaultValue: "" },
+      nameVisible: { type: "boolean", defaultValue: false },
+      firstName: { type: "string", defaultValue: "" },
+      lastName: { type: "string", defaultValue: "" },
+      email: { type: "string", defaultValue: "" },
+      emailVisible: { type: "boolean", defaultValue: false },
+      anonymous: { type: "boolean", defaultValue: true },
+      enabled: { type: "boolean", defaultValue: false },
+      external: { type: "boolean", defaultValue: false },
+      creationDate: { type: "date" },
+      modifiedDate: { type: "date" },
+      status: { type: "string", defaultValue: "NONE" },
+      properties: { type: "object", defaultValue: {} },
+      roles: { type: "object", defaultValue: [] },
+    },
+    formattedCreationDate: function () {
+      return kendo.toString(this.get("creationDate"), "g");
+    },
+    formattedModifiedDate: function () {
+      return kendo.toString(this.get("modifiedDate"), "g");
+    },
+    hasRole: function (role) {
+      if (typeof this.roles != "undefined" && $.inArray(role, this.roles) >= 0)
+        return true;
+      else return false;
+    },
+    copy: function (target) {
+      target.userId = this.get("userId");
+      target.set("username", this.get("username"));
+      target.set("name", this.get("name"));
+      target.set("email", this.get("email"));
+      target.set("status", this.get("status"));
+      if (this.get("creationDate") != null)
+        target.set("creationDate", this.get("creationDate"));
+      if (this.get("modifiedDate") != null)
+        target.set("modifiedDate", this.get("modifiedDate"));
+      target.set("enabled", this.get("enabled"));
+      target.set("external", this.get("external"));
+      target.set("nameVisible", this.get("nameVisible"));
+      target.set("emailVisible", this.get("emailVisible"));
+      target.set("anonymous", this.get("anonymous"));
+      if (typeof this.get("roles") === "object")
+        target.set("roles", this.get("roles"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+    },
   },
-},
-BodyContentModel = {
-  id: "bodyId",
-  fields: {
-    bodyId: { type: "number", defaultValue: -1 },
-    bodyText: { type: "string", defaultValue: "" },
-    bodyType: { type: "string", defaultValue: "FREEMARKER" },
-    pageId: { type: "number", defaultValue: 0 },
+  ImageLinkModel = {
+    id: "imageId",
+    fields: {
+      imageId: { type: "number", defaultValue: 0 },
+      linkId: { type: "string", defaultValue: null },
+      publicShared: { type: "boolean", defaultValue: false },
+      filename: { type: "string", defaultValue: null },
+    },
   },
-},
-ApiModel = {
-  id: "apiId",
-  fields: {
-    apiId: { type: "number", defaultValue: -1 },
-    objectType: { type: "number", defaultValue: -1 },
-    objectId: { type: "number", defaultValue: -1 },
-    title: { type: "string", defaultValue: null },
-    name: { type: "string", defaultValue: null },
-    version: { type: "string", defaultValue: null },
-    description: { type: "string", defaultValue: null },
-    contentType: { type: "string", defaultValue: null },
-    scriptSource: { type: "string", defaultValue: null },
-    pattern: { type: "string", defaultValue: null },
-    creator: { type: "object", defaultValue: {} },
-    properties: { type: "object", defaultValue: {} },
-    secured: { type: "boolean", defaultValue: false },
-    enabled: { type: "boolean", defaultValue: false },
-    creationDate: { type: "date" },
-    modifiedDate: { type: "date" },
+  SharedLinkModel = {
+    id: "linkId",
+    fields: {
+      objectType: { type: "number", defaultValue: 0 },
+      objectId: { type: "number", defaultValue: 0 },
+      linkId: { type: "string", defaultValue: null },
+      publicShared: { type: "boolean", defaultValue: false },
+    },
   },
-  copy: function (target) {
-    target.apiId = this.get("apiId");
-    target.set("objectType", this.get("objectType"));
-    target.set("objectId", this.get("objectId"));
-    target.set("title", this.get("title"));
-    target.set("name", this.get("name"));
-    target.set("version", this.get("version"));
-    target.set("description", this.get("description"));
-    target.set("contentType", this.get("contentType"));
-    target.set("scriptSource", this.get("scriptSource"));
-    target.set("pattern", this.get("pattern"));
-    target.set("secured", this.get("secured"));
-    target.set("enabled", this.get("enabled"));
-    target.set("modifiedDate", this.get("modifiedDate"));
-    target.set("creationDate", this.get("creationDate"));
-    if (typeof this.get("creator") === "object")
-      target.set("creator", this.get("creator"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));
+  AttachmentModel = {
+    id: "attachmentId",
+    fields: {
+      attachmentId: { type: "number", defaultValue: 0 },
+      objectType: { type: "number", defaultValue: 0 },
+      objectId: { type: "number", defaultValue: 0 },
+      name: { type: "string", defaultValue: "" },
+      contentType: { type: "string", defaultValue: "" },
+      downloadCount: { type: "number", defaultValue: 0 },
+      size: { type: "number", defaultValue: 0 },
+      user: { type: "object", defaultValue: { userId: 0 } },
+      properties: { type: "object", defaultValue: {} },
+      sharedLink: { type: "object", defaultValue: {} },
+      creationDate: { type: "date" },
+      modifiedDate: { type: "date" },
+    },
+    copy: function (target) {
+      target.attachmentId = this.get("attachmentId");
+      target.set("objectType", this.get("objectType"));
+      target.set("objectId", this.get("objectId"));
+      target.set("name", this.get("name"));
+      target.set("contentType", this.get("contentType"));
+      target.set("size", this.get("size"));
+      target.set("downloadCount", this.get("downloadCount"));
+      target.set("modifiedDate", this.get("modifiedDate"));
+      target.set("creationDate", this.get("creationDate"));
+      if (typeof this.get("user") === "object")
+        target.set("user", this.get("user"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+      if (typeof this.get("sharedLink") === "object")
+        target.set("sharedLink", this.get("sharedLink"));
+    },
+    formattedSize: function () {
+      return kendo.toString(this.get("size"), "##,###");
+    },
+    formattedCreationDate: function () {
+      return kendo.toString(this.get("creationDate"), "g");
+    },
+    formattedModifiedDate: function () {
+      return kendo.toString(this.get("modifiedDate"), "g");
+    },
   },
-},
-StreamsModel = {
-  id: "streamId",
-  fields: {
-    streamId: { type: "number", defaultValue:0 },
-    objectType: { type: "number", defaultValue:0 },
-    objectId: { type: "number", defaultValue: 0},
-    categoryId: { type: "number", defaultValue: 0},
-    name: { type: "string", defaultValue: null },
-    displayName: { type: "string", defaultValue: null },
-    description: { type: "string", defaultValue: null },
-    creationDate: { type: "date" },
-    modifiedDate: { type: "date" },
-    properties: { type: "object", defaultValue: {} },
+  ImageModel = {
+    id: "imageId",
+    fields: {
+      imageId: { type: "number", defaultValue: 0 },
+      objectType: { type: "number", defaultValue: 0 },
+      objectId: { type: "number", defaultValue: 0 },
+      name: { type: "string", defaultValue: "" },
+      contentType: { type: "string", defaultValue: "" },
+      size: { type: "number", defaultValue: 0 },
+      thumbnailContentType: { type: "string", defaultValue: "" },
+      thumbnailSize: { type: "number", defaultValue: 0 },
+      user: { type: "object", defaultValue: { userId: 0 } },
+      imageLink: {
+        type: "object",
+        defaultValue: {},
+      },
+      tags: { type: "string", defaultValue: "" },
+      properties: { type: "object", defaultValue: {} },
+      creationDate: { type: "date" },
+      modifiedDate: { type: "date" },
+    },
+    copy: function (target) {
+      target.imageId = this.get("imageId");
+      target.set("objectType", this.get("objectType"));
+      target.set("objectId", this.get("objectId"));
+      target.set("name", this.get("name"));
+      target.set("contentType", this.get("contentType"));
+      target.set("size", this.get("size"));
+      target.set("thumbnailContentType", this.get("thumbnailContentType"));
+      target.set("thumbnailSize", this.get("thumbnailSize"));
+      target.set("modifiedDate", this.get("modifiedDate"));
+      target.set("creationDate", this.get("creationDate"));
+      target.set("tags", this.get("tags"));
+      if (typeof this.get("user") === "object")
+        target.set("user", this.get("user"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+      if (typeof this.get("imageLink") === "object")
+        target.set("imageLink", this.get("imageLink"));
+    },
+    formattedSize: function () {
+      return kendo.toString(this.get("size"), "##,###");
+    },
+    formattedCreationDate: function () {
+      return kendo.toString(this.get("creationDate"), "g");
+    },
+    formattedModifiedDate: function () {
+      return kendo.toString(this.get("modifiedDate"), "g");
+    },
   },
-  copy: function (target) {
-    target.streamId = this.get("streamId");
-    target.set("objectType", this.get("objectType"));
-    target.set("objectId", this.get("objectId")); 
-    target.set("categoryId", this.get("categoryId"));
-    target.set("name", this.get("name"));
-    target.set("displayName", this.get("displayName"));
-    target.set("description", this.get("description"));
-    target.set("enabled", this.get("enabled"));
-    target.set("modifiedDate", this.get("modifiedDate"));
-    target.set("creationDate", this.get("creationDate"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));
+  AlbumModel = {
+    id: "albumId", // the identifier of the model
+    fields: {
+      albumId: { type: "number", editable: false, defaultValue: 0 },
+      name: { type: "string", editable: true },
+      description: { type: "string", editable: true, defaultValue: "" },
+      collaborate: { type: "boolean", editable: true, defaultValue: "" },
+      shared: { type: "boolean", editable: true, defaultValue: false },
+      properties: { type: "object", defaultValue: {} },
+      user: { type: "object", defaultValue: { userId: 0 } },
+      modifiedDate: { type: "date" },
+      creationDate: { type: "date" },
+    },
+    copy: function (target) {
+      target.albumId = this.get("albumId");
+      target.set("name", this.get("name"));
+      target.set("description", this.get("description"));
+      target.set("collaborate", this.get("collaborate"));
+      target.set("shared", this.get("shared"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+      if (typeof this.get("user") === "object")
+        target.set("user", this.get("user"));
+      target.set("creationDate", this.get("creationDate"));
+      target.set("modifiedDate", this.get("modifiedDate"));
+    },
   },
-},
-MessageModel = {
-  id: "messageId",
-  fields: { 	
-    user: { type: "object" , defaultValue : {} },
-    objectType: { type: "number", defaultValue: 0 },			
-    objectId: { type: "number", defaultValue: 0 },			
-    threadId: { type: "number", defaultValue: 0 },			
-    messageId: { type: "number", defaultValue: 0 },			
-    parentMessageId: { type: "number", defaultValue: 0 },			
-    keywords:{ type: "string", defaultValue: "" },		
-    subject:{ type: "string", defaultValue: "" },			
-    body:{type: "string", defaultValue: "" },			
-    replyCount:{ type: "number", defaultValue: 0 },	
-    attachmentsCount:{ type: "number", defaultValue: 0 },	
-    properties: { type: "object", defaultValue : {} },
-    creationDate:{ type: "date" },			
-    modifiedDate:{ type: "date" }
+  PageModel = {
+    id: "pageId",
+    fields: {
+      objectType: { type: "number", defaultValue: -1 },
+      objectId: { type: "number", defaultValue: -1 },
+      pageId: { type: "number", defaultValue: 0 },
+      name: { type: "string", defaultValue: "" },
+      versionId: { type: "number", defaultValue: 0 },
+      pageState: { type: "string", defaultValue: "INCOMPLETE" },
+      commentCount: { type: "number", defaultValue: 0 },
+      viewCount: { type: "number", defaultValue: 0 },
+      summary: { type: "string", defaultValue: "" },
+      tagsString: { type: "string", defaultValue: "" },
+      title: { type: "string", defaultValue: "" },
+      template: { type: "string", defaultValue: "" },
+      pattern: { type: "string", defaultValue: "" },
+      script: { type: "string", defaultValue: "" },
+      secured: { type: "boolean", defaultValue: false },
+      properties: { type: "object", defaultValue: {} },
+      bodyText: { type: "string", defaultValue: "" },
+      bodyContent: {
+        type: "object",
+        defaultValue: {
+          bodyId: 0,
+          bodyText: "",
+          bodyType: "FREEMARKER",
+          pageId: 0,
+        },
+      },
+      user: { type: "object", defaultValue: { userId: 0 } },
+      creationDate: { type: "date" },
+      modifiedDate: { type: "date" },
+    },
+    copy: function (target) {
+      target.pageId = this.get("pageId");
+      target.set("objectType", this.get("objectType"));
+      target.set("objectId", this.get("objectId"));
+      target.set("name", this.get("name"));
+      target.set("versionId", this.get("versionId"));
+      target.set("pageState", this.get("pageState"));
+      target.set("commentCount", this.get("commentCount"));
+      target.set("viewCount", this.get("viewCount"));
+      target.set("summary", this.get("summary"));
+      target.set("tagsString", this.get("tagsString"));
+      target.set("title", this.get("title"));
+      target.set("template", this.get("template"));
+      target.set("pattern", this.get("pattern"));
+      target.set("script", this.get("script"));
+      target.set("secured", this.get("secured"));
+      target.set("bodyText", this.get("bodyText"));
+      target.set("modifiedDate", this.get("modifiedDate"));
+      target.set("creationDate", this.get("creationDate"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+      if (typeof this.get("user") === "object")
+        target.set("user", this.get("user"));
+      if (typeof this.get("bodyContent") === "object")
+        target.set("bodyContent", this.get("bodyContent"));
+    },
   },
-  copy: function (target) {
-    target.messageId = this.get("messageId");
-    target.set("objectType", this.get("objectType"));
-    target.set("objectId", this.get("objectId"));      
-    target.set("threadId", this.get("threadId"));
-    target.set("parentMessageId", this.get("parentMessageId"));
-    target.set("keywords", this.get("keywords"));
-    target.set("subject", this.get("subject"));
-    target.set("body", this.get("body"));
-    target.set("replyCount", this.get("replyCount"));
-    target.set("attachmentsCount", this.get("attachmentsCount"));
-    target.set("modifiedDate", this.get("modifiedDate"));
-    target.set("creationDate", this.get("creationDate"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));    
-    if (typeof this.get("user") === "object")
-      target.set("user", this.get("user")); 
-  }
-},
-ThreadModel = {
-  id : "threadId",
-  fields: { 	
-    threadId: { type: "number", defaultValue: 0 },		
-    objectType: { type: "number", defaultValue: 0 },		
-    objectId: { type: "number", defaultValue: 0 },		
-    latestMessage :{ type: "object", defaultValue:{} },	
-    rootMessage	: { type: "object", defaultValue: {} },	
-    messageCount: { type: "number", defaultValue: 0 },	
-    viewCount: { type: "number", defaultValue: 0 },	
-    properties: { type: "object", defaultValue : {} },
-    creationDate: { type: "date" },			
-    modifiedDate: { type: "date" }
+  BodyContentModel = {
+    id: "bodyId",
+    fields: {
+      bodyId: { type: "number", defaultValue: -1 },
+      bodyText: { type: "string", defaultValue: "" },
+      bodyType: { type: "string", defaultValue: "FREEMARKER" },
+      pageId: { type: "number", defaultValue: 0 },
+    },
   },
-  copy: function (target) {
-    target.threadId = this.get("threadId");
-    target.set("objectType", this.get("objectType"));
-    target.set("objectId", this.get("objectId"));  
-    target.set("messageCount", this.get("messageCount"));  
-    target.set("viewCount", this.get("viewCount"));  
-    target.set("modifiedDate", this.get("modifiedDate"));
-    target.set("creationDate", this.get("creationDate"));
-    if (typeof this.get("properties") === "object")
-      target.set("properties", this.get("properties"));    
-    if (typeof this.get("rootMessage") === "object")
-      target.set("rootMessage", this.get("rootMessage"));
-    if (typeof this.get("latestMessage") === "object")
-      target.set("latestMessage", this.get("latestMessage"));
-   }
-}
-;  
-
+  ApiModel = {
+    id: "apiId",
+    fields: {
+      apiId: { type: "number", defaultValue: -1 },
+      objectType: { type: "number", defaultValue: -1 },
+      objectId: { type: "number", defaultValue: -1 },
+      title: { type: "string", defaultValue: null },
+      name: { type: "string", defaultValue: null },
+      version: { type: "string", defaultValue: null },
+      description: { type: "string", defaultValue: null },
+      contentType: { type: "string", defaultValue: null },
+      scriptSource: { type: "string", defaultValue: null },
+      pattern: { type: "string", defaultValue: null },
+      creator: { type: "object", defaultValue: {} },
+      properties: { type: "object", defaultValue: {} },
+      secured: { type: "boolean", defaultValue: false },
+      enabled: { type: "boolean", defaultValue: false },
+      creationDate: { type: "date" },
+      modifiedDate: { type: "date" },
+    },
+    copy: function (target) {
+      target.apiId = this.get("apiId");
+      target.set("objectType", this.get("objectType"));
+      target.set("objectId", this.get("objectId"));
+      target.set("title", this.get("title"));
+      target.set("name", this.get("name"));
+      target.set("version", this.get("version"));
+      target.set("description", this.get("description"));
+      target.set("contentType", this.get("contentType"));
+      target.set("scriptSource", this.get("scriptSource"));
+      target.set("pattern", this.get("pattern"));
+      target.set("secured", this.get("secured"));
+      target.set("enabled", this.get("enabled"));
+      target.set("modifiedDate", this.get("modifiedDate"));
+      target.set("creationDate", this.get("creationDate"));
+      if (typeof this.get("creator") === "object")
+        target.set("creator", this.get("creator"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+    },
+  },
+  StreamsModel = {
+    id: "streamId",
+    fields: {
+      streamId: { type: "number", defaultValue: 0 },
+      objectType: { type: "number", defaultValue: 0 },
+      objectId: { type: "number", defaultValue: 0 },
+      categoryId: { type: "number", defaultValue: 0 },
+      name: { type: "string", defaultValue: null },
+      displayName: { type: "string", defaultValue: null },
+      description: { type: "string", defaultValue: null },
+      creationDate: { type: "date" },
+      modifiedDate: { type: "date" },
+      properties: { type: "object", defaultValue: {} },
+    },
+    copy: function (target) {
+      target.streamId = this.get("streamId");
+      target.set("objectType", this.get("objectType"));
+      target.set("objectId", this.get("objectId"));
+      target.set("categoryId", this.get("categoryId"));
+      target.set("name", this.get("name"));
+      target.set("displayName", this.get("displayName"));
+      target.set("description", this.get("description"));
+      target.set("enabled", this.get("enabled"));
+      target.set("modifiedDate", this.get("modifiedDate"));
+      target.set("creationDate", this.get("creationDate"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+    },
+  },
+  MessageModel = {
+    id: "messageId",
+    fields: {
+      user: { type: "object", defaultValue: {} },
+      objectType: { type: "number", defaultValue: 0 },
+      objectId: { type: "number", defaultValue: 0 },
+      threadId: { type: "number", defaultValue: 0 },
+      messageId: { type: "number", defaultValue: 0 },
+      parentMessageId: { type: "number", defaultValue: 0 },
+      keywords: { type: "string", defaultValue: "" },
+      subject: { type: "string", defaultValue: "" },
+      body: { type: "string", defaultValue: "" },
+      replyCount: { type: "number", defaultValue: 0 },
+      attachmentsCount: { type: "number", defaultValue: 0 },
+      properties: { type: "object", defaultValue: {} },
+      creationDate: { type: "date" },
+      modifiedDate: { type: "date" },
+    },
+    copy: function (target) {
+      target.messageId = this.get("messageId");
+      target.set("objectType", this.get("objectType"));
+      target.set("objectId", this.get("objectId"));
+      target.set("threadId", this.get("threadId"));
+      target.set("parentMessageId", this.get("parentMessageId"));
+      target.set("keywords", this.get("keywords"));
+      target.set("subject", this.get("subject"));
+      target.set("body", this.get("body"));
+      target.set("replyCount", this.get("replyCount"));
+      target.set("attachmentsCount", this.get("attachmentsCount"));
+      target.set("modifiedDate", this.get("modifiedDate"));
+      target.set("creationDate", this.get("creationDate"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+      if (typeof this.get("user") === "object")
+        target.set("user", this.get("user"));
+    },
+  },
+  ThreadModel = {
+    id: "threadId",
+    fields: {
+      threadId: { type: "number", defaultValue: 0 },
+      objectType: { type: "number", defaultValue: 0 },
+      objectId: { type: "number", defaultValue: 0 },
+      latestMessage: { type: "object", defaultValue: {} },
+      rootMessage: { type: "object", defaultValue: {} },
+      messageCount: { type: "number", defaultValue: 0 },
+      viewCount: { type: "number", defaultValue: 0 },
+      properties: { type: "object", defaultValue: {} },
+      creationDate: { type: "date" },
+      modifiedDate: { type: "date" },
+    },
+    copy: function (target) {
+      target.threadId = this.get("threadId");
+      target.set("objectType", this.get("objectType"));
+      target.set("objectId", this.get("objectId"));
+      target.set("messageCount", this.get("messageCount"));
+      target.set("viewCount", this.get("viewCount"));
+      target.set("modifiedDate", this.get("modifiedDate"));
+      target.set("creationDate", this.get("creationDate"));
+      if (typeof this.get("properties") === "object")
+        target.set("properties", this.get("properties"));
+      if (typeof this.get("rootMessage") === "object")
+        target.set("rootMessage", this.get("rootMessage"));
+      if (typeof this.get("latestMessage") === "object")
+        target.set("latestMessage", this.get("latestMessage"));
+    },
+  };
 const userState = [
-  {text: "NONE", value:"0"},
-  {text: "APPROVED", value:"1"},
-  {text: "REJECTED", value:"2"},
-  {text: "VALIDATED", value:"3"},
-  {text: "REGISTERED", value:"4"}
+  { text: "NONE", value: "0" },
+  { text: "APPROVED", value: "1" },
+  { text: "REJECTED", value: "2" },
+  { text: "VALIDATED", value: "3" },
+  { text: "REGISTERED", value: "4" },
 ];
 
 export const studio = {
@@ -484,9 +480,9 @@ export const studio = {
       BodyContent: BodyContentModel,
       Page: PageModel,
       Api: ApiModel,
-      Streams:StreamsModel,
-      Thread : ThreadModel,
-      Message : MessageModel
+      Streams: StreamsModel,
+      Thread: ThreadModel,
+      Message: MessageModel,
     },
   },
   ui: {
@@ -501,14 +497,18 @@ export const studio = {
     isUserLoggedIn,
     getImageUrl,
     getAttachmentUrl,
+    getAttachmentThumbnailUrl,
     setSecureImage,
     setImageAsBase64,
     getImageAsBase64,
     loadAceEditor,
     createToastUiEditor,
+    attachmentGrid: createAttachmentKendoGrid,
+    attachmentDataSource: createAttachmentDataSource,
     propertyGrid: createPropertyKendoGrid,
     aceEditor: createAceEditor,
     dropzone: createDropzone,
+    filepond: createFilePond,
     masonry: createMasonry,
     ckeditor: createCKEditor5,
     format: {
@@ -533,50 +533,52 @@ function getFormattedNumber(num, format) {
   return kendo.toString(num, format);
 }
 
-function isSpeechSynthesis(){
-  if ('speechSynthesis' in window) {
+function isSpeechSynthesis() {
+  if ("speechSynthesis" in window) {
     return true;
-   }else{
-     console.log("Sorry, your browser doesn't support text to speech!");
-     return false;
-   }
+  } else {
+    console.log("Sorry, your browser doesn't support text to speech!");
+    return false;
+  }
 }
 
 const DEFAULT_SPEECH_SYNTHESIS_OPTIONS = {
   voice: 10,
-  volume:1,
-  rate:1,
-  pitch:2,
-  lnag: 'en',
-  text: 'hello'
+  volume: 1,
+  rate: 1,
+  pitch: 2,
+  lnag: "en",
+  text: "hello",
 };
 
-function getSpeechSynthesisUtterance( options ){
+function getSpeechSynthesisUtterance(options) {
   options = options || {};
   var settings = $.extend(true, {}, DEFAULT_SPEECH_SYNTHESIS_OPTIONS, options);
   var utter = new SpeechSynthesisUtterance();
   var voices = window.speechSynthesis.getVoices();
-  utter.voice = voices[settings.voice]; 
+  utter.voice = voices[settings.voice];
   utter.volume = settings.volum; // From 0 to 1
   utter.rate = settings.rate; // From 0.1 to 10
-  utter.pitch = settings.pitch ; // From 0 to 2
+  utter.pitch = settings.pitch; // From 0 to 2
   utter.text = settings.text;
   utter.lang = settings.lang;
-  return utter ;
+  return utter;
 }
 
-function getUserRoles(userId){
+function getUserRoles(userId) {
   const headers = {};
-  Object.assign(headers, studio.services.accounts.authHeader()); 
+  Object.assign(headers, studio.services.accounts.authHeader());
   return axios
-  .get(`${API_ROOT_URL}/data/secure/mgmt/security/users/${userId}/roles`, { headers: headers })
-  .then((response) => {
-    const data = response.data;
-    return data.items;
-  })
-  .catch(function (error) {
-    return [];
-  });
+    .get(`${API_ROOT_URL}/data/secure/mgmt/security/users/${userId}/roles`, {
+      headers: headers,
+    })
+    .then((response) => {
+      const data = response.data;
+      return data.items;
+    })
+    .catch(function (error) {
+      return [];
+    });
 }
 
 function getFormattedDate(date, format) {
@@ -632,7 +634,7 @@ const DEFAULT_DOWNLOAD_OPTIONS = {
   thumbnail: false,
   width: 150,
   height: 150,
-  jwt:false
+  jwt: false,
 };
 
 function getImageUrlAsBase64(image, options) {
@@ -646,17 +648,6 @@ function isFunction(functionToCheck) {
   );
 }
 
-// ES6 : code for retry but it effect entire code ...
-/** 
-import axiosRetry from "axios-retry";
-axiosRetry(axios, {
-  retries: 3,
-  retryDelay: (retryCount) => {
-    return retryCount * 500;
-  },
-});
-*/
-
 function setSecureImage(elemment, delay, callback) {
   var delay = delay || 1000;
   let url = elemment.attr("secure-image");
@@ -668,7 +659,8 @@ function setSecureImage(elemment, delay, callback) {
       if (isFunction(callback)) callback();
     },
     function () {
-      let maxRetry = 3, retry = 0;
+      let maxRetry = 3,
+        retry = 0;
       if (defined(elemment.data("max-retry"))) {
         maxRetry = elemment.data("max-retry");
       }
@@ -677,11 +669,9 @@ function setSecureImage(elemment, delay, callback) {
       }
       if (retry < maxRetry) {
         elemment.data("retry", retry + 1);
-        setTimeout(
-          function() {
-            setSecureImage(elemment);
-          }, 
-          delay);         
+        setTimeout(function () {
+          setSecureImage(elemment);
+        }, delay);
       } else {
         elemment.parent().removeClass("is-loading");
       }
@@ -691,7 +681,7 @@ function setSecureImage(elemment, delay, callback) {
 
 async function setImageAsBase64(url, successHandler, errorHandler) {
   const headers = {};
-  Object.assign(headers, studio.services.accounts.authHeader()); 
+  Object.assign(headers, studio.services.accounts.authHeader());
   await axios
     .get(url, { headers: headers, responseType: "arraybuffer" })
     .then((response) => {
@@ -703,12 +693,11 @@ async function setImageAsBase64(url, successHandler, errorHandler) {
     .then((error) => {
       if (isFunction(errorHandler)) {
         errorHandler();
-      }else{
+      } else {
         handleAxiosError(error);
       }
     });
 }
-
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -729,20 +718,28 @@ async function getImageAsBase64(url) {
 
 function getImageUrl(image, options) {
   options = options || {};
-  var settings = $.extend( true, {}, DEFAULT_DOWNLOAD_OPTIONS, options);
-  if (image.imageId > 0) {  
-    var _imageUrl =`${API_ROOT_URL}/download/images/` + image.imageId + "/" + image.name;
-    if( defined( image.imageLink ) &&  image.imageLink != null ) {
-      _imageUrl =`${API_ROOT_URL}/download/images/` + image.imageLink.linkId ;
-    }  
-    if (settings.thumbnail) {
-      _imageUrl = _imageUrl + "?thumbnail=true&height=" + settings.height + "&width=" + settings.width + "&time=" + kendo.guid(); 
-    }else{
-      _imageUrl = _imageUrl +  "?time=" + kendo.guid(); 
+  var settings = $.extend(true, {}, DEFAULT_DOWNLOAD_OPTIONS, options);
+  if (image.imageId > 0) {
+    var _imageUrl =
+      `${API_ROOT_URL}/download/images/` + image.imageId + "/" + image.name;
+    if (defined(image.imageLink) && image.imageLink != null) {
+      _imageUrl = `${API_ROOT_URL}/download/images/` + image.imageLink.linkId;
     }
-    if( settings.jwt && isUserLoggedIn() ){
-      _imageUrl = _imageUrl + "&jwt=" + authHeader().Authorization 
-    } 
+    if (settings.thumbnail) {
+      _imageUrl =
+        _imageUrl +
+        "?thumbnail=true&height=" +
+        settings.height +
+        "&width=" +
+        settings.width +
+        "&time=" +
+        kendo.guid();
+    } else {
+      _imageUrl = _imageUrl + "?time=" + kendo.guid();
+    }
+    if (settings.jwt && isUserLoggedIn()) {
+      _imageUrl = _imageUrl + "&jwt=" + authHeader().Authorization;
+    }
     return encodeURI(_imageUrl);
   }
   return settings.deafultImage;
@@ -752,11 +749,7 @@ function getAttachmentUrl(attachment, options) {
   options = options || {};
   var settings = $.extend(true, {}, DEFAULT_DOWNLOAD_OPTIONS, options);
   if (attachment.attachmentId > 0) {
-    var _attachmentUrl =
-      `${API_ROOT_URL}/download/files/` +
-      attachment.attachmentId +
-      "/" +
-      attachment.name;
+    var _attachmentUrl = `${API_ROOT_URL}/download/files/${attachment.attachmentId}/${attachment.name}`;
     if (settings.thumbnail) {
       _attachmentUrl =
         _attachmentUrl +
@@ -817,7 +810,7 @@ function verifyToken(options) {
       } else if (error.request) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js 
+        // http.ClientRequest in node.js
         notify(null, error.message, "error");
       } else {
         // Something happened in setting up the request that triggered an Error
@@ -831,6 +824,7 @@ function logout() {
   // remove user from local storage to log user out
   localStorage.removeItem("user");
   initialState = { status: { loggedIn: false }, user: null };
+  window.location.replace("index.html");
 }
 
 function loginSuccess(state, data) {
@@ -879,9 +873,8 @@ function handleAxiosError(error) {
     // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
     //console.log(error.response.data);
     //console.log(error.response.status);
-    //console.log(error.response.headers); 
+    //console.log(error.response.headers);
     if (
-
       error.response.status == 0 ||
       error.response.status == 404 ||
       error.response.status == 503 ||
@@ -908,7 +901,7 @@ function handleAxiosError(error) {
   } else if (error.request) {
     // 요청이 이루어 졌으나 응답을 받지 못했습니다.
     // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
-    // Node.js의 http.ClientRequest 인스턴스입니다. 
+    // Node.js의 http.ClientRequest 인스턴스입니다.
     message = error.message;
     //console.log(error.request);
   } else {
@@ -1034,6 +1027,105 @@ function createAceEditor(renderTo, options) {
   }
   return ace.edit(renderTo.attr("id"));
 }
+
+function getAttachmentThumbnailUrl(attachment, width, height) {
+  (width = width || 100), (height = height || 100);
+  var _thumbnailUrl =
+    `${API_ROOT_URL}/download/files/${attachment.attachmentId}/${attachment.name}?thumbnail=true&height=${width}&width=${height}&jwt=` +
+    authHeader().Authorization;
+  console.log(_thumbnailUrl);
+  return encodeURI(_thumbnailUrl);
+}
+
+const ATTACHMENT_FILE_TEMPLATE =
+  '<img class="g-width-100 g-height-100 g-pa-5 g-rounded-5" style="padding:2px;" src="#= studio.ui.getAttachmentThumbnailUrl( data , 100, 100 )#" >';
+
+const DEFAULT_ATTACHMENT_GRID_OPTIONS = {
+  objectType: 0,
+  objectId: 0,
+  height: 300,
+};
+
+function createAttachmentKendoGrid(renderTo, options) {
+  renderTo = renderTo || $("#attachment-grid");
+  var settings = $.extend(true, {}, DEFAULT_ATTACHMENT_GRID_OPTIONS, options);
+  if (!renderTo.data("kendoGrid")) {
+    var grid = renderTo
+      .kendoGrid({
+        height: settings.height,
+        dataSource: [],
+        sortable: true,
+        filterable: true,
+        pageable: false,
+        columns: [
+          {
+            selectable: true,
+            width: "40px",
+            headerAttributes: { class: "text-center" },
+            attributes: { class: "text-center" },
+          },
+          //{ field: "ATTACHMENT_ID", title: "ID", filterable: false, sortable: true, width: 80, template: '#= attachmentId #', headerAttributes: { "class": "text-center" }, attributes: { class: "text-center" } },
+          {
+            field: "FILENAME",
+            title: "FILE",
+            filterable: false,
+            sortable: true,
+            template: ATTACHMENT_FILE_TEMPLATE,
+            headerAttributes: { class: "text-center" },
+            attributes: { class: "g-pa-0" },
+            width: 100,
+          },
+          {
+            field: "FILE_SIZE",
+            title: "Size",
+            filterable: false,
+            sortable: true,
+            template: "#: studio.ui.format.byte(size)  #",
+            headerAttributes: { class: "text-center" },
+            attributes: { class: "text-center" },
+            width: 100,
+          },
+          {
+            field: "CONTENT_TYPE",
+            title: "Content Type",
+            filterable: false,
+            sortable: false,
+            template: "#= contentType #",
+            headerAttributes: { class: "text-center" },
+            attributes: { class: "text-center" },
+          },
+          //{ field: "CREATION_DATE", title: "Creation Date", filterable: false, sortable: true, width: 100, template: '#: studio.ui.format.date( creationDate ,"yyyy.MM.dd")#', attributes: { class: "text-center" } },
+          //{ field: "MODIFIED_DATE", title: "Modified Date", filterable: false, sortable: true, width: 100, template: '#: studio.ui.format.date( modifiedDate ,"yyyy.MM.dd")#', attributes: { class: "text-center" } }
+        ],
+      })
+      .data("kendoGrid");
+  }
+  if ((settings.objectType > 0) & (settings.objectId > 0)) {
+    renderTo.data("kendoGrid").setDataSource( createAttachmentDataSource(settings.objectType, settings.objectId) );
+  }
+}
+
+function createAttachmentDataSource( objectType , objectId){
+  return new kendo.data.DataSource({
+    transport: {
+      read: {
+        url: `${API_ROOT_URL}/data/secure/mgmt/resources/${objectType}/${objectId}/files`,
+        type: "get",
+        contentType: "application/json",
+      },
+    },
+    serverPaging: false,
+    serverFiltering: false,
+    serverSorting: false,
+    error: handleAjaxError,
+    schema: {
+      total: "totalCount",
+      data: "items",
+      model: AttachmentModel,
+    },
+  });
+}
+
 
 function createPropertyKendoGrid(renderTo, type, objectId) {
   renderTo = renderTo || $("#property-grid");
@@ -1161,7 +1253,7 @@ function createPropertyKendoGrid(renderTo, type, objectId) {
 }
 
 const GET = "get",
-POST = "post"
+  POST = "post";
 function send(url, values, method, target) {
   method = method || GET;
   method = method && method.toUpperCase() == GET ? GET : POST;
@@ -1189,21 +1281,19 @@ function send(url, values, method, target) {
   form.submit();
 }
 
-function parseUrl ( url ){
-  if (url.indexOf('?') == -1)
-    return { url: url, params: {} }			
-  var parts = url.split('?'),
+function parseUrl(url) {
+  if (url.indexOf("?") == -1) return { url: url, params: {} };
+  var parts = url.split("?"),
     url = parts[0],
     query_string = parts[1],
-    elems = query_string.split('&'),
+    elems = query_string.split("&"),
     obj = {};
-  
-  for(var i in elems)
-  {
-    var pair = elems[i].split('=');
+
+  for (var i in elems) {
+    var pair = elems[i].split("=");
     obj[pair[0]] = pair[1];
   }
-  return {url: url, params: obj};	
+  return { url: url, params: obj };
 }
 
 function loadAceEditor() {
@@ -1217,155 +1307,160 @@ function loadAceEditor() {
 }
 
 // Using ES6 imports: Toast UI
-import Editor from '@toast-ui/editor';
-function createToastUiEditor( options ){    
+import Editor from "@toast-ui/editor";
+function createToastUiEditor(options) {
   return new Editor(options);
 }
 
 // Using ES6 imports: CKEditor 5
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 class StudioUploadAdapter {
-  constructor( loader ) {
-      // CKEditor 5's FileLoader instance.
-      this.loader = loader;
-      // URL where to send files.
-      this.url =  `${API_ROOT_URL}/data/images/0/upload` ;
+  constructor(loader) {
+    // CKEditor 5's FileLoader instance.
+    this.loader = loader;
+    // URL where to send files.
+    this.url = `${API_ROOT_URL}/data/images/0/upload`;
   }
   // Starts the upload process.
   upload() {
-      console.log( this.loader.file );
-      return new Promise( ( resolve, reject ) => {         
-        console.log('init...');
-          this._initRequest();
-          console.log('listner...');
-          this._initListeners( resolve, reject );
-          console.log('sending...');
-          this._sendRequest();
-          console.log('sended');
-      } );
+    return new Promise((resolve, reject) => {
+      this._initRequest();
+      this._initListeners(resolve, reject);
+      this._sendRequest();
+    });
   }
   // Aborts the upload process.
   abort() {
-      if ( this.xhr ) {
-          this.xhr.abort();
-      }
+    if (this.xhr) {
+      this.xhr.abort();
+    }
   }
   // Example implementation using XMLHttpRequest.
   _initRequest() {
-      const xhr = this.xhr = new XMLHttpRequest();
-      xhr.open( 'POST', this.url, true );
-      xhr.responseType = 'json';
+    const xhr = (this.xhr = new XMLHttpRequest());
+    xhr.open("POST", this.url, true);
+    xhr.responseType = "json";
   }
   // Initializes XMLHttpRequest listeners.
-  _initListeners( resolve, reject ) {
-      const xhr = this.xhr;
-      const loader = this.loader;
-      const genericErrorText = 'Couldn\'t upload file:' + ` ${ loader.file.name }.`;
-      xhr.addEventListener( 'error', () => reject( genericErrorText ) );
-      xhr.addEventListener( 'abort', () => reject() );
-      xhr.addEventListener( 'load', () => {
-          const response = xhr.response;
-          console.log( response );
-          if ( !response || response.error ) {
-              return reject( response && response.error ? response.error.message : genericErrorText );
-          }
-          // If the upload is successful, resolve the upload promise with an object containing
-          // at least the "default" URL, pointing to the image on the server.
-          resolve( {
-              default: getDownloadUrl(response[0])
-          } );
-      } );
-      if ( xhr.upload ) {
-          xhr.upload.addEventListener( 'progress', evt => {
-              if ( evt.lengthComputable ) {
-                  loader.uploadTotal = evt.total;
-                  loader.uploaded = evt.loaded;
-              }
-          } );
+  _initListeners(resolve, reject) {
+    const xhr = this.xhr;
+    const loader = this.loader;
+    const genericErrorText = "Couldn't upload file:" + ` ${loader.file.name}.`;
+    xhr.addEventListener("error", () => reject(genericErrorText));
+    xhr.addEventListener("abort", () => reject());
+    xhr.addEventListener("load", () => {
+      const response = xhr.response;
+      console.log(response);
+      if (!response || response.error) {
+        return reject(
+          response && response.error ? response.error.message : genericErrorText
+        );
       }
+      // If the upload is successful, resolve the upload promise with an object containing
+      // at least the "default" URL, pointing to the image on the server.
+      resolve({
+        default: getDownloadUrl(response[0]),
+      });
+    });
+    if (xhr.upload) {
+      xhr.upload.addEventListener("progress", (evt) => {
+        if (evt.lengthComputable) {
+          loader.uploadTotal = evt.total;
+          loader.uploaded = evt.loaded;
+        }
+      });
+    }
   }
   // Prepares the data and sends the request.
   _sendRequest() {
-      const data = new FormData();
-      let that = this;
-      let file = that.loader.file;
-      that.xhr.setRequestHeader( 'Authorization', authHeader().Authorization );    
-      file.then(function(result){
-         //wait for the promise to finish then continue
-         data.append("upload", result);
-         that.xhr.send( data );
-      });      
-      //data.append( 'upload', this.loader.file );
-      //console.log( that.loader.file );      
-      
+    const data = new FormData();
+    let that = this;
+    let file = that.loader.file;
+    that.xhr.setRequestHeader("Authorization", authHeader().Authorization);
+    file.then(function (result) {
+      //wait for the promise to finish then continue
+      data.append("upload", result);
+      that.xhr.send(data);
+    });
   }
 }
 
-function getDownloadUrl(item){
+function getDownloadUrl(item) {
   return encodeURI(`${API_ROOT_URL}/download/images/${item.linkId}`);
 }
 
-function StudioUploadAdapterPlugin( editor ) {
-  editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
-      return new StudioUploadAdapter( loader );
+function StudioUploadAdapterPlugin(editor) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+    return new StudioUploadAdapter(loader);
   };
 }
 
-
-function createCKEditor5( renderTo , options , callback ){
+function createCKEditor5(renderTo, options, callback) {
   renderTo = renderTo || $("#ckeditor");
   var $headers = headerWithAuth({});
- return ClassicEditor.create(renderTo.get(0), {   
-   extraPlugins: [StudioUploadAdapterPlugin],
-   mediaEmbed : { previewsInData : true },
-   image: {
-     // Configure the available styles.
-     styles: ["alignLeft", "alignCenter", "alignRight"],
-     // Configure the available image resize options.
-     resizeOptions: [
-       {
-         name: "imageResize:original",
-         label: "Original",
-         value: null,
-       },
-       {
-         name: "imageResize:50",
-         label: "50%",
-         value: "50",
-       },
-       {
-         name: "imageResize:75",
-         label: "75%",
-         value: "75",
-       },
-     ],
-     // You need to configure the image toolbar, too, so it shows the new style
-     // buttons as well as the resize buttons.
-     toolbar: [
-       "imageStyle:alignLeft",
-       "imageStyle:alignCenter",
-       "imageStyle:alignRight",
-       "|",
-       "imageResize",
-       "|",
-       "imageTextAlternative",
-     ],
-   },
- })
-   .then((editor) => {
-     window.ckeditor = editor;
-     if (isFunction(callback)) {
-      callback(editor);
-     }
-   })
-   .catch((error) => {
-     console.error("There was a problem initializing the editor.", error);
-   });
+  return ClassicEditor.create(renderTo.get(0), {
+    extraPlugins: [StudioUploadAdapterPlugin],
+    mediaEmbed: {
+      previewsInData: true,
+      extraProviders: [
+        {
+          name: "me",
+          url: /^.*\/download/,
+          html: match => {
+            const id = match[ 1 ];
+            return 'hello';
+          }
+        },
+      ],
+    },
+
+    image: {
+      // Configure the available styles.
+      styles: ["alignLeft", "alignCenter", "alignRight"],
+      // Configure the available image resize options.
+      resizeOptions: [
+        {
+          name: "imageResize:original",
+          label: "Original",
+          value: null,
+        },
+        {
+          name: "imageResize:50",
+          label: "50%",
+          value: "50",
+        },
+        {
+          name: "imageResize:75",
+          label: "75%",
+          value: "75",
+        },
+      ],
+      // You need to configure the image toolbar, too, so it shows the new style
+      // buttons as well as the resize buttons.
+      toolbar: [
+        "imageStyle:alignLeft",
+        "imageStyle:alignCenter",
+        "imageStyle:alignRight",
+        "|",
+        "imageResize",
+        "|",
+        "imageTextAlternative",
+      ],
+    },
+  })
+    .then((editor) => {
+      window.ckeditor = editor;
+      if (isFunction(callback)) {
+        callback(editor);
+      }
+    })
+    .catch((error) => {
+      console.error("There was a problem initializing the editor.", error);
+    });
 }
 
 import Dropzone from "dropzone";
-
 function createDropzone(renderTo, options) {
   var myDropzone = new Dropzone(renderTo, options);
   return myDropzone;
@@ -1373,7 +1468,6 @@ function createDropzone(renderTo, options) {
 
 import Masonry from "masonry-layout";
 import jQueryBridget from "jquery-bridget";
-
 // make Masonry a jQuery plugin
 jQueryBridget("masonry", Masonry, $);
 
@@ -1388,4 +1482,29 @@ function createMasonry(renderTo, options) {
   options = options || {};
   var settings = $.extend(true, {}, DEFAULT_MASONRY_OPTIONS, options);
   renderTo.masonry(settings);
+}
+
+import * as FilePond from "filepond";
+import "filepond/dist/filepond.min.css";
+
+// Import the plugin code
+import FilePondPluginImagePreview from "filepond-plugin-image-preview";
+import FilePondPluginMediaPreview from "filepond-plugin-media-preview";
+
+// Import the plugin styles
+import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
+
+// Import the plugin code
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
+
+function createFilePond(renderTo, options) {
+  options = options || {};
+  // Register the plugin
+  FilePond.registerPlugin(
+    FilePondPluginImagePreview,
+    FilePondPluginMediaPreview,
+    FilePondPluginFileValidateSize
+  );
+
+  return FilePond.create(renderTo.get(0), options);
 }

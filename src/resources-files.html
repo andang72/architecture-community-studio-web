@@ -176,16 +176,26 @@
           var renderTo = $("#mainContent");
           var observable = kendo.observable({
             selected: false,
-            selectedImages: null,
+            selectedFiles: [],
+            selectedFileCount : 0,
+            setSelectedFiles: function () {
+              var $this = this;
+              $this.set('selectedFiles', []);
+              var grid = $('#grid').data('kendoGrid');
+              grid.select().each(function () {
+                $this.selectedFiles.push(grid.dataItem(this));
+              });
+              $this.set('selectedFileCount', $this.get('selectedFiles').length);
+            },
             upload: function () {
               getAttachmentEditorWindow();
             },
             delete: function (e) {
               var $this = this;
-              var selected = $('#grid').data('kendoGrid').dataSource.view();
-              var template = kendo.template('Permanently remove the selected image.<br/> Moves cannot be minimized.');
+              $this.setSelectedFiles();
+              var template = kendo.template('Permanently remove the selected files (#= selectedFiles.length #).<br/> Moves cannot be minimized.');
               var dialog = $("#delete-dialog").kendoDialog({
-                title: 'Are you sure you want to delete the image?',
+                title: 'Are you sure you want to delete the files?',
                 content: template($this),
                 actions: [
                   {
@@ -193,15 +203,16 @@
                     action: function (e) {
                       kendo.ui.progress($('.k-dialog'), true);
                       axios({
-                        url: studio.services.getApiUrl('/data/secure/mgmt/images/delete.json'),
-                        method: "post",
-                        data: JSON.stringify(selected),
+                        url: studio.services.getApiUrl('/data/secure/mgmt/attachments'),
+                        method: "delete",
+                        data: JSON.stringify($this.selectedFiles),
                         headers: headers
                       })
                         .then(response => {
                           const data = response.data;
+                          $('#grid').data('kendoGrid').clearSelection();
                           $('#grid').data('kendoGrid').dataSource.read();
-                          studio.ui.notify(null, data.count + "image has been deleted.", "success");
+                          studio.ui.notify(null, data.count + " files has been deleted.", "success");
                         }).catch(function (error) {
                           studio.ui.handleAxiosError(error);
                         })

@@ -608,7 +608,7 @@
                 var xhr = e.XMLHttpRequest;
                 if (xhr) {
                   xhr.addEventListener("readystatechange", function onUploadReady(e) {
-                    if (xhr.readyState == 1 /* OPENED */) {
+                    if (xhr.readyState == 1 /* OPENED */) {                     
                       xhr.setRequestHeader('Authorization', studio.services.accounts.authHeader()['Authorization']);
                     }
                   });

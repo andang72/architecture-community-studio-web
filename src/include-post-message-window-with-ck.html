@@ -18,22 +18,56 @@
     content: "\e918";
   }
 
+  .bordered-window {
+    border-width: 1px;
+    border-color: #c4c4c4;
+    box-shadow: var(--ck-drop-shadow), 0 0;
+  }
+
   .post-message-window {
     position: fixed !important;
     bottom: 0;
     top: unset !important;
+    border-width: 0px;
     background-color: transparent !important;
   }
 
   .post-message-window > .k-window-titlebar {
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
-    border-bottom: 1;
     border-bottom-color: #f5f5ff;
+    border-width: 0px;
+    border-bottom-width: 1px;
+    border-color: #c4c4c4;
   }
 
   .post-message-window > .k-window-content {
     background-color: #fff;
+    border-width: 0px;
+    border-top-width: 1px;
+    border-color: #c4c4c4;
+  }
+
+  .rounded-window {
+    border-width: 0;
+    background-color: transparent !important;
+    border-radius: 15px;
+    box-shadow: var(--ck-drop-shadow), 0 0;
+  }
+  .rounded-window > .k-window-titlebar,
+  .post-message-window > .k-window-titlebar {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-width: 1px;
+    border-color: #c4c4c4;
+  }
+  .rounded-window > .k-window-content {
+    background-color: #fff;
+    border-width: 1px;
+    border-top: 1px;
+    border-color: #c4c4c4;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
   }
 
   .post-message-window button[data-toggle="button"]:hover {
@@ -42,7 +76,7 @@
   }
 
   .ck.ck-editor {
-    width : 100%;
+    width: 100%;
   }
 
   .ck-content.ck-editor__editable {
@@ -50,9 +84,8 @@
   }
 
   :root {
-   --ck-z-default: 10005
+    --ck-z-default: 10005;
   }
-
 </style>
 <script>
   /**
@@ -82,30 +115,42 @@
               //ace_editor.setValue(observable.get('message.body'));
               ace_editor.setValue(window.ckeditor.getData());
               observable.set("editor.visible", false);
-              $('.ck.ck-editor').hide();
-              observable.set("editor.ace.visible", true);             
+              $(".ck.ck-editor").hide();
+              observable.set("editor.ace.visible", true);
             },
             cancle: function () {
               //observable.set('message.body' , ace_editor.getValue() );
               window.ckeditor.setData(ace_editor.getValue());
               //toast_editor.setData(ace_editor.getValue());
               observable.set("editor.visible", true);
-              $('.ck.ck-editor').show();
+              $(".ck.ck-editor").show();
               observable.set("editor.ace.visible", false);
             },
           },
           switch: function () {
-            if ( $('.post-message-window button[data-toggle="button"][aria-pressed="true"]').length > 0 ) {
+            if (
+              $(
+                '.post-message-window button[data-toggle="button"][aria-pressed="true"]'
+              ).length > 0
+            ) {
               observable.editor.ace.cancle();
             } else {
               observable.editor.ace.edit();
             }
           },
           reset: function () {
-            $('.post-message-window button[data-toggle="button"][aria-pressed="true"]').button("toggle");
+            $(
+              '.post-message-window button[data-toggle="button"][aria-pressed="true"]'
+            ).button("toggle");
             observable.set("editor.visible", true);
             observable.set("editor.ace.visible", false);
           },
+        },
+        upload: function () {
+          getAttachmentsWindow(null, this.message);
+        },
+        close: function () {
+          kendoWindow.close();
         },
         setSource: function (data) {
           var $this = this;
@@ -116,9 +161,9 @@
         },
         saveOrUpdate: function () {
           var $self = this;
-          if($self.editor.ace.visible){
+          if ($self.editor.ace.visible) {
             $self.set("message.body", ace_editor.getValue());
-          }else{
+          } else {
             $self.set("message.body", window.ckeditor.getData());
           }
           var template = kendo.template(
@@ -137,7 +182,8 @@
                   text: "Ok",
                   action: function (e) {
                     kendo.ui.progress($(".k-dialog"), true);
-                    var _url = "/data/secure/mgmt/messages/" + $self.message.messageId;
+                    var _url =
+                      "/data/secure/mgmt/messages/" + $self.message.messageId;
                     var _method = "put";
                     // 1.thread root message
                     // method : post
@@ -195,7 +241,8 @@
                 },
                 { text: "Cancle" },
               ],
-            }).data("kendoDialog");
+            })
+            .data("kendoDialog");
           dialog.open();
         },
       });
@@ -212,9 +259,9 @@
       renderTo.data("model", observable);
       var kendoWindow = renderTo
         .kendoWindow({
-          width:'900px',
+          width: "900px",
           //minWidth: "900px",
-          height: "700px",
+          height: "701px",
           //size: "wide",
           title: "Post Message",
           visible: false,
@@ -222,7 +269,7 @@
           draggable: false,
           //scrollable: false,
           modal: {
-            preventScroll: true
+            preventScroll: true,
           },
           actions: ["Maximize", "Close"], //
           open: function () {
@@ -233,7 +280,6 @@
           close: function () {},
         })
         .data("kendoWindow");
-      
       kendoWindow.wrapper.addClass("post-message-window");
     }
     renderTo.data("model").setSource(item);
@@ -253,10 +299,8 @@
     return toastEditor;
   }
 
-
-
   function createCKEditor(renderTo, observable) {
-    studio.ui.ckeditor( renderTo, observable );
+    studio.ui.ckeditor(renderTo, observable);
   }
 
   function createAceEditor(renderTo, observable) {
@@ -270,11 +314,244 @@
     }
     return ace.edit(renderTo.attr("id"));
   }
+
+  function getAttachmentsWindow(renderTo, item, callback) {
+    renderTo = renderTo || $("#fileupload-window");
+    if (!renderTo.data("kendoWindow")) {
+      var observable = kendo.observable({
+        objectType: 22,
+        objectId: 0,
+        shared : true,
+        selectable: false,
+        visible : false,
+        close: function () {
+          kendoWindow.close();
+        },
+        select: function () {
+          var $this = this;
+          var grid = $("#post-file-grid").data("kendoGrid");
+          var template = kendo.template(
+            "Are you sure you want to selected files into message body.<br/> This action cannot be undone."
+          );
+          var video_templage = kendo.template($("#file-video-template").html());
+          var dialog = $("#select-dialog")
+            .kendoDialog({
+              title: "Select",
+              content: template($this),
+              actions: [
+                {
+                  text: "Ok",
+                  action: function (e) {
+                    const ck = window.ckeditor;
+                    grid.select().each(function () {
+                      const item = grid.dataItem(this);
+                      console.log(video_templage(item));
+                      console.log(studio.ui.getAttachmentUrl(item));
+                     // ck.execute("mediaEmbed", {
+                     //   url: studio.ui.getAttachmentUrl(item),
+                     // });
+
+                      const viewFragment = ck.data.processor.toView( video_templage(item) );
+                      const modelFragment = ck.data.toModel( viewFragment );
+                      ck.model.insertContent( modelFragment, ck.model.document.selection );
+                    });
+                    grid.clearSelection();
+                    dialog.close();
+                  },
+                  primary: true,
+                },
+                { text: "Cancle" },
+              ],
+            })
+            .data("kendoDialog");
+          dialog.open();
+        },
+        updatable() {
+          var $this = this;
+          if (
+            observable.get("objectType") > 0 &&
+            observable.get("objectId") > 0
+          )
+            return true;
+          else return false;
+        },
+        setSource(item) {
+          this.set("objectId", item.messageId);
+          this.set("shared", true);
+          studio.ui.attachmentGrid(
+            $("#post-file-grid"),
+            {
+              objectType: observable.get("objectType"),
+              objectId: observable.get("objectId"),
+              height: 450
+            }
+          );
+          $("#post-file-grid")
+            .data("kendoGrid")
+            .bind("change", function (e) {
+              if (this.selectedKeyNames().length > 0) {
+                observable.set("selectable", true);
+              } else {
+                observable.set("selectable", false);
+              }
+            });
+        },
+      });
+      var filepond = studio.ui.filepond($("#filepond"), {
+        instantUpload: false,
+        server: {
+          url: studio.services.getApiUrl("/data/files/filepond"),
+          timeout: 300000,
+          process: {
+            withCredentials: true,
+            headers: studio.services.accounts.authHeader(),
+            ondata: (formData) => {
+              
+              formData.append("objectType", observable.get("objectType"));
+              formData.append("objectId", observable.get("objectId"));
+              formData.append("shared", observable.get("shared"));
+              return formData;
+            },
+            onload: (response) => {
+              if (observable.updatable())
+                $("#post-file-grid").data("kendoGrid").dataSource.read();
+            },
+          },
+          revert: {
+            withCredentials: true,
+            headers: studio.services.accounts.authHeader(),
+          },
+        },
+      });
+      var kendoWindow = renderTo
+        .kendoWindow({
+          width: "800px",
+          height: "550px",
+          title: "Upload",
+          animation: false,
+          visible: false,
+          scrollable: true,
+          draggable: false,
+          modal: {
+            preventScroll: true,
+          },
+          actions: ["Close"],
+          open: function () {},
+          close: function () {},
+        })
+        .data("kendoWindow");
+      kendoWindow.wrapper.addClass("rounded-window");
+      kendo.bind(renderTo, observable);
+      renderTo.data("model", observable);
+    }
+    renderTo.data("model").setSource(item);
+    renderTo.data("kendoWindow").center().open();
+  }
 </script>
+<script type="text/x-kendo-template" id="file-video-template">
+  <video class="video-js"
+  controls
+  preload="auto"
+  data-setup='{}'>
+  <source src="#= studio.ui.getAttachmentUrl(data)#" type="video/mp4"></source>
+  </video>
+</script>
+<span id="select-dialog"></span>
+<div
+  id="fileupload-window"
+  class="g-pa-0 g-height-500 post-window"
+  style="display: none"
+>
+  <div class="row no-gutters">
+    <div class="col-5">
+      <div class="g-pa-15">
+        <label class="d-flex align-items-center justify-content-between g-mb-15">
+          <span class="g-pr-20 g-font-size-12 g-font-weight-300"
+            >Shared</span
+          >
+          <div class="u-check">
+            <input
+              class="g-hidden-xs-up g-pos-abs g-top-0 g-right-0"
+              name="useWarp"
+              value="true"
+              data-bind="checked:shared"
+              type="checkbox"
+            />
+            <div class="u-check-icon-radio-v8">
+              <i class="fa" data-check-icon=""></i>
+            </div>
+          </div>
+        </label>
+        <input
+          type="file"
+          class="filepond"
+          name="filepond"
+          id="filepond"
+          multiple
+          data-allow-reorder="true"
+          data-max-file-size="50MB"
+          data-max-files="3"
+        />
+      </div>
+    </div>
+    <div class="col-7">
+      <div id="post-file-grid"></div>
+    </div>
+  </div>
+  <div class="layer w-100 g-pa-15">
+    <div class="peers ai-c jc-sb fxw-nw">
+      <div class="peer"></div>
+      <div class="peer">
+        <button
+          type="button"
+          class="btn cur-p btn-outline-secondary"
+          data-toggle="button"
+          aria-pressed="false"
+          autocomplete="off"
+          data-bind="click:close"
+        >
+          Close
+        </button>
+
+        <button
+          type="button"
+          class="btn cur-p btn-outline-secondary"
+          data-toggle="button"
+          aria-pressed="false"
+          autocomplete="off"
+          data-bind="click:select, enabled:selectable, visible:visible"
+        >
+          <svg
+            width="1em"
+            height="1em"
+            viewBox="0 0 16 16"
+            class="bi bi-box-arrow-in-down-left"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M1.5 13A1.5 1.5 0 0 0 3 14.5h10a1.5 1.5 0 0 0 1.5-1.5V8a.5.5 0 0 0-1 0v5a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5h4a.5.5 0 0 0 0-1H3A1.5 1.5 0 0 0 1.5 3v10z"
+            />
+            <path
+              fill-rule="evenodd"
+              d="M11.5 10a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 1 0v4.5H11a.5.5 0 0 1 .5.5z"
+            />
+            <path
+              fill-rule="evenodd"
+              d="M5.646 10.354a.5.5 0 0 1 0-.708l8-8a.5.5 0 0 1 .708.708l-8 8a.5.5 0 0 1-.708 0z"
+            />
+          </svg>
+          Select
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 <div
   id="post-edit-window"
   class="g-pa-0 g-height-700 post-window"
-  style="display: none;"
+  style="display: none"
 >
   <div class="g-pa-15 g-pa-15--sm">
     <form id="streams-form" onsubmit="return false">
@@ -297,21 +574,28 @@
             class="k-widget k-tooltip k-tooltip-validation k-invalid-msg"
             data-for="input-post-subject"
             role="alert"
-            style="display: none;"
+            style="display: none"
           ></span>
         </div>
       </div>
       <div class="form-row g-mb-25">
         <div class="col">
-          <textarea id="ckeditor" style="height: 495px; width: 100%; display:none;" 
-          data-bind="value:message.body" placeholder="Type the content here!"></textarea>
+          <textarea
+            id="ckeditor"
+            style="height: 495px; width: 100%; display: none"
+            data-bind="value:message.body"
+            placeholder="Type the content here!"
+          ></textarea>
 
           <div
             data-bind="visible:editor.ace.visible"
             class="g-brd-1 g-brd-style-solid"
-            style="border-color: #d1cccc;"
+            style="border-color: #d1cccc"
           >
-            <div class="layer w-100" style="border-bottom: 1px solid rgb(209, 204, 204);">
+            <div
+              class="layer w-100"
+              style="border-bottom: 1px solid rgb(209, 204, 204)"
+            >
               <div class="peers ai-c jc-sb p-15 fxw-nw">
                 <div class="peer"></div>
                 <div class="peer">
@@ -341,8 +625,8 @@
                   </ul>
                 </div>
               </div>
-            </div> 
-            <div id="ace-editor" style="height: 495px; width: 100%;"></div>
+            </div>
+            <div id="ace-editor" style="height: 483px; width: 100%"></div>
           </div>
         </div>
       </div>
@@ -371,8 +655,36 @@
             </svg>
             Source
           </button>
+
+          <button
+            type="button"
+            class="btn cur-p btn-outline-secondary"
+            data-bind="click:upload"
+          >
+            <svg
+              width="1em"
+              height="1em"
+              viewBox="0 0 16 16"
+              class="bi bi-cloud-upload-fill"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8 0a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 4.095 0 5.555 0 7.318 0 9.366 1.708 11 3.781 11H7.5V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11h4.188C14.502 11 16 9.57 16 7.773c0-1.636-1.242-2.969-2.834-3.194C12.923 1.999 10.69 0 8 0zm-.5 14.5V11h1v3.5a.5.5 0 0 1-1 0z"
+              />
+            </svg>
+            File Upload
+          </button>
         </div>
         <div class="col-6 text-right">
+          <button
+            type="button"
+            class="btn btn-md u-btn-outline-darkgray g-rounded-50 g-mr-10 g-mb-15"
+            data-bind="click:close"
+          >
+            Close
+          </button>
           <button
             type="button"
             class="btn btn-md u-btn-outline-blue g-rounded-50 g-mr-10 g-mb-15"
