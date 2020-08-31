@@ -1,11 +1,12 @@
 # DATA APIs Studio Dashbard
-A dashboard for managing a community version of DATA APIs Studio.
+A dashboard for DATA APIs Server.
 
-# Based on Adminator HTML5 Admin Template
+# It's based on Adminator HTML5 Admin Template
 This project based on **Adminator**.
 **Adminator** is a responsive Bootstrap 4 Admin Template. It provides you with a collection of ready to use code snippets and utilities, custom pages, a collection of applications and some useful widgets. Preview of this awesome admin template available here: https://colorlib.com/polygon/adminator/index.html
 
 ## TOC
+- [About](#about)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installing & Local Development](#installing--local-development)
@@ -16,9 +17,11 @@ This project based on **Adminator**.
 - [Authors](#authors)
 - [License](#license)
 
+## About
+**DATA APIs Studio** is simple management platform for making APIs, webpages.
 
 ## Getting Started
-In order to run **studio** on your local machine all what you need to do is to have the prerequisites stated below installed on your machine and follow the installation steps down below.
+In order to run **DATA APIs Studio** on your local machine all what you need to do is to have the prerequisites stated below installed on your machine and follow the installation steps down below.
 
 #### Prerequisites
   - node.js & npm
@@ -127,6 +130,7 @@ Used to create a local dev server in order to preview the final output of build 
 - [Skycons](https://darkskyapp.github.io/skycons/)
 - [Fontawesome](http://fontawesome.io/)
 - [Themify Icons](https://themify.me/themify-icons)  
+
 
 ## Changelog
 #### V 1.0.0
