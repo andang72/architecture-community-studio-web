@@ -1,9 +1,10 @@
-# DATA APIs Studio Dashbard
-A dashboard for DATA APIs Server.
+# RESTful APIs Studio
+A dashboard web application for RESTful APIs Server.
 
 # It's based on Adminator HTML5 Admin Template
 This project based on **Adminator**.
 **Adminator** is a responsive Bootstrap 4 Admin Template. It provides you with a collection of ready to use code snippets and utilities, custom pages, a collection of applications and some useful widgets. Preview of this awesome admin template available here: https://colorlib.com/polygon/adminator/index.html
+
 
 ## TOC
 - [About](#about)
@@ -18,7 +19,7 @@ This project based on **Adminator**.
 - [License](#license)
 
 ## About
-**DATA APIs Studio** is simple management platform for making APIs, webpages.
+**RESTful APIs Studio** is simple web application working with  a RESTful APIs Server. 
 
 ## Getting Started
 In order to run **DATA APIs Studio** on your local machine all what you need to do is to have the prerequisites stated below installed on your machine and follow the installation steps down below.
